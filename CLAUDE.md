@@ -1,0 +1,31 @@
+# CLAUDE.md — Coletor de Cristais
+
+Instruções para agentes que trabalham neste repositório. Leia também o `README.md` (o que é o jogo, como abrir, testar e a estrutura de pastas).
+
+Detalhes da máquina local (caminhos de instalação, restrições de disco) **não são versionados**: ficam em `CLAUDE.local.md`, que está no `.gitignore`. Se o arquivo não existir na sua máquina, peça esse contexto ao desenvolvedor.
+
+## Contexto
+- Unity 6000.3.28f1 (6.3 LTS), URP, Windows.
+- Cada sessão trabalha em **uma tarefa** combinada com o desenvolvedor. Não adiante outras tarefas.
+
+## Regra de escopo
+Decisões criativas e de escopo são sempre do desenvolvedor, nunca do agente. O agente pode propor ideias, apontar riscos e estimar impacto, mas não decide nem aplica. Decisões técnicas de implementação dentro de uma tarefa combinada (estrutura do código, nomes, padrões) o agente pode tomar, documentando; se a decisão muda o que o jogador vê ou faz, é criativa e fica com o desenvolvedor. Ideias ou mudanças de escopo que surgirem durante uma tarefa não são implementadas: o agente as descreve ao desenvolvedor como mudanças propostas, e o desenvolvedor decide se e quando entram. Exceção: correções de bug e ajustes técnicos necessários para concluir a tarefa combinada, sem mudar o que ela entrega.
+
+## Regras gerais
+- **Commits:** nenhum commit, push ou merge feito pelo agente. Ao terminar, apresente um resumo das alterações (arquivos e o que mudou) para o desenvolvedor revisar e commitar.
+- **Branches:** uma branch por tarefa (ex.: `movimento-jogador`). O agente pode sugerir o nome; criar e trocar de branch é do desenvolvedor, a menos que ele peça.
+- **GitHub:** comandos que acessam o GitHub e pedem login rodam na aba de terminal do desenvolvedor, nunca pelo agente.
+- **Nada pessoal ou externo ao jogo no repositório:** informações pessoais (nomes, e-mails, contas, caminhos da máquina do usuário), credenciais e documentos de organização do trabalho (cronogramas, datas, notas) não entram em arquivos versionados. Esse conteúdo vai no `CLAUDE.local.md` ou em arquivos cobertos pelo `.gitignore` (seção "Arquivos pessoais e locais"). Ao criar um tipo novo de arquivo desse tipo, adicione o padrão ao `.gitignore` no mesmo conjunto de alterações. Antes de apresentar as alterações, confira com `git status` que nada desse tipo ficou para ser commitado.
+- **Testes:** toda lógica nova tem testes EditMode em `Assets/Testes/EditMode/` (assembly `ColetorDeCristais.Testes.EditMode`). Rode os testes antes de apresentar as alterações e informe o resultado com fidelidade.
+- **Documentação:** em português, como código, nomes de variáveis, comentários e docstrings (exceto palavras reservadas e APIs externas). Toda mudança de comportamento atualiza o `README.md` no mesmo conjunto de alterações.
+- **Disco:** nada instalado no C: (está cheio). Ferramentas, caches e temporários ficam no E: (detalhes no `CLAUDE.local.md`).
+- **Conta e sistema:** login na Unity, aceite de termos e UAC ficam com o desenvolvedor.
+
+## Como trabalhar no projeto
+- Código do jogo em `Assets/Scripts/` (assembly `ColetorDeCristais`, namespace `ColetorDeCristais`). Lógica testável em classes C# puras; `MonoBehaviour` só faz a ponte com a Unity. Um `MonoBehaviour` por arquivo, com o nome da classe.
+- Se um novo assembly ou pacote for necessário (ex.: `Unity.InputSystem`), adicione a referência no `.asmdef` correspondente e documente no README.
+- Com a Editor aberta, edite cenas, prefabs e assets pela CLI (`unity command ...`, `script eval`), não editando o YAML à mão.
+- Testes (na raiz do projeto):
+  - Editor fechada: `unity test . --mode EditMode`
+  - Editor aberta: `unity command test run --mode editor --filter ColetorDeCristais.Testes.EditMode --filter-type Assembly --project-path .`
+- Não feche a Editor do desenvolvedor para rodar testes em batch.

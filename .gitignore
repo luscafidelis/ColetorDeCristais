@@ -1,0 +1,82 @@
+# Unity — pastas geradas pela Editor (nunca versionar)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Resultados de testes gerados pela CLI
+/TestResults*/
+*.TestResults.xml
+test-results*.xml
+
+# Pacotes gerados automaticamente
+/[Aa]ssets/AssetStoreTools*
+/[Aa]ssets/Plugins/Editor/JetBrains*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# IDEs (soluções e projetos são regenerados pela Unity)
+.vs/
+.vscode/
+.idea/
+.gradle/
+ExportedObj/
+.consulo/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Metadados de debug e de crash
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+crashlytics-build.properties
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Arquivos pessoais e locais (nunca versionar)
+# Contexto local da máquina para agentes vai em CLAUDE.local.md.
+CLAUDE.local.md
+*.local.md
+.claude/settings.local.json
+.claude/projects/
+.claude/memory/
+/[Nn]otas/
+/[Rr]ascunhos/
+*.notas.md
+# Credenciais, tokens e configurações da máquina
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+**/[Cc]redenciais*
+**/[Ss]ecrets*
