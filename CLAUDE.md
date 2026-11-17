@@ -23,6 +23,8 @@ Decisões criativas e de escopo são sempre do desenvolvedor, nunca do agente. O
 
 ## Como trabalhar no projeto
 - Código do jogo em `Assets/Scripts/` (assembly `ColetorDeCristais`, namespace `ColetorDeCristais`). Lógica testável em classes C# puras; `MonoBehaviour` só faz a ponte com a Unity. Um `MonoBehaviour` por arquivo, com o nome da classe.
+- Organização por sistema: cada sistema tem uma subpasta e um sub-namespace (ex.: `Assets/Scripts/Atributos/`, `ColetorDeCristais.Atributos`), e os testes ficam na subpasta de mesmo nome em `Assets/Testes/EditMode/`.
+- Atributos numéricos (velocidade e outros) usam `ColetorDeCristais.Atributos.Atributo` com modificadores. Não crie outro mecanismo de bônus; as regras de cálculo estão no README ("Atributos e modificadores"). Valores concretos (base, bônus, limites) são decisões criativas do desenvolvedor.
 - Se um novo assembly ou pacote for necessário (ex.: `Unity.InputSystem`), adicione a referência no `.asmdef` correspondente e documente no README.
 - Com a Editor aberta, edite cenas, prefabs e assets pela CLI (`unity command ...`, `script eval`), não editando o YAML à mão.
 - Testes (na raiz do projeto):

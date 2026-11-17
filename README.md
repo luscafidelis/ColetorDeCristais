@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: só o projeto, o repositório e a estrutura de testes existem. Movimento, cristais e atributos ainda não foram implementados.
+> Estado atual: existem o projeto, a estrutura de testes e o sistema de atributos com modificadores permanentes e temporários (só a lógica, ainda sem ligação com o jogador ou a cena). Movimento e cristais ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -52,7 +52,8 @@ Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 |---|---|
 | `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais` |
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
-| `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor |
+| `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`. Ver "Atributos e modificadores" abaixo |
+| `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`) |
 | `Assets/Scenes/` | Cenas (`SampleScene` do template) |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações padrão do Input System, vindas do template |
@@ -61,6 +62,52 @@ Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 | `ProjectSettings/` | Configurações do projeto |
 
 Pastas geradas (`Library/`, `Temp/`, `Logs/`, `UserSettings/`, `obj/`, `.csproj`, `.slnx`) estão no `.gitignore`.
+
+## Atributos e modificadores
+Código em `Assets/Scripts/Atributos/`, C# puro, sem `MonoBehaviour` e sem dependência da Unity. Um `Atributo` (ex.: velocidade) tem um **valor base** e uma lista de **modificadores**, permanentes ou temporários; o **valor final** é recalculado quando algo muda.
+
+**Tipos de modificador** (`TipoModificador`). Nos percentuais, o valor é uma fração: `0.1` = 10%.
+| Tipo | Efeito | Dois modificadores de `0.1` |
+|---|---|---|
+| `Plano` | Soma ao valor base | +0,2 |
+| `PercentualAditivo` | Os percentuais se somam e o total multiplica uma vez | ×1,2 |
+| `PercentualMultiplicativo` | Cada um multiplica de forma independente | ×1,21 |
+
+**Ordem de aplicação** (fixa, não depende da ordem em que os modificadores foram adicionados):
+```
+final = (base + Σ planos) × (1 + Σ percentuais aditivos) × Π (1 + percentual multiplicativo)
+final = limitar(final, ValorMinimo, ValorMaximo)
+```
+
+**Regras:**
+- Valores negativos são aceitos na base e nos modificadores (reduzem o atributo). Um multiplicativo de `-1` zera o valor.
+- Os limites `ValorMinimo`/`ValorMaximo` são opcionais (padrão: sem limite) e valem só para o valor final. Sem limites, o valor final pode ficar negativo.
+- Valores NaN ou infinitos geram `ArgumentException`; mínimo maior que máximo também.
+- A remoção é pela instância do modificador (`RemoverModificador`), por origem (`RemoverModificadoresDaOrigem`, ex.: tudo que um item concedeu) ou total (`RemoverTodosModificadores`). Adicionar duas vezes a mesma instância gera `InvalidOperationException`.
+
+**Permanentes e temporários:**
+- Sem `duracao`, o modificador é **permanente**: só sai quando é removido.
+- Com `duracao` (segundos, finita e maior que zero), o modificador é **temporário**. O tempo só passa quando quem usa o atributo chama `Atualizar(deltaTempo)` (ex.: uma vez por quadro com `Time.deltaTime`). Quando o tempo restante chega a zero, o modificador é removido e o valor final volta a ser calculado. `Atualizar` devolve quantos modificadores expiraram.
+- `TentarObterTempoRestante(modificador, out tempo)` informa quanto falta (útil para a interface).
+- **Renovação por grupo** (regra definida pelo desenvolvedor: se dois cristais temporários com o mesmo modificador forem coletados, o tempo reseta e os modificadores se somam). Um temporário pode ter um `grupo` (texto, ex.: o tipo de cristal). Ao adicionar um temporário de um grupo que já está ativo, **todos** os temporários desse grupo voltam à duração completa do novo modificador, e os efeitos continuam somados. Por isso eles expiram juntos. Temporários sem grupo têm tempos independentes. Grupo só é aceito em temporários (`ArgumentException` em permanentes).
+
+**Exemplo** (números ilustrativos, não são valores de jogo):
+```csharp
+var velocidade = new Atributo(valorBase: 5f, valorMinimo: 0f);
+
+// Permanente, removido pela origem
+var bonus = Modificador.PercentualAditivo(0.2f, origem: itemQueConcedeu);
+velocidade.AdicionarModificador(bonus);                   // ValorFinal == 6
+velocidade.RemoverModificadoresDaOrigem(itemQueConcedeu); // volta a 5
+
+// Temporários do mesmo grupo: somam e o tempo reseta
+velocidade.AdicionarModificador(Modificador.Plano(1f, duracao: 4f, grupo: "cristal-velocidade")); // 6
+velocidade.Atualizar(3f);                                                                         // falta 1 s
+velocidade.AdicionarModificador(Modificador.Plano(1f, duracao: 4f, grupo: "cristal-velocidade")); // 7, os dois com 4 s
+velocidade.Atualizar(4f);                                                                         // os dois expiram: 5
+```
+
+Os valores concretos de cada atributo e item (base, bônus, limites, durações e quais cristais são temporários) são decisões de design e são definidos por quem usa o sistema, não aqui.
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (subpastas e sub-namespaces por sistema, conforme as tarefas forem criando).
