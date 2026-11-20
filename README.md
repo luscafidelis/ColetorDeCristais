@@ -53,6 +53,7 @@ Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 ```powershell
 python -m unittest discover -s ferramentas
 ```
+(`python -m unittest ferramentas.test_montar_apng` também funciona.)
 
 ## Estrutura de pastas
 | Caminho | Conteúdo |
@@ -65,6 +66,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
 | `Assets/Scripts/Cristais/` | Cristais coletáveis (namespace `ColetorDeCristais.Cristais`): lógica pura (`EstadoDeColeta`, `ContadorDeColeta`, `CalculadoraDeFlutuacao`), dados (`DefinicaoCristal`, `EfeitoDeCristal`) e componentes (`CristalColetavel`, `ColetorDoJogador`, `GiroEFlutuacao`). Ver "Cristais coletáveis" abaixo |
+| `Assets/Scripts/Ferramentas/` | Ferramentas de desenvolvimento (namespace `ColetorDeCristais.Ferramentas`): `GravadorDeQuadros`, só da Editor (`#if UNITY_EDITOR`, fica fora do build), grava quadros da câmera do jogo seguindo um `RoteiroDeEntrada` (C# puro, testado). Uso no `ATUALIZACOES.md` |
 | `Assets/Prefabs/Cristal.prefab` | Prefab do cristal: trigger, coleta e visual animado |
 | `Assets/Dados/Cristais/` | Assets `DefinicaoCristal` (por enquanto, `CristalBase`) |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
@@ -75,7 +77,7 @@ python -m unittest discover -s ferramentas
 | `ProjectSettings/` | Configurações do projeto |
 | `ATUALIZACOES.md` | Registro das atualizações do jogo, em ordem, com imagens |
 | `docs/atualizacoes/` | Imagens e animações (APNG) do registro de atualizações (Git LFS) |
-| `ferramentas/` | Ferramentas de apoio em Python, sem pacotes extras: `montar_apng.py` junta PNGs num PNG animado. Tem testes (`test_montar_apng.py`) |
+| `ferramentas/` | Ferramentas de apoio em Python, sem pacotes extras. `montar_apng.py` junta PNGs num PNG animado: lê os quadros em ordem natural do nome, ignora a própria saída se ela estiver na pasta, copia paleta e chunks de cor e guarda só a região alterada de cada quadro (RGB/RGBA de 8 bits). Tem testes (`test_montar_apng.py`) |
 
 Pastas geradas (`Library/`, `Temp/`, `Logs/`, `UserSettings/`, `obj/`, `.csproj`, `.slnx`) estão no `.gitignore`.
 

@@ -2,7 +2,7 @@
 
 Registro do que foi entrando no jogo, em ordem: da primeira atualização (no topo) até a mais recente (no fim). Cada entrada diz o que mudou para quem joga, o que mudou por dentro e como foi validada. Os detalhes técnicos de cada sistema ficam no [README](README.md).
 
-As imagens ficam em [`docs/atualizacoes/`](docs/atualizacoes/) e são versionadas com Git LFS. As animadas são PNG animado (APNG): o GitHub, os navegadores e a pré-visualização de Markdown do VS Code mostram a animação.
+As imagens ficam em [`docs/atualizacoes/`](docs/atualizacoes/) e são versionadas com Git LFS. As animadas são PNG animado (APNG): os navegadores e a pré-visualização de Markdown do VS Code mostram a animação. A exibição no GitHub (arquivos em LFS) ainda não foi conferida.
 
 ---
 
@@ -46,7 +46,7 @@ As imagens ficam em [`docs/atualizacoes/`](docs/atualizacoes/) e são versionada
 - A velocidade do personagem já é um `Atributo`, pronta para receber modificadores.
 - Nova cena `Assets/Scenes/Arena.unity`, que passa a ser a cena do build.
 
-**Validação:** 84 testes EditMode passando. Em Play Mode, o personagem parou nas quatro muretas. O desenvolvedor testou com teclado e gamepad.
+**Validação:** 84 testes EditMode passando. Em Play Mode, o personagem parou nas quatro muretas. O desenvolvedor testou jogando; o controle por gamepad ainda não foi confirmado em teste.
 
 ---
 
@@ -81,8 +81,17 @@ O personagem andando até um cristal do canto, coletando, e seguindo para o pró
    unity command capture game_view --project-path . -- --source camera --width 1280 --height 720 --output-path Temp/captura.png
    ```
    Depois, copie o arquivo de `Temp/` para `docs/atualizacoes/`.
-4. Animações: grave uma sequência de PNGs do mesmo tamanho (ex.: com `Time.captureFramerate` fixo e um script temporário que salva um quadro por frame, apagado depois). Depois junte os quadros num PNG animado com a ferramenta do projeto, que usa só Python, sem pacotes extras:
+4. Animações: grave os quadros com o `GravadorDeQuadros`, uma ferramenta só da Editor em `Assets/Scripts/Ferramentas/`. Ele fixa `Time.captureFramerate`, move o personagem por um roteiro de entradas simuladas e salva a câmera do jogo em `Temp/quadros/`. Com a Editor aberta na cena Arena:
    ```powershell
-   python ferramentas/montar_apng.py <pasta_com_os_quadros> docs/atualizacoes/<nome>.png 50
+   unity command editor.playmode start --project-path .
+   unity command script eval --project-path . --code "ColetorDeCristais.Ferramentas.GravadorDeQuadros.Iniciar();"
+   unity command job wait --project-path . -- --condition '{"member":"ColetorDeCristais.Ferramentas.GravadorDeQuadros.Concluido","op":"equals","value":true}' --timeout 120
+   unity command editor.playmode stop --project-path .
    ```
-   O último número é a duração de cada quadro em ms (50 = 20 quadros por segundo). Use sempre a câmera do jogo, para a animação mostrar o visual real. Mantenha cada animação em poucos MB; a de movimento tem 147 quadros de 480×270 e ocupa cerca de 4,4 MB.
+   Se a Editor estiver sem foco, rode antes `unity command editor set_auto_tick` e `unity command editor.playmode set_run_in_background`. Depois da gravação, desligue os dois (`-- --enabled false`). Para outro percurso, tamanho ou duração, edite os campos do componente (`etapas`, `largura`, `altura`, `quadrosPorSegundo`).
+
+   Depois junte os quadros num PNG animado com a ferramenta do projeto, que usa só Python, sem pacotes extras:
+   ```powershell
+   python ferramentas/montar_apng.py Temp/quadros docs/atualizacoes/<nome>.png 50
+   ```
+   O último número é a duração de cada quadro em ms (50 = 20 quadros por segundo). Cada quadro depois do primeiro guarda só a região que mudou. A animação de movimento tem 147 quadros de 480×270 e ocupa cerca de 1,3 MB. Use sempre a câmera do jogo, para a animação mostrar o visual real.
