@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad) e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo). Cristais ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad) e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); o cristal coletável base (some ao ser coletado e é contado, ainda sem efeito). Efeitos dos cristais, contagem na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -59,7 +59,10 @@ Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 | `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
-| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador` |
+| `Assets/Scripts/Cristais/` | Cristais coletáveis (namespace `ColetorDeCristais.Cristais`): lógica pura (`EstadoDeColeta`, `ContadorDeColeta`, `CalculadoraDeFlutuacao`), dados (`DefinicaoCristal`, `EfeitoDeCristal`) e componentes (`CristalColetavel`, `ColetorDoJogador`, `GiroEFlutuacao`). Ver "Cristais coletáveis" abaixo |
+| `Assets/Prefabs/Cristal.prefab` | Prefab do cristal: trigger, coleta e visual animado |
+| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal` (por enquanto, `CristalBase`) |
+| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
@@ -148,6 +151,46 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 5. **Câmera:** `Main Camera` com *Rotation* (60, 0, 0), *Position* (0, 19,27, -13,06) e *Field of View* 60. Com esses valores, a arena inteira cabe numa tela 16:9.
 
 **Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad.
+
+## Cristais coletáveis
+**Decisões de design** (do desenvolvedor): o cristal é um losango levemente esticado, ciano brilhante, que gira e flutua. Ao ser coletado, some na hora. Na Arena há 5 cristais: um no centro, onde o jogador nasce e por isso é coletado logo no início, e um perto de cada canto, em (±6, ±6). Ainda não há som (T13) nem contagem na tela (T11).
+
+**Código** (`Assets/Scripts/Cristais/`):
+
+*Lógica pura* (testada em EditMode):
+- `EstadoDeColeta`: a regra de coleta. Só um coletor válido coleta, e só uma vez, mesmo que a física avise duas entradas no trigger no mesmo quadro.
+- `ContadorDeColeta`: total de cristais coletados e quantidade por tipo (identificador da definição). Tem `Zerar()`.
+- `CalculadoraDeFlutuacao`: altura (senoide) e ângulo de giro em função do tempo.
+
+*Dados:*
+- `DefinicaoCristal` (ScriptableObject): `Identificador` (único e estável, usado na contagem), `NomeExibicao` e uma lista de `Efeitos`.
+- `EfeitoDeCristal` (ScriptableObject abstrato): **ponto de extensão** para os efeitos (velocidade, ímã, investida). Ainda não existe nenhum efeito concreto e a lista da `CristalBase` está vazia. Cada efeito futuro será uma subclasse com `Aplicar(ColetorDoJogador coletor)`. Essa assinatura é provisória e pode mudar no primeiro efeito real.
+
+*Componentes* (finos):
+- `CristalColetavel`: no `OnTriggerEnter`, procura um `ColetorDoJogador` em quem entrou. Se a regra deixar, registra a coleta e destrói o cristal.
+- `ColetorDoJogador` (no `Jogador`): guarda o `ContadorDeColeta` (`Contador`), escreve "Cristal coletado: …" no Console e aplica os efeitos da definição. É por ele que outras partes do jogo (ex.: interface) leem a contagem.
+- `GiroEFlutuacao`: anima um objeto, por padrão a 90°/s, 0,15 m de amplitude e período de 2 s.
+
+**Decisões técnicas:**
+- O jogador é reconhecido pelo componente `ColetorDoJogador`, não pela tag. Assim, só quem tem o componente coleta.
+- O trigger fica na raiz do prefab e a animação fica no filho `Visual`. Assim o trigger não se mexe com a flutuação.
+- O `CharacterController` do jogador dispara `OnTriggerEnter` sem precisar de `Rigidbody`.
+- Por enquanto todos os cristais giram em sincronia, porque a animação usa o mesmo `Time.time` para todos.
+
+**Como foi montado na Editor** (para reproduzir):
+1. **ScriptableObject (definição):** na janela Project, clique com o botão direito em `Assets/Dados/Cristais` e escolha *Create > Coletor de Cristais > Definição de Cristal*. Isso cria um asset de dados (não é um objeto da cena). No Inspector, preencha *Identificador* (`cristal-base`) e *Nome Exibicao* (`Cristal Base`). Os cristais apontam para esse asset, então mudar o asset muda todos.
+2. **Material:** `Assets/Materiais/Cristal` (URP Lit), *Base Map* ciano (0,1; 0,9; 1), *Smoothness* 0,85, *Emission* ligada com a mesma cor a 60%.
+3. **Prefab:**
+   - Crie um GameObject vazio `Cristal` e adicione:
+     - `Sphere Collider` com *Is Trigger* marcado e *Radius* 0,5. Um *trigger* não bloqueia ninguém: ele só avisa (`OnTriggerEnter`) quando outro collider entra.
+     - `Cristal Coletavel`, com o campo *Definicao* apontando para `CristalBase`.
+   - Filho `Visual` (vazio), com *Scale* (1; 1,35; 1) para esticar na vertical, e o componente `Giro E Flutuacao`.
+   - Filho de `Visual`: `Gema`, um cubo com *Rotation* (45; 0; 35,264), que deixa o cubo apoiado numa ponta, como um losango. *Scale* 0,5 e material `Cristal`. Remova o `Box Collider`: quem detecta o jogador é só o trigger da raiz.
+   - Arraste `Cristal` da Hierarchy para `Assets/Prefabs` para virar prefab. Depois edite pelo prefab (dois cliques nele): as instâncias na cena recebem as mudanças.
+4. **Jogador:** adicione o componente `Coletor Do Jogador` ao `Jogador`.
+5. **Cena:** um GameObject vazio `Cristais` com 5 instâncias do prefab (arraste de `Assets/Prefabs` para a cena), em y = 0,8: centro (0; 0,8; 0) e cantos (±6; 0,8; ±6).
+
+Ao apertar Play, o cristal do centro é coletado logo de cara e o Console mostra "Cristal coletado: Cristal Base (cristal-base). Total: 1.". Ande até os outros para coletá-los.
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (subpastas e sub-namespaces por sistema, conforme as tarefas forem criando).
