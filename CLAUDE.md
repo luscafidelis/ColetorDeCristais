@@ -25,7 +25,9 @@ Decisões criativas e de escopo são sempre do desenvolvedor, nunca do agente. O
 - Código do jogo em `Assets/Scripts/` (assembly `ColetorDeCristais`, namespace `ColetorDeCristais`). Lógica testável em classes C# puras; `MonoBehaviour` só faz a ponte com a Unity. Um `MonoBehaviour` por arquivo, com o nome da classe.
 - Organização por sistema: cada sistema tem uma subpasta e um sub-namespace (ex.: `Assets/Scripts/Atributos/`, `ColetorDeCristais.Atributos`), e os testes ficam na subpasta de mesmo nome em `Assets/Testes/EditMode/`.
 - Atributos numéricos (velocidade e outros) usam `ColetorDeCristais.Atributos.Atributo` com modificadores. Não crie outro mecanismo de bônus; as regras de cálculo estão no README ("Atributos e modificadores"). Valores concretos (base, bônus, limites) são decisões criativas do desenvolvedor.
-- Se um novo assembly ou pacote for necessário (ex.: `Unity.InputSystem`), adicione a referência no `.asmdef` correspondente e documente no README.
+- O assembly `ColetorDeCristais` referencia `Unity.InputSystem`. Se um novo assembly ou pacote for necessário, adicione a referência no `.asmdef` correspondente e documente no README.
+- Cena do jogo: `Assets/Scenes/Arena.unity` (única cena no build). O personagem é o objeto `Jogador` (tag `Player`, `CharacterController`, `MovimentoDoJogador`); a velocidade dele é o `Atributo` em `MovimentoDoJogador.Velocidade`, onde itens aplicam modificadores.
+- Para verificar movimento em Play Mode pela CLI: com a Editor sem foco, o Input System desliga teclados simulados. Valide a lógica pelos testes EditMode e as colisões chamando o `CharacterController` por `script eval`. O teste com teclado de verdade é do desenvolvedor.
 - Com a Editor aberta, edite cenas, prefabs e assets pela CLI (`unity command ...`, `script eval`), não editando o YAML à mão.
 - Testes (na raiz do projeto):
   - Editor fechada: `unity test . --mode EditMode`

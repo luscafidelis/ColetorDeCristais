@@ -1,7 +1,9 @@
 {
     "name": "ColetorDeCristais",
     "rootNamespace": "ColetorDeCristais",
-    "references": [],
+    "references": [
+        "Unity.InputSystem"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

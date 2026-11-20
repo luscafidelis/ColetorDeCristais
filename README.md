@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: existem o projeto, a estrutura de testes e o sistema de atributos com modificadores permanentes e temporários (só a lógica, ainda sem ligação com o jogador ou a cena). Movimento e cristais ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad) e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo). Cristais ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -28,7 +28,9 @@ Na raiz do projeto:
 unity open .
 unity status --until-ready --project-path .
 ```
-Na Editor, abra `Assets/Scenes/SampleScene.unity` e aperte Play.
+Na Editor, abra `Assets/Scenes/Arena.unity` e aperte Play. Clique na janela Game para ela receber o teclado.
+
+**Controles:** WASD ou setas no teclado; analógico esquerdo no gamepad.
 
 Depois de clonar o repositório pela primeira vez, rode `git lfs install` (uma vez por máquina) e `git lfs pull` para baixar os binários.
 
@@ -53,10 +55,13 @@ Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 | `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais` |
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
 | `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`. Ver "Atributos e modificadores" abaixo |
-| `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`) |
-| `Assets/Scenes/` | Cenas (`SampleScene` do template) |
+| `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
+| `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
+| `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
+| `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
+| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
-| `Assets/InputSystem_Actions.inputactions` | Ações padrão do Input System, vindas do template |
+| `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
 | `Packages/` | `manifest.json` e lock dos pacotes UPM. Inclui `com.unity.pipeline` (liga a CLI à Editor) e `com.unity.test-framework` |
 | `ProjectSettings/` | Configurações do projeto |
@@ -108,6 +113,41 @@ velocidade.Atualizar(4f);                                                       
 ```
 
 Os valores concretos de cada atributo e item (base, bônus, limites, durações e quais cristais são temporários) são decisões de design e são definidos por quem usa o sistema, não aqui.
+
+## Movimento do personagem
+**Decisões de design** (do desenvolvedor): controles por teclado (WASD/setas) e gamepad (analógico esquerdo); velocidade base 3,5 m/s; o personagem gira suavemente para a direção do movimento (720°/s); arena 20×20 m em cinza neutro; câmera fixa inclinada a 60°.
+
+**Código** (`Assets/Scripts/Movimento/`):
+- `CalculadoraDeMovimento` (estática, sem `MonoBehaviour`, testada em EditMode):
+  - `CalcularDeslocamento(entrada, velocidade, deltaTempo)`: a entrada 2D vira um deslocamento no chão (x da entrada → X do mundo, y da entrada → Z). A entrada é limitada a tamanho 1, então a diagonal do teclado não é mais rápida. Velocidade negativa conta como zero.
+  - `TentarCalcularAnguloAlvo(entrada, out angulo)`: ângulo Y para onde olhar (0° = +Z, 90° = +X). Entradas menores que `EntradaMinima` (0,01) não giram o personagem.
+  - `GirarEmDirecao(atual, alvo, velocidadeAngular, deltaTempo)`: gira pelo caminho mais curto sem passar do alvo.
+- `MovimentoDoJogador` (`MonoBehaviour`, exige `CharacterController`): lê a ação, chama a calculadora, aplica com `CharacterController.Move` e ajusta a rotação. Não tem lógica própria.
+
+**Decisões técnicas:**
+- A velocidade é um `Atributo` (`MovimentoDoJogador.Velocidade`), criado no `Awake` com o valor base do Inspector e mínimo 0. Itens aplicam modificadores nele. O componente chama `Velocidade.Atualizar(Time.deltaTime)` a cada quadro, então modificadores temporários expiram sozinhos. Mudar o valor base no Inspector durante o Play não tem efeito (use `Velocidade.ValorBase`).
+- `CharacterController` em vez de `Rigidbody`: colide com as muretas sem precisar de física, e continua funcionando com triggers para coletar itens. Não há gravidade nem pulo: o deslocamento é sempre horizontal (o chão é plano).
+- A entrada vem por `InputActionReference` (campo **Acao Mover** no Inspector), apontando para `Player/Move` no `InputSystem_Actions`. O componente habilita a ação no `OnEnable`.
+- A câmera não tem script: é só a `Main Camera` posicionada. "Para cima" no controle anda para +Z, que é para onde a câmera olha.
+
+**Como a cena foi montada** (para reproduzir na Editor):
+1. **Cena:** `Assets/Scenes/Arena.unity` é uma cópia da `SampleScene` (que já tem `Directional Light`, `Global Volume` e `Main Camera` do URP). Em *File > Build Profiles*, ela é a única cena da lista.
+2. **Materiais:** em `Assets/Materiais`, *Create > Material* (shader *Universal Render Pipeline/Lit*), mudando só a *Base Map* (cor): `Chao` cinza claro, `Mureta` cinza escuro, `Jogador` azul, `NarizJogador` branco.
+3. **Arena:** um GameObject vazio `Arena` com cubos (*GameObject > 3D Object > Cube*):
+   | Objeto | Position | Scale |
+   |---|---|---|
+   | `Chao` | (0, -0,1, 0) | (20, 0,2, 20) |
+   | `MuretaNorte` / `MuretaSul` | (0, 0,5, ±10,25) | (21, 1, 0,5) |
+   | `MuretaLeste` / `MuretaOeste` | (±10,25, 0,5, 0) | (0,5, 1, 20) |
+
+   O topo do chão fica em y = 0 e as muretas ficam por fora da área de 20×20. Os cubos mantêm o `Box Collider` padrão (é ele que segura o jogador) e estão marcados como *Static*.
+4. **Jogador:** *3D Object > Capsule* em (0, 1, 0), tag `Player`.
+   - Remova o `Capsule Collider` e adicione um `Character Controller` (*Height* 2, *Radius* 0,5, *Center* (0, 0, 0)). O `Character Controller` já faz a colisão.
+   - Filho `Nariz`: um cubo em (0, 0,5, 0,45), escala (0,3, 0,2, 0,3), sem `Box Collider` e com o material `NarizJogador`. Ele mostra para onde o personagem está virado.
+   - Adicione o componente `MovimentoDoJogador`. Em **Acao Mover**, escolha `Player/Move` (clique no círculo ao lado do campo). Deixe **Velocidade Base** em 3,5 e **Velocidade De Giro** em 720.
+5. **Câmera:** `Main Camera` com *Rotation* (60, 0, 0), *Position* (0, 19,27, -13,06) e *Field of View* 60. Com esses valores, a arena inteira cabe numa tela 16:9.
+
+**Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad.
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (subpastas e sub-namespaces por sistema, conforme as tarefas forem criando).
