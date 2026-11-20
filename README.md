@@ -49,6 +49,11 @@ unity command test run --mode editor --filter ColetorDeCristais.Testes.EditMode 
 
 Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 
+**Ferramentas em Python** (`ferramentas/`, fora da Unity):
+```powershell
+python -m unittest discover -s ferramentas
+```
+
 ## Estrutura de pastas
 | Caminho | Conteúdo |
 |---|---|
@@ -68,6 +73,9 @@ Na Editor também dá para usar *Window > General > Test Runner*, aba EditMode.
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
 | `Packages/` | `manifest.json` e lock dos pacotes UPM. Inclui `com.unity.pipeline` (liga a CLI à Editor) e `com.unity.test-framework` |
 | `ProjectSettings/` | Configurações do projeto |
+| `ATUALIZACOES.md` | Registro das atualizações do jogo, em ordem, com imagens |
+| `docs/atualizacoes/` | Imagens e animações (APNG) do registro de atualizações (Git LFS) |
+| `ferramentas/` | Ferramentas de apoio em Python, sem pacotes extras: `montar_apng.py` junta PNGs num PNG animado. Tem testes (`test_montar_apng.py`) |
 
 Pastas geradas (`Library/`, `Temp/`, `Logs/`, `UserSettings/`, `obj/`, `.csproj`, `.slnx`) estão no `.gitignore`.
 
@@ -198,6 +206,7 @@ Ao apertar Play, o cristal do centro é coletado logo de cara e o Console mostra
 - Cada `MonoBehaviour` fica sozinho em um `.cs` com o nome da classe.
 - Uma branch por tarefa (ex.: `movimento-jogador`). Os commits são feitos pelo desenvolvedor.
 - Nada pessoal ou externo ao jogo entra no repositório (dados pessoais, credenciais, cronogramas, datas, notas). Esse conteúdo fica em arquivos ignorados, como o `CLAUDE.local.md`.
+- Cada entrega que muda o que o jogador vê ou faz ganha uma entrada no [`ATUALIZACOES.md`](ATUALIZACOES.md), com imagem ou animação quando ajudar.
 - Regras para agentes: ver `CLAUDE.md`.
 
 ## Versionamento

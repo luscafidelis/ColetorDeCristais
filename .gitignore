@@ -80,3 +80,7 @@ CLAUDE.local.md
 *.p12
 **/[Cc]redenciais*
 **/[Ss]ecrets*
+
+# Python (ferramentas/)
+__pycache__/
+*.pyc
