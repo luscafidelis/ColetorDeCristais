@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad) e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); o cristal coletável base (some ao ser coletado e é contado, ainda sem efeito). Efeitos dos cristais, contagem na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad) e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); o item coletável base (some ao ser coletado e é contado, ainda sem efeito), com visual de comida (carne, peixe e coxa) numa arena de piso e paredes de supermercado, com modelos da Kenney. Efeitos dos cristais, contagem na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -67,7 +67,10 @@ python -m unittest discover -s ferramentas
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
 | `Assets/Scripts/Cristais/` | Cristais coletáveis (namespace `ColetorDeCristais.Cristais`): lógica pura (`EstadoDeColeta`, `ContadorDeColeta`, `CalculadoraDeFlutuacao`), dados (`DefinicaoCristal`, `EfeitoDeCristal`) e componentes (`CristalColetavel`, `ColetorDoJogador`, `GiroEFlutuacao`). Ver "Cristais coletáveis" abaixo |
 | `Assets/Scripts/Ferramentas/` | Ferramentas de desenvolvimento (namespace `ColetorDeCristais.Ferramentas`): `GravadorDeQuadros`, só da Editor (`#if UNITY_EDITOR`, fica fora do build), grava quadros da câmera do jogo seguindo um `RoteiroDeEntrada` (C# puro, testado). Uso no `ATUALIZACOES.md` |
-| `Assets/Prefabs/Cristal.prefab` | Prefab do cristal: trigger, coleta e visual animado |
+| `Assets/Prefabs/Cristal.prefab` | Prefab base do item coletável: trigger, coleta e visual animado (losango ciano) |
+| `Assets/Prefabs/Comida_Carne.prefab`, `Comida_Peixe.prefab`, `Comida_Coxa.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
+| `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
+| `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
 | `Assets/Dados/Cristais/` | Assets `DefinicaoCristal` (por enquanto, `CristalBase`) |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
@@ -75,6 +78,7 @@ python -m unittest discover -s ferramentas
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
 | `Packages/` | `manifest.json` e lock dos pacotes UPM. Inclui `com.unity.pipeline` (liga a CLI à Editor) e `com.unity.test-framework` |
 | `ProjectSettings/` | Configurações do projeto |
+| `CREDITOS.md` | Créditos e licenças de todos os assets de terceiros |
 | `ATUALIZACOES.md` | Registro das atualizações do jogo, em ordem, com imagens |
 | `docs/atualizacoes/` | Imagens e animações (APNG) do registro de atualizações (Git LFS) |
 | `ferramentas/` | Ferramentas de apoio em Python, sem pacotes extras. `montar_apng.py` junta PNGs num PNG animado: lê os quadros em ordem natural do nome, ignora a própria saída se ela estiver na pasta, copia paleta e chunks de cor e guarda só a região alterada de cada quadro (RGB/RGBA de 8 bits). Tem testes (`test_montar_apng.py`) |
@@ -128,7 +132,7 @@ velocidade.Atualizar(4f);                                                       
 Os valores concretos de cada atributo e item (base, bônus, limites, durações e quais cristais são temporários) não fazem parte deste sistema: ficam nos componentes e assets que o usam.
 
 ## Movimento do personagem
-**Como funciona no jogo:** controles por teclado (WASD/setas) e gamepad (analógico esquerdo); velocidade base 3,5 m/s; o personagem gira suavemente para a direção do movimento (720°/s); arena 20×20 m em cinza neutro; câmera fixa inclinada a 60°.
+**Como funciona no jogo:** controles por teclado (WASD/setas) e gamepad (analógico esquerdo); velocidade base 3,5 m/s; o personagem gira suavemente para a direção do movimento (720°/s); arena 20×20 m com piso em placas e paredes do Mini Shop (Kenney); câmera fixa inclinada a 60°.
 
 **Código** (`Assets/Scripts/Movimento/`):
 - `CalculadoraDeMovimento` (estática, sem `MonoBehaviour`, testada em EditMode):
@@ -154,6 +158,12 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
    | `MuretaLeste` / `MuretaOeste` | (±10,25, 0,5, 0) | (0,5, 1, 20) |
 
    O topo do chão fica em y = 0 e as muretas ficam por fora da área de 20×20. Os cubos mantêm o `Box Collider` padrão (é ele que segura o jogador) e estão marcados como *Static*.
+
+   **Visual da arena (Kenney):** os cubos são só colisão. O `Mesh Renderer` deles está desligado (desmarque o componente no Inspector). O que aparece é `Arena/VisualKenney`, uma instância do prefab `Assets/Prefabs/ArenaVisualKenney.prefab`. Com as peças dentro de um prefab, a cena guarda uma referência só, e não 484 objetos. Para mudar o visual, abra o prefab com dois cliques. Ele tem modelos do Mini Shop arrastados de `Assets/Terceiros/Kenney/MiniShop/`, todos *Static* e sem collider:
+   - `Piso`: 400 placas `floor` (1×1 m), de (-9,5; 0; -9,5) a (9,5; 0; 9,5), de metro em metro.
+   - `Paredes`: 20 peças `wall` (1 m de largura, 1 m de altura, 0,6 m de espessura) por lado, a 10,3 m do centro. Assim a face interna fica no limite de 10 m. Rotação Y: norte 180°, sul 0°, leste 270°, oeste 90°. Nos quatro cantos há uma `column`.
+
+   Separar colisão e visual permite trocar o visual da arena sem mexer na física.
 4. **Jogador:** *3D Object > Capsule* em (0, 1, 0), tag `Player`.
    - Remova o `Capsule Collider` e adicione um `Character Controller` (*Height* 2, *Radius* 0,5, *Center* (0, 0, 0)). O `Character Controller` já faz a colisão.
    - Filho `Nariz`: um cubo em (0, 0,5, 0,45), escala (0,3, 0,2, 0,3), sem `Box Collider` e com o material `NarizJogador`. Ele mostra para onde o personagem está virado.
@@ -163,7 +173,9 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 **Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad.
 
 ## Cristais coletáveis
-**Como funciona no jogo:** o cristal é um losango levemente esticado, ciano brilhante, que gira e flutua. Ao ser coletado, some na hora. Na Arena há 5 cristais: um no centro, onde o jogador nasce e por isso é coletado logo no início, e um perto de cada canto, em (±6, ±6). A coleta ainda não tem som nem contagem na tela.
+**Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe e coxa, do Food Kit da Kenney) de cerca de 0,8 m que giram e flutuam. Ao ser coletado, o item some na hora. Na Arena há 5 itens: carne no centro, onde o jogador nasce e por isso é coletada logo no início, peixe nos cantos noroeste e sudeste, e coxa nos cantos nordeste e sudoeste, em (±6, ±6). O prefab base `Cristal` (losango ciano) continua no projeto. A coleta ainda não tem som nem contagem na tela.
+
+**Visuais por Prefab Variant:** cada comida é uma *Prefab Variant* de `Cristal` (`Comida_Carne`, `Comida_Peixe`, `Comida_Coxa`). A variante herda tudo do prefab base: trigger, `CristalColetavel` com a definição `CristalBase` e `GiroEFlutuacao`. Ela muda só o visual: em `Visual`, *Scale* (1, 1, 1), a `Gema` desativada e um filho `Comida` com o modelo, escalado para que a maior dimensão tenha 0,8 m e centralizado no `Visual`. Mudanças de lógica no prefab base valem para todas as comidas. Para criar uma variante na Editor, clique com o botão direito em `Cristal.prefab` e escolha *Create > Prefab Variant*. Depois, edite o `Visual` da variante.
 
 **Código** (`Assets/Scripts/Cristais/`):
 
@@ -210,6 +222,9 @@ Ao apertar Play, o cristal do centro é coletado logo de cara e o Console mostra
 - Nada pessoal ou externo ao jogo entra no repositório (dados pessoais, credenciais, cronogramas, datas, notas). Esse conteúdo fica em arquivos ignorados, como o `CLAUDE.local.md`.
 - Cada entrega que muda o que o jogador vê ou faz ganha uma entrada no [`ATUALIZACOES.md`](ATUALIZACOES.md), com imagem ou animação quando ajudar.
 - Regras para agentes: ver `CLAUDE.md`.
+
+## Créditos e licenças
+Assets de terceiros: Food Kit 2.0 e Mini Shop 2.1, de **Kenney** ([www.kenney.nl](https://www.kenney.nl)), sob licença [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). A lista completa, com origem e uso de cada pacote, está em [`CREDITOS.md`](CREDITOS.md). Todo asset de terceiros novo entra nessa lista.
 
 ## Versionamento
 - `.gitignore` de Unity na raiz. A seção "Arquivos pessoais e locais" ignora `CLAUDE.local.md`, `*.local.md`, as configurações locais do Claude Code (`.claude/settings.local.json`), as pastas `Notas/` e `Rascunhos/`, os arquivos `*.notas.md`, `.env` e os arquivos de credenciais e chaves.
