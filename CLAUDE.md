@@ -11,6 +11,9 @@ Detalhes da máquina local (caminhos de instalação, restrições de disco) **n
 ## Regra de escopo
 Decisões criativas e de escopo são sempre do desenvolvedor, nunca do agente. O agente pode propor ideias, apontar riscos e estimar impacto, mas não decide nem aplica. Decisões técnicas de implementação dentro de uma tarefa combinada (estrutura do código, nomes, padrões) o agente pode tomar, documentando; se a decisão muda o que o jogador vê ou faz, é criativa e fica com o desenvolvedor. Ideias ou mudanças de escopo que surgirem durante uma tarefa não são implementadas: o agente as descreve ao desenvolvedor como mudanças propostas, e o desenvolvedor decide se e quando entram. Exceção: correções de bug e ajustes técnicos necessários para concluir a tarefa combinada, sem mudar o que ela entrega.
 
+## Regra de documentação
+A documentação reflete o **produto**, não a conversa. Ela descreve o que o jogo **é** e como funciona hoje: regras, mecânicas, arquitetura, como rodar, testar e jogar. Não registra a conversa que levou até ali: nada de "conforme pedido", "o usuário disse" ou "o agente sugeriu", perguntas e respostas, nem relatos de sessão. O histórico de decisões e mudanças tem lugar próprio: o planejamento do jogo, fora deste repositório, o `ATUALIZACOES.md` e o histórico do Git.
+
 ## Regras gerais
 - **Commits:** nenhum commit, push ou merge feito pelo agente. Ao terminar, apresente um resumo das alterações (arquivos e o que mudou) para o desenvolvedor revisar e commitar.
 - **Branches:** uma branch por tarefa (ex.: `movimento-jogador`). O agente pode sugerir o nome; criar e trocar de branch é do desenvolvedor, a menos que ele peça.

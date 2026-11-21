@@ -107,7 +107,7 @@ final = limitar(final, ValorMinimo, ValorMaximo)
 - Sem `duracao`, o modificador é **permanente**: só sai quando é removido.
 - Com `duracao` (segundos, finita e maior que zero), o modificador é **temporário**. O tempo só passa quando quem usa o atributo chama `Atualizar(deltaTempo)` (ex.: uma vez por quadro com `Time.deltaTime`). Quando o tempo restante chega a zero, o modificador é removido e o valor final volta a ser calculado. `Atualizar` devolve quantos modificadores expiraram.
 - `TentarObterTempoRestante(modificador, out tempo)` informa quanto falta (útil para a interface).
-- **Renovação por grupo** (regra definida pelo desenvolvedor: se dois cristais temporários com o mesmo modificador forem coletados, o tempo reseta e os modificadores se somam). Um temporário pode ter um `grupo` (texto, ex.: o tipo de cristal). Ao adicionar um temporário de um grupo que já está ativo, **todos** os temporários desse grupo voltam à duração completa do novo modificador, e os efeitos continuam somados. Por isso eles expiram juntos. Temporários sem grupo têm tempos independentes. Grupo só é aceito em temporários (`ArgumentException` em permanentes).
+- **Renovação por grupo:** quando dois cristais temporários com o mesmo modificador são coletados, o tempo reseta e os modificadores se somam. Um temporário pode ter um `grupo` (texto, ex.: o tipo de cristal). Ao adicionar um temporário de um grupo que já está ativo, **todos** os temporários desse grupo voltam à duração completa do novo modificador, e os efeitos continuam somados. Por isso eles expiram juntos. Temporários sem grupo têm tempos independentes. Grupo só é aceito em temporários (`ArgumentException` em permanentes).
 
 **Exemplo** (números ilustrativos, não são valores de jogo):
 ```csharp
@@ -125,10 +125,10 @@ velocidade.AdicionarModificador(Modificador.Plano(1f, duracao: 4f, grupo: "crist
 velocidade.Atualizar(4f);                                                                         // os dois expiram: 5
 ```
 
-Os valores concretos de cada atributo e item (base, bônus, limites, durações e quais cristais são temporários) são decisões de design e são definidos por quem usa o sistema, não aqui.
+Os valores concretos de cada atributo e item (base, bônus, limites, durações e quais cristais são temporários) não fazem parte deste sistema: ficam nos componentes e assets que o usam.
 
 ## Movimento do personagem
-**Decisões de design** (do desenvolvedor): controles por teclado (WASD/setas) e gamepad (analógico esquerdo); velocidade base 3,5 m/s; o personagem gira suavemente para a direção do movimento (720°/s); arena 20×20 m em cinza neutro; câmera fixa inclinada a 60°.
+**Como funciona no jogo:** controles por teclado (WASD/setas) e gamepad (analógico esquerdo); velocidade base 3,5 m/s; o personagem gira suavemente para a direção do movimento (720°/s); arena 20×20 m em cinza neutro; câmera fixa inclinada a 60°.
 
 **Código** (`Assets/Scripts/Movimento/`):
 - `CalculadoraDeMovimento` (estática, sem `MonoBehaviour`, testada em EditMode):
@@ -163,7 +163,7 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 **Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad.
 
 ## Cristais coletáveis
-**Decisões de design** (do desenvolvedor): o cristal é um losango levemente esticado, ciano brilhante, que gira e flutua. Ao ser coletado, some na hora. Na Arena há 5 cristais: um no centro, onde o jogador nasce e por isso é coletado logo no início, e um perto de cada canto, em (±6, ±6). Ainda não há som (T13) nem contagem na tela (T11).
+**Como funciona no jogo:** o cristal é um losango levemente esticado, ciano brilhante, que gira e flutua. Ao ser coletado, some na hora. Na Arena há 5 cristais: um no centro, onde o jogador nasce e por isso é coletado logo no início, e um perto de cada canto, em (±6, ±6). A coleta ainda não tem som nem contagem na tela.
 
 **Código** (`Assets/Scripts/Cristais/`):
 
@@ -203,7 +203,7 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 Ao apertar Play, o cristal do centro é coletado logo de cara e o Console mostra "Cristal coletado: Cristal Base (cristal-base). Total: 1.". Ande até os outros para coletá-los.
 
 ## Convenções
-- Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (subpastas e sub-namespaces por sistema, conforme as tarefas forem criando).
+- Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (uma subpasta e um sub-namespace por sistema).
 - Toda lógica nova tem teste EditMode em `Assets/Testes/EditMode/`. Lógica testável fica em classes C# puras, separada dos `MonoBehaviour`, para não depender de Play Mode.
 - Cada `MonoBehaviour` fica sozinho em um `.cs` com o nome da classe.
 - Uma branch por tarefa (ex.: `movimento-jogador`). Os commits são feitos pelo desenvolvedor.

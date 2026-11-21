@@ -46,7 +46,7 @@ As imagens ficam em [`docs/atualizacoes/`](docs/atualizacoes/) e são versionada
 - A velocidade do personagem já é um `Atributo`, pronta para receber modificadores.
 - Nova cena `Assets/Scenes/Arena.unity`, que passa a ser a cena do build.
 
-**Validação:** 84 testes EditMode passando. Em Play Mode, o personagem parou nas quatro muretas. O desenvolvedor testou jogando; o controle por gamepad ainda não foi confirmado em teste.
+**Validação:** 84 testes EditMode passando. Em Play Mode, o personagem parou nas quatro muretas. Teste manual jogando; o controle por gamepad não tem teste confirmado.
 
 ---
 
@@ -69,7 +69,7 @@ O personagem andando até um cristal do canto, coletando, e seguindo para o pró
   - `ContadorDeColeta`: total e quantidade por tipo, guardados em `ColetorDoJogador.Contador`.
   - `CalculadoraDeFlutuacao`: o giro e a flutuação.
 
-**Validação:** 106 testes EditMode passando. Em Play Mode, o cristal do centro foi coletado ao iniciar, e um cristal de canto foi coletado com o personagem sobre ele. O desenvolvedor testou jogando.
+**Validação:** 106 testes EditMode passando. Em Play Mode, o cristal do centro foi coletado ao iniciar, e um cristal de canto foi coletado com o personagem sobre ele. Teste manual jogando.
 
 ---
 
