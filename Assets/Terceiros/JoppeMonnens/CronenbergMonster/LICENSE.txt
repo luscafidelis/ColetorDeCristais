@@ -1,0 +1,20 @@
+Cronenberg Monster Creature
+Autor: Joppe Monnens
+Origem: https://sketchfab.com/3d-models/cronenberg-monster-creature-joppe-monnens-b469c9fe16f84845941bffaae9a06b00
+Licença: Creative Commons Attribution 4.0 International (CC BY 4.0)
+         https://creativecommons.org/licenses/by/4.0/
+
+"Cronenberg Monster Creature" (https://sketchfab.com/3d-models/cronenberg-monster-creature-joppe-monnens-b469c9fe16f84845941bffaae9a06b00)
+by Joppe Monnens is licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+
+A CC BY 4.0 exige crédito: nome do autor, link da obra, link da licença e aviso de modificação.
+Isso vale para o repositório e para a tela de créditos do jogo.
+
+Modificações feitas neste projeto:
+- Texturas reduzidas de 2048 para 1024 na importação da Unity.
+- Mapas Metallic e Roughness originais combinados num único mapa no formato do URP Lit
+  (*_MetallicSmoothness.png: metálico no RGB, suavidade = 1 - rugosidade no alfa), em 1024.
+- Mapas Displacement não usados (não foram trazidos para o projeto).
+- Materiais recriados para o URP Lit (Materiais/Montrengo_Corpo e Montrengo_Osso).
+- Modelo escalado e reposicionado no jogo, e deformado por animação procedural
+  (pulsar, esticar, achatar e inclinar).

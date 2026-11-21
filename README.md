@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad) e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); o item coletável base (some ao ser coletado e é contado, ainda sem efeito), com visual de comida (carne, peixe e coxa) numa arena de piso e paredes de supermercado, com modelos da Kenney. Efeitos dos cristais, contagem na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); o item coletável base (some ao ser coletado e é contado, ainda sem efeito), com visual de comida (carne, peixe e coxa) numa arena de piso e paredes de supermercado, com modelos da Kenney. Efeitos dos cristais, contagem na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -66,11 +66,14 @@ python -m unittest discover -s ferramentas
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
 | `Assets/Scripts/Cristais/` | Cristais coletáveis (namespace `ColetorDeCristais.Cristais`): lógica pura (`EstadoDeColeta`, `ContadorDeColeta`, `CalculadoraDeFlutuacao`), dados (`DefinicaoCristal`, `EfeitoDeCristal`) e componentes (`CristalColetavel`, `ColetorDoJogador`, `GiroEFlutuacao`). Ver "Cristais coletáveis" abaixo |
+| `Assets/Scripts/Animacao/` | Animação procedural (namespace `ColetorDeCristais.Animacao`): `CalculadoraDeDeformacao`, `ParametrosDeDeformacao` e `PoseDeDeformacao` (C# puro) e `DeformacaoProcedural` (`MonoBehaviour`). Ver "Visual do jogador (montrengo)" abaixo |
 | `Assets/Scripts/Ferramentas/` | Ferramentas de desenvolvimento (namespace `ColetorDeCristais.Ferramentas`): `GravadorDeQuadros`, só da Editor (`#if UNITY_EDITOR`, fica fora do build), grava quadros da câmera do jogo seguindo um `RoteiroDeEntrada` (C# puro, testado). Uso no `ATUALIZACOES.md` |
 | `Assets/Prefabs/Cristal.prefab` | Prefab base do item coletável: trigger, coleta e visual animado (losango ciano) |
 | `Assets/Prefabs/Comida_Carne.prefab`, `Comida_Peixe.prefab`, `Comida_Coxa.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
+| `Assets/Prefabs/VisualMontrengo.prefab` | Visual do jogador: o modelo do montrengo com a `DeformacaoProcedural`, sem colisão (ver "Visual do jogador (montrengo)") |
 | `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
 | `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
+| `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
 | `Assets/Dados/Cristais/` | Assets `DefinicaoCristal` (por enquanto, `CristalBase`) |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
@@ -166,11 +169,31 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
    Separar colisão e visual permite trocar o visual da arena sem mexer na física.
 4. **Jogador:** *3D Object > Capsule* em (0, 1, 0), tag `Player`.
    - Remova o `Capsule Collider` e adicione um `Character Controller` (*Height* 2, *Radius* 0,5, *Center* (0, 0, 0)). O `Character Controller` já faz a colisão.
-   - Filho `Nariz`: um cubo em (0, 0,5, 0,45), escala (0,3, 0,2, 0,3), sem `Box Collider` e com o material `NarizJogador`. Ele mostra para onde o personagem está virado.
+   - Filho `Nariz`: um cubo em (0, 0,5, 0,45), escala (0,3, 0,2, 0,3), sem `Box Collider` e com o material `NarizJogador`. Ele mostrava para onde a cápsula estava virada.
    - Adicione o componente `MovimentoDoJogador`. Em **Acao Mover**, escolha `Player/Move` (clique no círculo ao lado do campo). Deixe **Velocidade Base** em 3,5 e **Velocidade De Giro** em 720.
+   - **Visual do montrengo:** desligue o `Mesh Renderer` da cápsula e desative o `Nariz`. Arraste o prefab `VisualMontrengo` para dentro do `Jogador`, em (0, -1, 0), que é a base do `Character Controller` (os pés). Detalhes em "Visual do jogador (montrengo)".
 5. **Câmera:** `Main Camera` com *Rotation* (60, 0, 0), *Position* (0, 19,27, -13,06) e *Field of View* 60. Com esses valores, a arena inteira cabe numa tela 16:9.
 
 **Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad.
+
+## Visual do jogador (montrengo)
+**Como funciona no jogo:** o jogador é desenhado como um monstro de carne de cerca de 2 m de largura e 1,6 m de altura, com olhos em antenas e a boca virada para a frente. Parado, ele pulsa devagar (±4%, um pulso por segundo). Andando, estica e achata no ritmo do passo (até 10%, um ciclo a cada 0,4 s na velocidade base) e se inclina até 12° na direção do movimento. O efeito de andar cresce com a velocidade e o pulso parado some na mesma proporção. Só o desenho muda: colisão, movimento e coleta continuam os da cápsula (`Character Controller` de 2 m de altura e 0,5 m de raio).
+
+**Código** (`Assets/Scripts/Animacao/`):
+- `CalculadoraDeDeformacao` (C# puro, testada em EditMode): guarda as fases do pulso e do passo e a velocidade suavizada. `Atualizar(velocidadeLocal, deltaTempo, parametros)` recebe a velocidade no referencial do corpo (x para a direita, y para a frente) e devolve uma `PoseDeDeformacao` (multiplicador de escala e rotação de inclinação). `Reiniciar()` volta ao repouso.
+  - Intensidade de andar = velocidade suavizada ÷ velocidade de referência, limitada a 1. O pulso parado é multiplicado por `1 - intensidade` e o esticar e achatar por `intensidade`.
+  - O pulso parado muda os três eixos por igual. O esticar e achatar preserva o volume: altura × `f`, largura e profundidade × `1/√f`.
+  - O passo avança no ritmo da intensidade, então fica mais lento quando o personagem anda devagar e para quando ele para.
+  - A inclinação gira o topo para a direção do movimento (`InclinacaoMaxima × intensidade`).
+  - A suavização da velocidade é exponencial (`TempoDeResposta`) e não depende da taxa de quadros.
+- `ParametrosDeDeformacao` (struct): os valores acima, validados no construtor (`ArgumentException` fora da faixa).
+- `DeformacaoProcedural` (`MonoBehaviour`, no `LateUpdate`): mede a velocidade pela mudança de posição do objeto, no referencial do pai (o `Jogador`), e aplica a pose sobre a escala e a rotação originais. Não depende do `MovimentoDoJogador`: funciona com qualquer forma de movimento e com modificadores de velocidade. Os campos podem ser ajustados no Inspector durante o Play.
+
+**Prefab `Assets/Prefabs/VisualMontrengo.prefab`:** a raiz tem a `DeformacaoProcedural` e o pivô na base do corpo, para a deformação não afundar o modelo no chão. O filho `Modelo` é o FBX, com escala 0,429 (maior dimensão de 2 m), centralizado na horizontal e com a base em y = 0. A frente do modelo (a boca) é o +Z do FBX, a mesma frente do `Jogador`.
+
+**Importação do modelo** (`Assets/Terceiros/JoppeMonnens/CronenbergMonster/`):
+- FBX com dois materiais: `Material.002` (corpo) e `Bone.002` (dentes), remapeados no *Model Importer* (aba *Materials*) para `Montrengo_Corpo` e `Montrengo_Osso` (URP Lit com *Base Map*, *Normal Map* e *Metallic Map*).
+- Texturas com *Max Size* 1024; as `_Normal` como *Normal map*; as `_MetallicSmoothness` sem sRGB. O URP Lit lê a suavidade do alfa do mapa metálico, então os mapas originais Metallic e Roughness foram combinados num só (metálico no RGB, `1 - rugosidade` no alfa). O corpo é bem liso (rugosidade média 0,24, aparência molhada) e os dentes, foscos (0,9). Os mapas Displacement do pacote não são usados.
 
 ## Cristais coletáveis
 **Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe e coxa, do Food Kit da Kenney) de cerca de 0,8 m que giram e flutuam. Ao ser coletado, o item some na hora. Na Arena há 5 itens: carne no centro, onde o jogador nasce e por isso é coletada logo no início, peixe nos cantos noroeste e sudeste, e coxa nos cantos nordeste e sudoeste, em (±6, ±6). O prefab base `Cristal` (losango ciano) continua no projeto. A coleta ainda não tem som nem contagem na tela.
@@ -224,7 +247,11 @@ Ao apertar Play, o cristal do centro é coletado logo de cara e o Console mostra
 - Regras para agentes: ver `CLAUDE.md`.
 
 ## Créditos e licenças
-Assets de terceiros: Food Kit 2.0 e Mini Shop 2.1, de **Kenney** ([www.kenney.nl](https://www.kenney.nl)), sob licença [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). A lista completa, com origem e uso de cada pacote, está em [`CREDITOS.md`](CREDITOS.md). Todo asset de terceiros novo entra nessa lista.
+Assets de terceiros:
+- Food Kit 2.0 e Mini Shop 2.1, de **Kenney** ([www.kenney.nl](https://www.kenney.nl)), sob licença [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+- "[Cronenberg Monster Creature](https://sketchfab.com/3d-models/cronenberg-monster-creature-joppe-monnens-b469c9fe16f84845941bffaae9a06b00)", de **Joppe Monnens**, sob licença [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), com modificações. Essa licença **exige crédito** (também na tela de créditos do jogo).
+
+A lista completa, com origem e uso de cada pacote, está em [`CREDITOS.md`](CREDITOS.md). Todo asset de terceiros novo entra nessa lista.
 
 ## Versionamento
 - `.gitignore` de Unity na raiz. A seção "Arquivos pessoais e locais" ignora `CLAUDE.local.md`, `*.local.md`, as configurações locais do Claude Code (`.claude/settings.local.json`), as pastas `Notas/` e `Rascunhos/`, os arquivos `*.notas.md`, `.env` e os arquivos de credenciais e chaves.
