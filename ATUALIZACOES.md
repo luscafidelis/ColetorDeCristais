@@ -138,6 +138,29 @@ O personagem anda um pouco para a direita, para e dá uma investida, esticando p
 
 ---
 
+## 9. Ímã e rosquinha
+
+**Para quem joga:** a primeira habilidade passiva. Na arena há uma rosquinha (por enquanto ao sul do centro). Pegar a rosquinha **libera o ímã** até o fim da partida: sem apertar nada, os itens perto do personagem são puxados até ele e coletados. O puxão começa devagar e **acelera** conforme o item se aproxima. A força depende do item:
+- **Cristais de experiência** (pequenos losangos ciano, com 1/4 do tamanho do cristal original; quatro na arena, por enquanto sem efeito): de até **3 m**, chegando a **6 m/s**.
+- **Carne, peixe e coxa:** um terço disso, de até **1 m** e até **2 m/s**. Como a coleta já acontece a cerca de 1 m, na prática quase não se nota.
+- **Café e rosquinha** não são puxados.
+
+Nada atravessa paredes: um item com algo sólido no caminho fica parado. Ainda não há efeito visual do ímã nem indicação na tela de que ele foi liberado.
+
+Com o ímã liberado, o personagem desce na direção dos dois cristais de experiência, que vêm até ele de lados opostos:
+
+![Animação: o montrengo anda um pouco para baixo, para, e dois pequenos losangos ciano deslizam de lados opostos até ele, cada vez mais rápido, e somem ao encostar](docs/atualizacoes/ima.png)
+
+**Por dentro:**
+- Ímã no sistema `Habilidades`: `Ima` (C# puro) diz quem está no raio e para onde cada item vai a cada quadro, com uma solução exata do movimento, que não depende da taxa de quadros. `ImaDoJogador` move os cristais e verifica, com um `Linecast`, se o caminho até o jogador está livre.
+- Valores no ScriptableObject `DefinicaoIma` (asset `Ima`), com dois níveis (completo e reduzido) e a aceleração.
+- `DefinicaoCristal` ganhou `AtracaoDoIma` (`Completa`, `Reduzida` ou `Nenhuma`), e `CristalColetavel` ganhou a lista `Ativos`.
+- Novo efeito `EfeitoLiberarIma`, a definição `Rosquinha` e a variante `Comida_Rosquinha`, com o donut do Food Kit. Nova definição `Experiencia` e variante `Cristal_Experiencia` (o visual do `Cristal` em 1/4 do tamanho, com o mesmo trigger) para os cristais ciano.
+
+**Validação:** 209 testes EditMode passando, incluindo o alcance, a aceleração, o caminho igual com um quadro grande ou muitos pequenos, o item que para no jogador sem passar dele e a escolha dos níveis. Em Play Mode, pela CLI: antes da rosquinha, um cristal a 2,6 m não se mexe; depois dela, ele vem e é coletado; com um bloco entre o cristal e o personagem, ele fica parado, e é puxado e coletado quando o bloco sai; o café a 2 m não se mexe. O teste jogando com teclado ou gamepad ainda não foi feito.
+
+---
+
 ## Como registrar uma nova atualização
 1. Acrescente uma seção no fim, com o próximo número, seguindo o mesmo formato: **Para quem joga**, **Por dentro** e **Validação**, com o número de testes passando.
 2. Não registre aqui planejamento, cronograma ou dados pessoais (veja a regra no `CLAUDE.md`).

@@ -16,3 +16,4 @@ MonoBehaviour:
   nomeExibicao: "Caf\xE9"
   efeitos:
   - {fileID: 11400000, guid: d2ebe88d3367c9343b12214fd03d3628, type: 2}
+  atracaoDoIma: 2

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ColetorDeCristais.Cristais
@@ -13,7 +14,12 @@ namespace ColetorDeCristais.Cristais
         [Tooltip("Tipo deste cristal (asset DefinicaoCristal).")]
         [SerializeField] private DefinicaoCristal definicao;
 
+        private static readonly List<CristalColetavel> _ativos = new List<CristalColetavel>();
+
         private readonly EstadoDeColeta _estado = new EstadoDeColeta();
+
+        /// <summary>Cristais ativos na cena agora (ex.: para o ímã do jogador procurar quem puxar).</summary>
+        public static IReadOnlyList<CristalColetavel> Ativos => _ativos;
 
         /// <summary>Tipo deste cristal.</summary>
         public DefinicaoCristal Definicao => definicao;
@@ -35,6 +41,10 @@ namespace ColetorDeCristais.Cristais
                 Debug.LogError($"{name}: o cristal não tem DefinicaoCristal.", this);
             }
         }
+
+        private void OnEnable() => _ativos.Add(this);
+
+        private void OnDisable() => _ativos.Remove(this);
 
         private void OnTriggerEnter(Collider outro)
         {

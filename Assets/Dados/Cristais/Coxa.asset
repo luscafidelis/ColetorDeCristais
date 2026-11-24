@@ -16,3 +16,4 @@ MonoBehaviour:
   nomeExibicao: Coxa
   efeitos:
   - {fileID: 11400000, guid: aded8775be83c1b46a8eedfcf6a511a9, type: 2}
+  atracaoDoIma: 1

@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; carne e peixe ainda não têm efeito. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; a rosquinha libera o ímã, que puxa os itens próximos até o personagem (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido); carne e peixe ainda não têm efeito, e os cristais de experiência ainda não dão experiência. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -66,7 +66,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
 | `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`, `BonusDeAtributo` e `MomentoDoPermanente`. Ver "Atributos e modificadores" abaixo |
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
-| `Assets/Scripts/Habilidades/` | Habilidades ativas (namespace `ColetorDeCristais.Habilidades`): `Investida` e `ParametrosDeInvestida` (C# puro), `DefinicaoInvestida` (ScriptableObject) e `InvestidaDoJogador` (`MonoBehaviour`). Ver "Investida" abaixo |
+| `Assets/Scripts/Habilidades/` | Habilidades do jogador (namespace `ColetorDeCristais.Habilidades`). Investida: `Investida` e `ParametrosDeInvestida` (C# puro), `DefinicaoInvestida` (ScriptableObject) e `InvestidaDoJogador` (`MonoBehaviour`). Ímã: `Ima` e `ParametrosDeIma` (C# puro), `DefinicaoIma` (ScriptableObject) e `ImaDoJogador` (`MonoBehaviour`). Ver "Investida" e "Ímã" abaixo |
 | `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
@@ -74,13 +74,14 @@ python -m unittest discover -s ferramentas
 | `Assets/Scripts/Animacao/` | Animação procedural (namespace `ColetorDeCristais.Animacao`): `CalculadoraDeDeformacao`, `ParametrosDeDeformacao` e `PoseDeDeformacao` (C# puro) e `DeformacaoProcedural` (`MonoBehaviour`). Ver "Visual do jogador (montrengo)" abaixo |
 | `Assets/Scripts/Ferramentas/` | Ferramentas de desenvolvimento (namespace `ColetorDeCristais.Ferramentas`): `GravadorDeQuadros`, só da Editor (`#if UNITY_EDITOR`, fica fora do build), grava quadros da câmera do jogo seguindo um `RoteiroDeEntrada` (C# puro, testado). Uso no `ATUALIZACOES.md` |
 | `Assets/Prefabs/Cristal.prefab` | Prefab base do item coletável: trigger, coleta e visual animado (losango ciano) |
-| `Assets/Prefabs/Comida_Carne.prefab`, `Comida_Peixe.prefab`, `Comida_Coxa.prefab`, `Comida_Cafe.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
+| `Assets/Prefabs/Comida_Carne.prefab`, `Comida_Peixe.prefab`, `Comida_Coxa.prefab`, `Comida_Cafe.prefab`, `Comida_Rosquinha.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
+| `Assets/Prefabs/Cristal_Experiencia.prefab` | Prefab Variant de `Cristal` para os cristais de experiência: definição `Experiencia` e visual com 1/4 do tamanho (ver "Cristais coletáveis") |
 | `Assets/Prefabs/VisualMontrengo.prefab` | Visual do jogador: o modelo do montrengo com a `DeformacaoProcedural`, sem colisão (ver "Visual do jogador (montrengo)") |
 | `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
 | `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
 | `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
-| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito), `Coxa` e `Cafe`. Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`) |
-| `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) |
+| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito), `Coxa`, `Cafe`, `Rosquinha` e `Experiencia` (cristais de experiência). Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`, `LiberarIma`) |
+| `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) e `Ima` (`DefinicaoIma`) |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move` e `Player/Investida`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
@@ -219,14 +220,22 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 - Texturas com *Max Size* 1024; as `_Normal` como *Normal map*; as `_MetallicSmoothness` sem sRGB. O URP Lit lê a suavidade do alfa do mapa metálico, então os mapas originais Metallic e Roughness foram combinados num só (metálico no RGB, `1 - rugosidade` no alfa). O corpo é bem liso (rugosidade média 0,24, aparência molhada) e os dentes, foscos (0,9). Os mapas Displacement do pacote não são usados.
 
 ## Cristais coletáveis
-**Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe, coxa e xícara de café, do Food Kit da Kenney) de cerca de 0,8 m que giram e flutuam. Ao ser coletado, o item some na hora. Na Arena há 6 itens: carne no centro, onde o jogador nasce e por isso é coletada logo no início, peixe nos cantos noroeste e sudeste, coxa nos cantos nordeste e sudoeste, em (±6, ±6), e o café em (0, 6), ao norte do centro. A posição do café é provisória, para teste. O prefab base `Cristal` (losango ciano) continua no projeto. A coleta ainda não tem som nem contagem na tela.
+**Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe, coxa, xícara de café e rosquinha, do Food Kit da Kenney) de cerca de 0,8 m e cristais de experiência (um losango ciano pequeno, com 1/4 do tamanho do prefab base `Cristal`, cerca de 0,2 m de altura), que giram e flutuam. O tamanho menor vale só para o desenho: a área de coleta (o trigger) é a mesma dos outros itens. Ao ser coletado, o item some na hora. Na Arena há 11 itens:
+- carne no centro, onde o jogador nasce e por isso é coletada logo no início;
+- peixe nos cantos noroeste e sudeste, e coxa nos cantos nordeste e sudoeste, em (±6, ±6);
+- café em (0, 6) e rosquinha em (0, -4);
+- quatro cristais de experiência, em (±3, 3) e (±2,5, -7).
 
-**Efeitos das comidas:**
-| Comida | Definição | Efeito |
-|---|---|---|
-| Coxa | `Coxa` (`coxa`) | **Velocidade:** +30% por 5 s; quando esse efeito acaba, +0,3 m/s permanente. Pegar outra coxa durante o efeito soma mais 30% e reinicia os 5 s, e os +0,3 m/s de cada coxa entram juntos no fim. Na velocidade base (3,5 m/s): 4,55 m/s por 5 s e depois 3,8 m/s; duas coxas seguidas: 5,6 m/s e depois 4,1 m/s. |
-| Café | `Cafe` (`cafe`) | **Libera a investida** até o fim da partida (ver "Investida"). Pegar outro café não muda nada. |
-| Carne, peixe | `CristalBase` (`cristal-base`) | Nenhum (só contam). |
+As posições do café, da rosquinha e dos cristais de experiência são provisórias, para teste. A coleta ainda não tem som nem contagem na tela.
+
+**Efeitos dos itens** (a coluna "Ímã" é o nível de atração do item, ver "Ímã"):
+| Item | Definição | Efeito | Ímã |
+|---|---|---|---|
+| Coxa | `Coxa` (`coxa`) | **Velocidade:** +30% por 5 s; quando esse efeito acaba, +0,3 m/s permanente. Pegar outra coxa durante o efeito soma mais 30% e reinicia os 5 s, e os +0,3 m/s de cada coxa entram juntos no fim. Na velocidade base (3,5 m/s): 4,55 m/s por 5 s e depois 3,8 m/s; duas coxas seguidas: 5,6 m/s e depois 4,1 m/s. | Reduzida |
+| Café | `Cafe` (`cafe`) | **Libera a investida** até o fim da partida (ver "Investida"). Pegar outro café não muda nada. | Nenhuma |
+| Rosquinha | `Rosquinha` (`rosquinha`) | **Libera o ímã** até o fim da partida (ver "Ímã"). Pegar outra rosquinha não muda nada. | Nenhuma |
+| Carne, peixe | `CristalBase` (`cristal-base`) | Nenhum (só contam). | Reduzida |
+| Cristal de experiência | `Experiencia` (`experiencia`) | Nenhum por enquanto (só conta). | Completa |
 
 Os valores da coxa ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem ser ajustados no Inspector.
 
@@ -240,13 +249,14 @@ Os valores da coxa ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa`
 - `CalculadoraDeFlutuacao`: altura (senoide) e ângulo de giro em função do tempo.
 
 *Dados:*
-- `DefinicaoCristal` (ScriptableObject): `Identificador` (único e estável, usado na contagem), `NomeExibicao` e uma lista de `Efeitos`.
+- `DefinicaoCristal` (ScriptableObject): `Identificador` (único e estável, usado na contagem), `NomeExibicao`, uma lista de `Efeitos` e `AtracaoDoIma` (`Completa`, o padrão, `Reduzida` ou `Nenhuma`).
 - `EfeitoDeCristal` (ScriptableObject abstrato): **ponto de extensão** para os efeitos (velocidade, ímã, investida). Cada efeito é uma subclasse com `Aplicar(ColetorDoJogador coletor)`, criada como asset e colocada na lista de `Efeitos` de uma definição. A lista da `CristalBase` está vazia.
 - `EfeitoDeVelocidade` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Velocidade*): campos da parte temporária (*Tipo Temporario*, *Valor Temporario*, *Duracao*, *Grupo*) e da permanente (*Tipo Permanente*, *Valor Permanente*, *Momento*). Monta um `BonusDeAtributo` e o aplica em `MovimentoDoJogador.Velocidade` do jogador que coletou, com o próprio asset como origem. Escreve a nova velocidade no Console. Sem `MovimentoDoJogador` no coletor, registra um erro e não aplica nada. Valores inválidos no asset (ex.: parte temporária sem grupo) geram um aviso no Inspector (`OnValidate`) e, na coleta, um erro no Console, sem aplicar o efeito. `AplicarEm(atributo)` aplica o bônus num atributo qualquer e devolve se aplicou.
 - `EfeitoLiberarInvestida` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Liberar Investida*): chama `InvestidaDoJogador.Liberar()` no jogador que coletou e escreve "investida liberada" no Console. Sem `InvestidaDoJogador` no coletor, registra um erro e não faz nada.
+- `EfeitoLiberarIma` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Liberar Ímã*): o mesmo para o ímã, com `ImaDoJogador.Liberar()` ("ímã liberado" no Console).
 
 *Componentes* (finos):
-- `CristalColetavel`: no `OnTriggerEnter`, procura um `ColetorDoJogador` em quem entrou. Se a regra deixar, registra a coleta e destrói o cristal.
+- `CristalColetavel`: no `OnTriggerEnter`, procura um `ColetorDoJogador` em quem entrou. Se a regra deixar, registra a coleta e destrói o cristal. `CristalColetavel.Ativos` lista os cristais ativos na cena (cada um entra no `OnEnable` e sai no `OnDisable`); o ímã usa essa lista.
 - `ColetorDoJogador` (no `Jogador`): guarda o `ContadorDeColeta` (`Contador`), escreve "Cristal coletado: …" no Console e aplica os efeitos da definição, em ordem. Se um efeito lançar exceção, ela vai para o Console (`Debug.LogException`) e os outros efeitos são aplicados mesmo assim: a coleta é contada e o item some. É por ele que outras partes do jogo (ex.: interface) leem a contagem.
 - `GiroEFlutuacao`: anima um objeto, por padrão a 90°/s, 0,15 m de amplitude e período de 2 s.
 
@@ -274,6 +284,9 @@ Os valores da coxa ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa`
 Ao apertar Play, o item do centro é coletado logo de cara e o Console mostra "Cristal coletado: Cristal Base (cristal-base). Total: 1.". Ande até os outros para coletá-los. Ao pegar uma coxa, o Console mostra "VelocidadeCoxa: velocidade agora 4,55 m/s.".
 
 7. **Café que libera a investida:** em `Assets/Dados/Cristais/Efeitos`, *Create > Coletor de Cristais > Efeitos > Liberar Investida* (`LiberarInvestida`, sem campos). Crie a definição `Assets/Dados/Cristais/Cafe` (*Identificador* `cafe`, *Nome Exibicao* `Café`) com `LiberarInvestida` na lista de *Efeitos*. Crie a variante `Comida_Cafe` como as outras comidas, com o modelo `cup-coffee` do Food Kit, e aponte o *Definicao* para `Cafe`. Na cena, coloque uma instância em `Cristais`, na posição (0; 0,8; 6).
+8. **Rosquinha que libera o ímã:** como o café, com o efeito `LiberarIma` (*Create > Coletor de Cristais > Efeitos > Liberar Ímã*), a definição `Rosquinha` (*Identificador* `rosquinha`, *Nome Exibicao* `Rosquinha`, *Atracao Do Ima* `Nenhuma`), a variante `Comida_Rosquinha` com o modelo `donut` e uma instância em (0; 0,8; -4).
+9. **Cristais de experiência:** a definição `Assets/Dados/Cristais/Experiencia` (*Identificador* `experiencia`, *Nome Exibicao* `Cristal de Experiência`, sem efeitos, *Atracao Do Ima* `Completa`). Crie a variante `Cristal_Experiencia` de `Cristal` (*Create > Prefab Variant*): *Definicao* `Experiencia` e, em `Visual`, *Scale* (0,25; 0,3375; 0,25), 1/4 da escala do base. A `Gema` e o trigger ficam como no base. Na cena, quatro instâncias da variante em `Cristais` (`Cristal_Experiencia_1` a `4`), em (-2,5; 0,8; -7), (2,5; 0,8; -7), (-3; 0,8; 3) e (3; 0,8; 3).
+10. **Níveis de atração:** em `CristalBase` e `Coxa`, *Atracao Do Ima* `Reduzida`; em `Cafe`, `Nenhuma`.
 
 ## Investida
 **Como funciona no jogo:** a investida é a primeira habilidade ativa. Ela começa bloqueada e é liberada ao pegar o café. Com o botão (Espaço ou gatilho direito), o personagem avança rápido em linha reta:
@@ -307,6 +320,43 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajust
 2. **Valores:** em `Assets/Dados/Habilidades`, *Create > Coletor de Cristais > Definição de Investida* (`Investida`), com os valores padrão.
 3. **Jogador:** adicione `Investida Do Jogador` ao `Jogador`. Em *Acao Investida*, escolha `Player/Investida`; em *Definicao*, o asset `Investida`.
 4. **Item:** o café (passo 7 de "Cristais coletáveis").
+
+## Ímã
+**Como funciona no jogo:** o ímã é a primeira habilidade passiva. Ele começa bloqueado e é liberado, até o fim da partida, ao pegar a rosquinha. Depois disso, sem botão, os itens perto do personagem são puxados até ele e coletados normalmente (pelo mesmo trigger de sempre). Cada tipo de item tem um nível de atração (`AtracaoDoIma` na definição):
+
+| Nível | Raio | Velocidade (borda → junto do jogador) | Itens |
+|---|---|---|---|
+| `Completa` | 3 m | 1,5 → 6 m/s | Cristais de experiência |
+| `Reduzida` | 1 m | 0,5 → 2 m/s | Comidas com efeito ou com efeito previsto: carne, peixe, coxa |
+| `Nenhuma` | — | — | Itens que liberam habilidades: café, rosquinha |
+
+- **Distância:** medida no chão (a altura não conta), do centro do personagem ao centro do item.
+- **Aceleração:** o item começa na borda do raio a 25% da velocidade e acelera em linha reta até a velocidade cheia junto do personagem. Com o personagem parado, um cristal de experiência na borda chega em cerca de 0,9 s. O item é coletado quando encosta no personagem, a cerca de 1 m do centro dele.
+- **Nível reduzido:** como a coleta já acontece a cerca de 1 m, o raio de 1 m quase não aparece na prática: o item é coletado praticamente ao entrar no raio.
+- **Caminho:** o item anda em linha reta no chão, mantendo a altura. Só é puxado se nada sólido estiver entre ele e o personagem (verificado a cada quadro, na altura do item), então não atravessa paredes nem obstáculos: fica parado até o caminho ficar livre.
+- Ainda não há efeito visual do ímã nem indicação na tela de que ele foi liberado.
+
+Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados no Inspector.
+
+**Código** (`Assets/Scripts/Habilidades/`):
+- `ParametrosDeIma` (struct, C# puro): `Raio` (> 0), `VelocidadeMaxima` (> 0, junto do jogador) e `FracaoNaBorda` (0 a 1; 1 = velocidade constante), validados no construtor (`ArgumentException`).
+- `Ima` (C# puro, testado em EditMode):
+  - `Liberar()` e `Liberada`.
+  - `DistanciaHorizontal`, `EstaNoAlcance(item, jogador, parametros)` (na borda conta) e `Velocidade(distancia, parametros)`: `vMax × (f + (1 - f) × (1 - d / R))`.
+  - `DistanciaApos(distancia, deltaTempo, parametros)`: resolve o movimento de forma exata (`d(t) = c - (c - d0) × e^(k t)`, com `k = vMax × (1 - f) / R` e `c = R / (1 - f)`; com `f = 1`, `d0 - vMax × t`). Por isso o caminho não depende da taxa de quadros, e a distância nunca fica negativa.
+  - `CalcularNovaPosicao(item, jogador, parametros, deltaTempo)`: a nova posição do item, em linha reta no chão na direção do jogador, mantendo a altura e sem passar do jogador. Fora do raio, não mexe.
+  - Valores não finitos ou tempo negativo geram `ArgumentException`.
+- `DefinicaoIma` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Ímã*): *Raio Completo* 3, *Velocidade Completa* 6, *Raio Reduzido* 1, *Velocidade Reduzida* 2 e *Fracao Na Borda* 0,25. `TentarObterParametros(atracao, out parametros)` devolve os valores do nível, ou `false` para `Nenhuma`.
+- `ImaDoJogador` (`MonoBehaviour`, no `Jogador`): depois de liberado, percorre `CristalColetavel.Ativos` a cada quadro e move os cristais no alcance com `Ima.CalcularNovaPosicao`. Antes de mover, faz um `Physics.Linecast` do cristal até o jogador, na altura do cristal, ignorando triggers: se acertar algo que não seja o próprio jogador, o cristal não se mexe naquele quadro. `Liberar()` é chamado pelo efeito da rosquinha.
+
+**Decisões técnicas:**
+- O nível de atração fica na definição do cristal, e os valores de cada nível ficam num asset só. Um tipo novo de item escolhe o nível sem código novo.
+- O cristal se move pelo `transform` (o trigger é estático, sem `Rigidbody`). A coleta pelo trigger foi verificada em Play Mode com o personagem parado e o cristal chegando até ele.
+
+**Como foi montado na Editor:**
+1. **Valores:** em `Assets/Dados/Habilidades`, *Create > Coletor de Cristais > Definição de Ímã* (`Ima`), com os valores padrão.
+2. **Jogador:** adicione `Ima Do Jogador` ao `Jogador` e, em *Definicao*, escolha o asset `Ima`.
+3. **Itens:** a rosquinha, os cristais de experiência e os níveis de atração (passos 8 a 10 de "Cristais coletáveis").
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (uma subpasta e um sub-namespace por sistema).

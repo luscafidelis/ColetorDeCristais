@@ -20,6 +20,9 @@ namespace ColetorDeCristais.Cristais
         [Tooltip("Efeitos aplicados ao jogador na coleta, em ordem (ex.: EfeitoDeVelocidade). Pode ficar vazio.")]
         [SerializeField] private List<EfeitoDeCristal> efeitos = new List<EfeitoDeCristal>();
 
+        [Tooltip("Quanto o ímã do jogador puxa este cristal: Completa, Reduzida ou Nenhuma (valores na DefinicaoIma).")]
+        [SerializeField] private AtracaoDoIma atracaoDoIma = AtracaoDoIma.Completa;
+
         /// <summary>Identificador único do tipo de cristal.</summary>
         public string Identificador => identificador;
 
@@ -28,5 +31,8 @@ namespace ColetorDeCristais.Cristais
 
         /// <summary>Efeitos aplicados ao jogador quando um cristal deste tipo é coletado.</summary>
         public IReadOnlyList<EfeitoDeCristal> Efeitos => efeitos;
+
+        /// <summary>Quanto o ímã do jogador puxa este cristal.</summary>
+        public AtracaoDoIma AtracaoDoIma => atracaoDoIma;
     }
 }
