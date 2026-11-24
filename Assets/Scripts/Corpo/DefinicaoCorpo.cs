@@ -39,11 +39,45 @@ namespace ColetorDeCristais.Corpo
         [Min(0f)]
         [SerializeField] private float piscadasPorSegundo = 10f;
 
+        [Header("Carne estragada (pode cair a cada dano)")]
+        [Tooltip("Chance, de 0 a 1, de uma batida que não derrota derrubar uma carne estragada (0,33 = 33%).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float chanceDeCarneEstragada = 0.33f;
+
+        [Tooltip("Prefab da carne estragada (sem prefab, nada cai).")]
+        [SerializeField] private GameObject prefabDaCarneEstragada;
+
+        [Tooltip("Altura, em metros, em que a carne estragada fica no chão (a mesma dos outros itens).")]
+        [SerializeField] private float alturaDaCarneEstragada = 0.8f;
+
+        [Tooltip("Duração, em segundos, da queda da carne estragada.")]
+        [Min(0f)]
+        [SerializeField] private float duracaoDaQuedaDaCarneEstragada = 0.4f;
+
+        [Tooltip("Quanto a carne estragada sobe, em metros, antes de cair.")]
+        [Min(0f)]
+        [SerializeField] private float alturaDoArcoDaCarneEstragada = 0.6f;
+
         /// <summary>Tamanho no começo da partida (multiplicador da escala do modelo).</summary>
         public float TamanhoInicial => tamanhoInicial;
 
         /// <summary>Quantas vezes por segundo o personagem pisca durante a invulnerabilidade.</summary>
         public float PiscadasPorSegundo => piscadasPorSegundo;
+
+        /// <summary>Chance de uma batida que não derrota derrubar uma carne estragada (0 a 1).</summary>
+        public float ChanceDeCarneEstragada => chanceDeCarneEstragada;
+
+        /// <summary>Prefab da carne estragada (nulo: nada cai).</summary>
+        public GameObject PrefabDaCarneEstragada => prefabDaCarneEstragada;
+
+        /// <summary>Altura da carne estragada no chão.</summary>
+        public float AlturaDaCarneEstragada => alturaDaCarneEstragada;
+
+        /// <summary>Duração da queda da carne estragada, em segundos.</summary>
+        public float DuracaoDaQuedaDaCarneEstragada => duracaoDaQuedaDaCarneEstragada;
+
+        /// <summary>Quanto a carne estragada sobe antes de cair.</summary>
+        public float AlturaDoArcoDaCarneEstragada => alturaDoArcoDaCarneEstragada;
 
         /// <summary>Valores do dano.</summary>
         /// <exception cref="System.ArgumentException">Se algum valor for inválido.</exception>

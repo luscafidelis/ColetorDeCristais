@@ -19,3 +19,8 @@ MonoBehaviour:
   duracaoDoTranco: 0.25
   tempoDeInvulnerabilidade: 1
   piscadasPorSegundo: 10
+  chanceDeCarneEstragada: 0.33
+  prefabDaCarneEstragada: {fileID: 8173859822071721852, guid: f482649ea34eb6d4da04a504af860aaa, type: 3}
+  alturaDaCarneEstragada: 0.8
+  duracaoDaQuedaDaCarneEstragada: 0.4
+  alturaDoArcoDaCarneEstragada: 0.6

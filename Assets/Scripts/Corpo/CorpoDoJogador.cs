@@ -1,5 +1,6 @@
 using System;
 using ColetorDeCristais.Atributos;
+using ColetorDeCristais.Cristais;
 using ColetorDeCristais.Partida;
 using UnityEngine;
 
@@ -20,6 +21,9 @@ namespace ColetorDeCristais.Corpo
     /// <item>Uma batida (<see cref="ReceberBatida"/>) encolhe, joga o personagem para trás com
     /// <c>CharacterController.Move</c> (as paredes seguram) e o deixa piscando, sem novo dano, por um tempo.
     /// Abaixo do tamanho mínimo, chama <see cref="ControladorDaPartida.DerrotarJogador"/>.</item>
+    /// <item>Uma batida que não derrota tem uma chance (<see cref="DefinicaoCorpo.ChanceDeCarneEstragada"/>) de derrubar
+    /// uma carne estragada, que sobe e cai (<see cref="QuedaDoItem"/>) no ponto da batida, enquanto o personagem é
+    /// jogado para longe.</item>
     /// <item>O <see cref="ControladorDaPartida"/> desliga este componente fora das ondas: o tranco para e o
     /// personagem volta a aparecer.</item>
     /// </list>
@@ -35,7 +39,11 @@ namespace ColetorDeCristais.Corpo
         [Tooltip("Partida da cena (opcional): recebe a derrota quando o tamanho fica abaixo do mínimo.")]
         [SerializeField] private ControladorDaPartida partida;
 
+        [Tooltip("Pai dos itens que caem do personagem, como a carne estragada (o objeto Cristais da cena).")]
+        [SerializeField] private Transform grupoDeItens;
+
         private readonly DanoNoCorpo _dano = new DanoNoCorpo();
+        private readonly System.Random _sorteio = new System.Random();
         private CharacterController _controlador;
         private Renderer[] _desenhos = Array.Empty<Renderer>();
         private bool _visivel = true;
@@ -110,12 +118,38 @@ namespace ColetorDeCristais.Corpo
             }
 
             Debug.Log($"{name}: batida, tamanho {Tamanho.ValorFinal:0.###} ({resultado}).", this);
-            if (resultado == ResultadoDaBatida.Derrota && partida != null)
+            if (resultado == ResultadoDaBatida.Derrota)
             {
-                partida.DerrotarJogador();
+                if (partida != null)
+                {
+                    partida.DerrotarJogador();
+                }
+            }
+            else if (SorteioDeDrop.Sorteou(definicao.ChanceDeCarneEstragada, _sorteio.NextDouble()))
+            {
+                DerrubarCarneEstragada();
             }
 
             return resultado;
+        }
+
+        /// <summary>
+        /// Derruba uma carne estragada onde o personagem está: ela sobe e cai no chão. Chamado por
+        /// <see cref="ReceberBatida"/> quando o sorteio acerta; público para testes pela CLI.
+        /// </summary>
+        /// <returns>A carne criada, ou nulo se não houver prefab.</returns>
+        public GameObject DerrubarCarneEstragada()
+        {
+            if (definicao == null || definicao.PrefabDaCarneEstragada == null)
+            {
+                return null;
+            }
+
+            var inicio = transform.position;
+            var fim = new Vector3(inicio.x, definicao.AlturaDaCarneEstragada, inicio.z);
+            var carne = Instantiate(definicao.PrefabDaCarneEstragada, inicio, Quaternion.identity, grupoDeItens);
+            QuedaDoItem.Derrubar(carne, inicio, fim, definicao.DuracaoDaQuedaDaCarneEstragada, definicao.AlturaDoArcoDaCarneEstragada);
+            return carne;
         }
 
         private void Update()
