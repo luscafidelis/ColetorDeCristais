@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6411863990522280886}
   - component: {fileID: 5750044085876586207}
+  - component: {fileID: 5225363985816491681}
   m_Layer: 0
   m_Name: VisualMontrengo
   m_TagString: Untagged
@@ -52,6 +53,19 @@ MonoBehaviour:
   inclinacaoMaxima: 12
   velocidadeDeReferencia: 3.5
   tempoDeResposta: 0.1
+  estiramentoDaInvestida: 0.3
+--- !u!114 &5225363985816491681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8199404053227180454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f57c849067251454db67211d913bde03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Contorno.ContornoDoObjeto
 --- !u!1001 &7621005248595538997
 PrefabInstance:
   m_ObjectHideFlags: 0

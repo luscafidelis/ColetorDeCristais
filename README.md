@@ -65,7 +65,7 @@ python -m unittest discover -s ferramentas
 ## Estrutura de pastas
 | Caminho | Conteúdo |
 |---|---|
-| `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais`. Referencia `Unity.InputSystem` e `UnityEngine.UI` (uGUI, usado na interface mínima da partida) |
+| `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais`. Referencia `Unity.InputSystem`, `UnityEngine.UI` (uGUI, usado na interface mínima da partida), `Unity.RenderPipelines.Core.Runtime` e `Unity.RenderPipelines.Universal.Runtime` (a feature do contorno) |
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
 | `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`, `BonusDeAtributo` e `MomentoDoPermanente`. Ver "Atributos e modificadores" abaixo |
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
@@ -79,6 +79,8 @@ python -m unittest discover -s ferramentas
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
 | `Assets/Scripts/Cristais/` | Cristais coletáveis (namespace `ColetorDeCristais.Cristais`): lógica pura (`EstadoDeColeta`, `ContadorDeColeta`, `CalculadoraDeFlutuacao`, `TrajetoriaDeQueda`), dados (`DefinicaoCristal`, `EfeitoDeCristal`) e componentes (`CristalColetavel`, `ColetorDoJogador`, `GiroEFlutuacao`, `QuedaDoItem`). Ver "Cristais coletáveis" abaixo |
 | `Assets/Scripts/Animacao/` | Animação procedural (namespace `ColetorDeCristais.Animacao`): `CalculadoraDeDeformacao`, `ParametrosDeDeformacao` e `PoseDeDeformacao` (C# puro) e `DeformacaoProcedural` (`MonoBehaviour`). Ver "Visual do jogador (montrengo)" abaixo |
+| `Assets/Scripts/Contorno/` | Contorno do montrengo e dos itens (namespace `ColetorDeCristais.Contorno`): `MedidaDoContorno` e `ListaSemRepeticao` (C# puro), `ContornoDoObjeto` (`MonoBehaviour`), `ContornoRendererFeature` e `PassoDoContorno` (URP). Ver "Contorno" abaixo |
+| `Assets/Shaders/` | Shaders do projeto: `Contorno` (`Hidden/ColetorDeCristais/Contorno`, máscara e composição do contorno) |
 | `Assets/Scripts/Ferramentas/` | Ferramentas de desenvolvimento (namespace `ColetorDeCristais.Ferramentas`): `GravadorDeQuadros`, só da Editor (`#if UNITY_EDITOR`, fica fora do build), grava quadros da câmera do jogo seguindo um `RoteiroDeEntrada` (C# puro, testado). Uso no `ATUALIZACOES.md` |
 | `Assets/Prefabs/Cristal.prefab` | Prefab base do item coletável: trigger, coleta e visual animado (losango ciano) |
 | `Assets/Prefabs/Comida_Carne.prefab`, `Comida_CarneEstragada.prefab` (variante da carne, com o material `CarneEstragada`), `Comida_Peixe.prefab`, `Comida_Coxa.prefab`, `Comida_Cafe.prefab`, `Comida_Rosquinha.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
@@ -95,7 +97,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Dados/Partida/` | Assets `DefinicaoPartida`: `Partida` (a Arena, 3 ondas) e `PartidaTutorial` (o mercado, 1 onda): cronômetro, ondas e itens novos de cada onda |
 | `Assets/Dados/Nivel/` | Asset `Mercado` (`DefinicaoNivel`): o vão, as áreas sem itens novos, a velocidade dos carrinhos e os produtos das prateleiras |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal`, `Vao` (quase preto, o fosso do vão) e `CarneEstragada` (verde-acinzentado, cor chapada); URP Unlit: `AnelInvestida` (ciano, o anel da investida) |
-| `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
+| `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers com a feature `Contorno`, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move` e `Player/Investida`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
 | `Packages/` | `manifest.json` e lock dos pacotes UPM. Inclui `com.unity.pipeline` (liga a CLI à Editor) e `com.unity.test-framework` |
@@ -230,6 +232,30 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 **Importação do modelo** (`Assets/Terceiros/JoppeMonnens/CronenbergMonster/`):
 - FBX com dois materiais: `Material.002` (corpo) e `Bone.002` (dentes), remapeados no *Model Importer* (aba *Materials*) para `Montrengo_Corpo` e `Montrengo_Osso` (URP Lit com *Base Map*, *Normal Map* e *Metallic Map*).
 - Texturas com *Max Size* 1024; as `_Normal` como *Normal map*; as `_MetallicSmoothness` sem sRGB. O URP Lit lê a suavidade do alfa do mapa metálico, então os mapas originais Metallic e Roughness foram combinados num só (metálico no RGB, `1 - rugosidade` no alfa). O corpo é bem liso (rugosidade média 0,24, aparência molhada) e os dentes, foscos (0,9). Os mapas Displacement do pacote não são usados.
+
+## Contorno
+**Como funciona no jogo:** o montrengo e os itens coletáveis (comidas, café, rosquinha, produtos derrubados e carne estragada) têm um contorno preto fino, para destacar do mercado. O contorno segue a silhueta de fora do objeto e **aparece através das prateleiras e paredes**: um item ou o montrengo escondido atrás de uma prateleira mostra o contorno por cima dela. O contorno some junto com o desenho (ex.: no pisca-pisca do dano, ou quando o item é coletado). Os cristais de experiência, os carrinhos e o cenário não têm contorno.
+
+A cor, a espessura e o momento do desenho ficam na feature `Contorno` dos renderers `Assets/Settings/PC_Renderer` e `Mobile_Renderer` e podem ser ajustados no Inspector.
+
+**Código** (`Assets/Scripts/Contorno/`, namespace `ColetorDeCristais.Contorno`, e `Assets/Shaders/Contorno.shader`):
+- `MedidaDoContorno` (estática, C# pura): `Deslocamento(espessura, largura, altura)` converte a espessura (em pixels numa tela de 1080 de altura) num deslocamento em UV, com o mesmo número de pixels na horizontal e na vertical. Assim, o contorno tem a mesma aparência em qualquer resolução. Valores inválidos dão zero (sem contorno).
+- `ListaSemRepeticao<T>` (C# puro): lista que não aceita nulo nem repetido.
+- `ContornoDoObjeto` (`MonoBehaviour`): marca o objeto. No `Awake`, guarda os `MeshRenderer` e `SkinnedMeshRenderer` dele e dos filhos; enquanto ligado, fica em `ContornoDoObjeto.Ativos`. `Desenhavel(desenho)` diz se um desenho entra no quadro (ligado e ativo). Está na raiz do prefab `Cristal` (e por isso nas variantes: comidas e produtos), removido na variante `Cristal_Experiencia`, e na raiz do `VisualMontrengo` (o anel da investida, irmão dele no `Jogador`, fica de fora).
+- `ContornoRendererFeature` (`ScriptableRendererFeature`): campos *Shader* (`Hidden/ColetorDeCristais/Contorno`), *Cor* preta, *Espessura* 2 e *Momento* `BeforeRenderingTransparents` (o texto da tela, um Canvas na câmera, fica por cima do contorno). Sem objetos com contorno, não faz nada.
+- `PassoDoContorno` (`ScriptableRenderPass`, Render Graph), em duas passadas:
+  1. **Máscara:** desenha os desenhos de `ContornoDoObjeto.Ativos` numa textura de um canal (`R8`), em branco e **sem teste de profundidade** (passada 0 do shader).
+  2. **Composição:** na imagem da câmera, pinta a cor onde há máscara num círculo em volta do pixel (16 direções, no raio cheio e na metade) mas não no próprio pixel (passada 1 do shader, com mistura por alfa para suavizar a borda).
+  As câmeras de prévia e de reflexo ficam sem contorno.
+
+**Decisões técnicas:**
+- Contorno em tela (máscara + borda), e não por casco invertido (cópia da malha aumentada): os modelos low-poly do Food Kit têm arestas duras, e o casco abriria nas quinas.
+- Os objetos são marcados por componente, e não por *Layer* ou *Rendering Layer*: as layers ficam livres para a física, e o contorno não depende de configuração do projeto.
+- O assembly `ColetorDeCristais` referencia `Unity.RenderPipelines.Core.Runtime` e `Unity.RenderPipelines.Universal.Runtime` por causa da feature.
+
+**Como foi montado na Editor:**
+1. **Renderers:** em `Assets/Settings/PC_Renderer` e `Mobile_Renderer`, *Add Renderer Feature > Contorno Renderer Feature* (nome `Contorno`), com o *Shader* `Hidden/ColetorDeCristais/Contorno`.
+2. **Objetos:** `Contorno Do Objeto` na raiz dos prefabs `Cristal` e `VisualMontrengo`; na variante `Cristal_Experiencia`, o componente herdado foi removido (*Remove Component*).
 
 ## Cristais coletáveis
 **Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe, coxa, xícara de café e rosquinha, do Food Kit da Kenney) de cerca de 0,8 m e cristais de experiência (um losango ciano pequeno, com 1/4 do tamanho do prefab base `Cristal`, cerca de 0,2 m de altura), que giram e flutuam. O tamanho menor vale só para o desenho: a área de coleta (o trigger) é a mesma dos outros itens. Ao ser coletado, o item some na hora. Na Arena há 11 itens:

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5862666419894995149}
   - component: {fileID: 3645554096759082128}
   - component: {fileID: 6928166553206412204}
+  - component: {fileID: 8670267806473726836}
   m_Layer: 0
   m_Name: Cristal
   m_TagString: Untagged
@@ -68,6 +69,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Cristais.CristalColetavel
   definicao: {fileID: 11400000, guid: 08c66fae218be7f40accf0bb366eac8f, type: 2}
+--- !u!114 &8670267806473726836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175471714606443226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f57c849067251454db67211d913bde03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Contorno.ContornoDoObjeto
 --- !u!1 &5263138264854121091
 GameObject:
   m_ObjectHideFlags: 0
