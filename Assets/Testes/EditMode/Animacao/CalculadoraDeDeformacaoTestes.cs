@@ -203,6 +203,57 @@ namespace ColetorDeCristais.Testes.Animacao
             Assert.Throws<ArgumentException>(() => calculadora.Atualizar(new Vector2(float.PositiveInfinity, 0f), 0.1f, Parametros()));
         }
 
+        // --- Investida ---
+
+        [Test]
+        public void Investida_EsticaParaAFrente_PreservandoOVolume()
+        {
+            var parametros = new ParametrosDeDeformacao(0.1f, 1f, 0.2f, 0.5f, 20f, 4f, 0f, 0.3f);
+
+            // Parado e sem passo (tempo zero): só o estiramento da investida aparece.
+            var pose = new CalculadoraDeDeformacao().Atualizar(Vector2.zero, 0f, parametros, emInvestida: true);
+
+            Assert.AreEqual(1.3f, pose.Escala.z, Tolerancia);
+            Assert.AreEqual(1f / Mathf.Sqrt(1.3f), pose.Escala.x, Tolerancia);
+            Assert.AreEqual(pose.Escala.x, pose.Escala.y, Tolerancia);
+            Assert.AreEqual(1f, Volume(pose.Escala), Tolerancia);
+        }
+
+        [Test]
+        public void Investida_ForaDela_NaoEstica()
+        {
+            var parametros = new ParametrosDeDeformacao(0.1f, 1f, 0.2f, 0.5f, 20f, 4f, 0f, 0.3f);
+
+            var pose = new CalculadoraDeDeformacao().Atualizar(Vector2.zero, 0f, parametros, emInvestida: false);
+
+            Assert.AreEqual(Vector3.one, pose.Escala);
+        }
+
+        [Test]
+        public void Investida_ComSuavizacao_EntraEVoltaAosPoucos()
+        {
+            var parametros = new ParametrosDeDeformacao(0f, 1f, 0f, 0.5f, 0f, 4f, 0.1f, 0.3f);
+            var calculadora = new CalculadoraDeDeformacao();
+
+            var entrando = calculadora.Atualizar(Vector2.zero, 0.1f, parametros, emInvestida: true);
+            Assert.AreEqual(1f + 0.3f * (1f - Mathf.Exp(-1f)), entrando.Escala.z, 0.001f, "~63% depois de um tempo de resposta");
+
+            for (var i = 0; i < 20; i++)
+            {
+                calculadora.Atualizar(Vector2.zero, 0.1f, parametros, emInvestida: false);
+            }
+
+            var depois = calculadora.Atualizar(Vector2.zero, 0.1f, parametros, emInvestida: false);
+            Assert.AreEqual(1f, depois.Escala.z, 0.001f, "voltou ao normal");
+        }
+
+        [Test]
+        public void Investida_EstiramentoForaDaFaixa_LancaExcecao()
+        {
+            Assert.Throws<ArgumentException>(() => new ParametrosDeDeformacao(0.1f, 1f, 0.2f, 0.5f, 20f, 4f, 0f, 1f));
+            Assert.Throws<ArgumentException>(() => new ParametrosDeDeformacao(0.1f, 1f, 0.2f, 0.5f, 20f, 4f, 0f, -0.1f));
+        }
+
         [Test]
         public void Parametros_ForaDaFaixa_LancamExcecao()
         {

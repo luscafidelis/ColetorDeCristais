@@ -119,6 +119,25 @@ O personagem pega a coxa do canto superior direito e desce até o peixe, mais r�
 
 ---
 
+## 8. Investida e café
+
+**Para quem joga:** a primeira habilidade ativa. Na arena há uma xícara de café (por enquanto ao norte do centro). Pegar o café **libera a investida**: com **Espaço** no teclado ou o **gatilho direito** no gamepad, o personagem avança em linha reta a **5 vezes a velocidade de movimento por 0,25 s**. Na velocidade base, isso dá **4,375 m**. Com a coxa ativa, a investida vai mais longe. A direção é a do controle; sem direção, o personagem avança para onde está virado. As paredes param a investida. Depois de usar, é preciso esperar **5 s** (contados desde o início) para usar de novo. Durante o avanço, o montrengo **estica 30% para a frente** e afina, mantendo o volume. Ainda não há indicação na tela da recarga nem de que a investida foi liberada.
+
+O personagem anda um pouco para a direita, para e dá uma investida, esticando para a frente:
+
+![Animação: o montrengo anda um pouco para a direita, para e avança rápido mais de 4 metros, esticado na direção do avanço](docs/atualizacoes/investida.png)
+
+**Por dentro:**
+- Novo sistema `Habilidades`: `Investida` (C# puro) guarda liberação, avanço e recarga e calcula o deslocamento de cada quadro. A distância é exata em qualquer taxa de quadros. `InvestidaDoJogador` aplica o deslocamento no `CharacterController`, que trata as colisões.
+- Valores no ScriptableObject `DefinicaoInvestida` (asset `Investida`): multiplicador 5, duração 0,25 s, recarga 5 s.
+- Novo efeito de coletável `EfeitoLiberarInvestida`, usado pela definição `Cafe`, e a variante `Comida_Cafe`, com a xícara do Food Kit.
+- Nova ação `Player/Investida` no Input System (Espaço e gatilho direito).
+- `MovimentoDoJogador` ganhou `Suspenso`, para não mover o personagem durante a investida, e `EntradaAtual`. A `DeformacaoProcedural` ganhou o esticamento da investida.
+
+**Validação:** 186 testes EditMode passando, incluindo a distância de 4,375 m, o último quadro, a recarga desde o início, a investida mais longa com bônus de velocidade e o esticamento com volume preservado. Em Play Mode, pela CLI: antes do café a investida não começa; depois de coletar o café, ela começa e percorre 4,375 m; durante a recarga não começa de novo e, passados 5 s, começa; partindo a 2,5 m da mureta leste, ela para encostada na mureta. O teste jogando com teclado e gamepad ainda não foi feito.
+
+---
+
 ## Como registrar uma nova atualização
 1. Acrescente uma seção no fim, com o próximo número, seguindo o mesmo formato: **Para quem joga**, **Por dentro** e **Validação**, com o número de testes passando.
 2. Não registre aqui planejamento, cronograma ou dados pessoais (veja a regra no `CLAUDE.md`).
@@ -134,7 +153,7 @@ O personagem pega a coxa do canto superior direito e desce até o peixe, mais r�
    unity command job wait --project-path . -- --condition '{"member":"ColetorDeCristais.Ferramentas.GravadorDeQuadros.Concluido","op":"equals","value":true}' --timeout 120
    unity command editor.playmode stop --project-path .
    ```
-   Se a Editor estiver sem foco, rode antes `unity command editor set_auto_tick` e `unity command editor.playmode set_run_in_background`. Depois da gravação, desligue os dois (`-- --enabled false`). Para outro percurso, tamanho ou duração, edite os campos do componente (`etapas`, `largura`, `altura`, `quadrosPorSegundo`).
+   Se a Editor estiver sem foco, rode antes `unity command editor set_auto_tick` e `unity command editor.playmode set_run_in_background`. Depois da gravação, desligue os dois (`-- --enabled=false`). Para outro percurso, tamanho ou duração, edite os campos do componente (`etapas`, `largura`, `altura`, `quadrosPorSegundo`).
 
    Depois junte os quadros num PNG animado com a ferramenta do projeto, que usa só Python, sem pacotes extras:
    ```powershell

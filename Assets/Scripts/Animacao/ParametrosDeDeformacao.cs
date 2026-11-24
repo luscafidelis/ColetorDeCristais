@@ -30,6 +30,9 @@ namespace ColetorDeCristais.Animacao
         /// <summary>Tempo (s) que a animação leva para acompanhar uma mudança de velocidade; 0 acompanha na hora.</summary>
         public float TempoDeResposta { get; }
 
+        /// <summary>Quanto o corpo estica para a frente durante a investida (0,3 = 30%); 0 desliga.</summary>
+        public float EstiramentoDaInvestida { get; }
+
         /// <param name="amplitudeDoPulso">Fração entre 0 e 1 (exclusive).</param>
         /// <param name="periodoDoPulso">Maior que zero.</param>
         /// <param name="estiramentoMaximo">Fração entre 0 e 1 (exclusive).</param>
@@ -37,6 +40,7 @@ namespace ColetorDeCristais.Animacao
         /// <param name="inclinacaoMaxima">Graus entre 0 e 90 (exclusive).</param>
         /// <param name="velocidadeDeReferencia">Maior que zero.</param>
         /// <param name="tempoDeResposta">Zero ou mais.</param>
+        /// <param name="estiramentoDaInvestida">Fração entre 0 e 1 (exclusive); padrão 0.</param>
         /// <exception cref="ArgumentException">Se algum valor estiver fora da faixa ou não for finito.</exception>
         public ParametrosDeDeformacao(
             float amplitudeDoPulso,
@@ -45,7 +49,8 @@ namespace ColetorDeCristais.Animacao
             float periodoDoPasso,
             float inclinacaoMaxima,
             float velocidadeDeReferencia,
-            float tempoDeResposta)
+            float tempoDeResposta,
+            float estiramentoDaInvestida = 0f)
         {
             ValidarFracao(amplitudeDoPulso, nameof(amplitudeDoPulso));
             ValidarPositivo(periodoDoPulso, nameof(periodoDoPulso));
@@ -63,6 +68,8 @@ namespace ColetorDeCristais.Animacao
                 throw new ArgumentException("O tempo de resposta não pode ser negativo.", nameof(tempoDeResposta));
             }
 
+            ValidarFracao(estiramentoDaInvestida, nameof(estiramentoDaInvestida));
+
             AmplitudeDoPulso = amplitudeDoPulso;
             PeriodoDoPulso = periodoDoPulso;
             EstiramentoMaximo = estiramentoMaximo;
@@ -70,6 +77,7 @@ namespace ColetorDeCristais.Animacao
             InclinacaoMaxima = inclinacaoMaxima;
             VelocidadeDeReferencia = velocidadeDeReferencia;
             TempoDeResposta = tempoDeResposta;
+            EstiramentoDaInvestida = estiramentoDaInvestida;
         }
 
         private static void ValidarFracao(float valor, string nome)

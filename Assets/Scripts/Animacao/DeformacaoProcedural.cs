@@ -1,3 +1,4 @@
+using ColetorDeCristais.Habilidades;
 using UnityEngine;
 
 namespace ColetorDeCristais.Animacao
@@ -45,15 +46,22 @@ namespace ColetorDeCristais.Animacao
         [Min(0f)]
         [SerializeField] private float tempoDeResposta = 0.1f;
 
+        [Header("Investida")]
+        [Tooltip("Quanto o corpo estica para a frente durante a investida (0,3 = 30%), afinando para preservar o volume.")]
+        [Range(0f, 0.9f)]
+        [SerializeField] private float estiramentoDaInvestida = 0.3f;
+
         private readonly CalculadoraDeDeformacao _calculadora = new CalculadoraDeDeformacao();
         private Vector3 _escalaOriginal;
         private Quaternion _rotacaoOriginal;
         private Vector3 _posicaoAnterior;
+        private InvestidaDoJogador _investida;
 
         private void Awake()
         {
             _escalaOriginal = transform.localScale;
             _rotacaoOriginal = transform.localRotation;
+            _investida = GetComponentInParent<InvestidaDoJogador>(); // opcional: sem ela, não há estiramento de investida
         }
 
         private void OnEnable()
@@ -81,8 +89,9 @@ namespace ColetorDeCristais.Animacao
 
             var parametros = new ParametrosDeDeformacao(
                 amplitudeDoPulso, periodoDoPulso, estiramentoMaximo, periodoDoPasso,
-                inclinacaoMaxima, velocidadeDeReferencia, tempoDeResposta);
-            var pose = _calculadora.Atualizar(velocidadeLocal, deltaTempo, parametros);
+                inclinacaoMaxima, velocidadeDeReferencia, tempoDeResposta, estiramentoDaInvestida);
+            var emInvestida = _investida != null && _investida.EmInvestida;
+            var pose = _calculadora.Atualizar(velocidadeLocal, deltaTempo, parametros, emInvestida);
 
             transform.localScale = Vector3.Scale(_escalaOriginal, pose.Escala);
             transform.localRotation = pose.Rotacao * _rotacaoOriginal;

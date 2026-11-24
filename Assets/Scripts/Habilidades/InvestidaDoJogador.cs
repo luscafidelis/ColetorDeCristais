@@ -1,0 +1,111 @@
+using ColetorDeCristais.Movimento;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace ColetorDeCristais.Habilidades
+{
+    /// <summary>
+    /// Investida do jogador: lê o botão, pede os cálculos à <see cref="Investida"/> e aplica o
+    /// deslocamento no <see cref="CharacterController"/>, que trata as colisões (a parede para o avanço).
+    /// Começa bloqueada; um item coletável a libera (<see cref="Liberar"/>).
+    /// </summary>
+    /// <remarks>
+    /// Roda antes do <see cref="MovimentoDoJogador"/> (<see cref="DefaultExecutionOrderAttribute"/>) e o
+    /// suspende durante o avanço, para os dois não moverem o personagem no mesmo quadro.
+    /// A direção é a da entrada de movimento; sem entrada, para onde o personagem está virado.
+    /// A velocidade é a de movimento no início (com os bônus) × o multiplicador da <see cref="DefinicaoInvestida"/>.
+    /// </remarks>
+    [DefaultExecutionOrder(-10)]
+    [RequireComponent(typeof(CharacterController), typeof(MovimentoDoJogador))]
+    public class InvestidaDoJogador : MonoBehaviour
+    {
+        [Tooltip("Ação da investida (botão). No projeto: InputSystem_Actions > Player/Investida.")]
+        [SerializeField] private InputActionReference acaoInvestida;
+
+        [Tooltip("Valores da investida (asset DefinicaoInvestida).")]
+        [SerializeField] private DefinicaoInvestida definicao;
+
+        private CharacterController _controlador;
+        private MovimentoDoJogador _movimento;
+
+        /// <summary>Estado da habilidade (liberada, em andamento, recarga).</summary>
+        public Investida Investida { get; } = new Investida();
+
+        /// <summary>Indica se o personagem está no meio de uma investida.</summary>
+        public bool EmInvestida => Investida.EmAndamento;
+
+        /// <summary>Libera a investida (chamado pelo efeito do item coletável).</summary>
+        public void Liberar() => Investida.Liberar();
+
+        private void Awake()
+        {
+            _controlador = GetComponent<CharacterController>();
+            _movimento = GetComponent<MovimentoDoJogador>();
+            if (definicao == null)
+            {
+                Debug.LogError($"{name}: a investida não tem DefinicaoInvestida; ela não vai funcionar.", this);
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (acaoInvestida != null)
+            {
+                acaoInvestida.action.Enable();
+            }
+            else
+            {
+                Debug.LogWarning($"{name}: a ação da investida não foi definida no Inspector.", this);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (acaoInvestida != null)
+            {
+                acaoInvestida.action.Disable();
+            }
+
+            if (_movimento != null)
+            {
+                _movimento.Suspenso = false;
+            }
+        }
+
+        private void Update()
+        {
+            if (acaoInvestida != null && definicao != null && acaoInvestida.action.WasPressedThisFrame())
+            {
+                TentarIniciar();
+            }
+
+            var deslocamento = Investida.Atualizar(Time.deltaTime);
+            if (deslocamento != Vector3.zero)
+            {
+                _controlador.Move(deslocamento);
+            }
+
+            _movimento.Suspenso = Investida.EmAndamento;
+        }
+
+        /// <summary>Tenta começar uma investida agora (botão ou chamada direta, ex.: testes pela CLI).</summary>
+        /// <returns><c>true</c> se a investida começou.</returns>
+        public bool TentarIniciar()
+        {
+            if (definicao == null || _movimento == null || _movimento.Velocidade == null)
+            {
+                return false;
+            }
+
+            var direcao = Investida.CalcularDirecao(_movimento.EntradaAtual, transform.forward, CalculadoraDeMovimento.EntradaMinima);
+            if (!Investida.TentarIniciar(direcao, _movimento.Velocidade.ValorFinal, definicao.Parametros))
+            {
+                return false;
+            }
+
+            transform.rotation = Quaternion.LookRotation(direcao, Vector3.up);
+            _movimento.Suspenso = true;
+            return true;
+        }
+    }
+}

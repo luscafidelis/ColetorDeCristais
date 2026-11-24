@@ -153,6 +153,7 @@ Transform:
   - {fileID: 2121120413}
   - {fileID: 296348692}
   - {fileID: 77048076}
+  - {fileID: 1223620905}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &77048075
@@ -1403,6 +1404,68 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 989774653}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &1223620904
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 67245933}
+    m_Modifications:
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6246851991290842109, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+      propertyPath: m_Name
+      value: Comida_Cafe
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+--- !u!4 &1223620905 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3169597864129866218, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+  m_PrefabInstance: {fileID: 1223620904}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1310601602
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1546,6 +1609,7 @@ GameObject:
   - component: {fileID: 2136594511}
   - component: {fileID: 2136594510}
   - component: {fileID: 2136594515}
+  - component: {fileID: 2136594516}
   m_Layer: 0
   m_Name: Jogador
   m_TagString: Player
@@ -1679,6 +1743,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a274bb42eb116a64db4599abf022a89a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Cristais.ColetorDoJogador
+--- !u!114 &2136594516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136594509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26afef36480f5f54ba5e9f87bf46f629, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Habilidades.InvestidaDoJogador
+  acaoInvestida: {fileID: -8955972256284636313, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  definicao: {fileID: 11400000, guid: d4d194d46ae76014387ad22c63a05c54, type: 2}
 --- !u!1001 &4267713269376084811
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -19,6 +19,9 @@ namespace ColetorDeCristais.Animacao
     /// <item>O ritmo do passo acompanha a velocidade: na velocidade de referência, um ciclo dura
     /// <see cref="ParametrosDeDeformacao.PeriodoDoPasso"/>; mais devagar, o ciclo fica mais lento.</item>
     /// <item>A inclinação gira o topo do corpo para o lado do movimento, proporcional à intensidade.</item>
+    /// <item>Durante a investida, o corpo estica para a frente (eixo Z local) por
+    /// <see cref="ParametrosDeDeformacao.EstiramentoDaInvestida"/> e afina na largura e na altura, preservando o volume.
+    /// A entrada e a saída desse estiramento são suavizadas pelo mesmo tempo de resposta.</item>
     /// </list>
     /// Os parâmetros vêm em cada chamada, então podem mudar durante o jogo (ex.: pelo Inspector).
     /// </remarks>
@@ -27,6 +30,7 @@ namespace ColetorDeCristais.Animacao
         private float _fasePulso;
         private float _fasePasso;
         private Vector2 _velocidadeSuavizada;
+        private float _investidaSuavizada;
 
         /// <summary>Velocidade suavizada usada no último cálculo, em m/s.</summary>
         public Vector2 VelocidadeSuavizada => _velocidadeSuavizada;
@@ -37,8 +41,9 @@ namespace ColetorDeCristais.Animacao
         /// <param name="velocidadeLocal">Velocidade horizontal no referencial do corpo: x para a direita, y para a frente (m/s).</param>
         /// <param name="deltaTempo">Tempo desde o último quadro, em segundos (zero ou mais).</param>
         /// <param name="parametros">Valores da animação.</param>
+        /// <param name="emInvestida">Indica se o corpo está no meio de uma investida (estica para a frente).</param>
         /// <exception cref="ArgumentException">Se a velocidade ou o tempo não forem finitos, ou se o tempo for negativo.</exception>
-        public PoseDeDeformacao Atualizar(Vector2 velocidadeLocal, float deltaTempo, ParametrosDeDeformacao parametros)
+        public PoseDeDeformacao Atualizar(Vector2 velocidadeLocal, float deltaTempo, ParametrosDeDeformacao parametros, bool emInvestida = false)
         {
             if (!Finito(velocidadeLocal.x) || !Finito(velocidadeLocal.y))
             {
@@ -60,7 +65,12 @@ namespace ColetorDeCristais.Animacao
             var pulso = 1f + parametros.AmplitudeDoPulso * (1f - intensidade) * Onda(_fasePulso);
             var altura = 1f + parametros.EstiramentoMaximo * intensidade * Onda(_fasePasso);
             var largura = 1f / Mathf.Sqrt(altura);
-            var escala = new Vector3(largura, altura, largura) * pulso;
+
+            _investidaSuavizada = Suavizar(_investidaSuavizada, emInvestida ? 1f : 0f, deltaTempo, parametros.TempoDeResposta);
+            var comprimento = 1f + parametros.EstiramentoDaInvestida * _investidaSuavizada;
+            var afinamento = 1f / Mathf.Sqrt(comprimento);
+
+            var escala = new Vector3(largura * afinamento, altura * afinamento, largura * comprimento) * pulso;
 
             return new PoseDeDeformacao(escala, CalcularInclinacao(intensidade, parametros.InclinacaoMaxima));
         }
@@ -71,6 +81,7 @@ namespace ColetorDeCristais.Animacao
             _fasePulso = 0f;
             _fasePasso = 0f;
             _velocidadeSuavizada = Vector2.zero;
+            _investidaSuavizada = 0f;
         }
 
         private Quaternion CalcularInclinacao(float intensidade, float inclinacaoMaxima)
@@ -86,17 +97,15 @@ namespace ColetorDeCristais.Animacao
             return Quaternion.AngleAxis(inclinacaoMaxima * intensidade, eixo);
         }
 
-        private static Vector2 Suavizar(Vector2 atual, Vector2 alvo, float deltaTempo, float tempoDeResposta)
-        {
-            if (tempoDeResposta <= 0f)
-            {
-                return alvo;
-            }
+        private static Vector2 Suavizar(Vector2 atual, Vector2 alvo, float deltaTempo, float tempoDeResposta) =>
+            Vector2.Lerp(atual, alvo, FatorDeSuavizacao(deltaTempo, tempoDeResposta));
 
-            // Suavização exponencial: não depende da taxa de quadros.
-            var fator = 1f - Mathf.Exp(-deltaTempo / tempoDeResposta);
-            return Vector2.Lerp(atual, alvo, fator);
-        }
+        private static float Suavizar(float atual, float alvo, float deltaTempo, float tempoDeResposta) =>
+            Mathf.Lerp(atual, alvo, FatorDeSuavizacao(deltaTempo, tempoDeResposta));
+
+        // Suavização exponencial: não depende da taxa de quadros. Tempo de resposta 0 acompanha na hora.
+        private static float FatorDeSuavizacao(float deltaTempo, float tempoDeResposta) =>
+            tempoDeResposta <= 0f ? 1f : 1f - Mathf.Exp(-deltaTempo / tempoDeResposta);
 
         private static float Onda(float fase) => Mathf.Sin(2f * Mathf.PI * fase);
 

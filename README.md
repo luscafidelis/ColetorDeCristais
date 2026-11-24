@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); carne e peixe ainda não têm efeito. Contagem e efeitos na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; carne e peixe ainda não têm efeito. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -30,7 +30,11 @@ unity status --until-ready --project-path .
 ```
 Na Editor, abra `Assets/Scenes/Arena.unity` e aperte Play. Clique na janela Game para ela receber o teclado.
 
-**Controles:** WASD ou setas no teclado; analógico esquerdo no gamepad.
+**Controles:**
+| Ação | Teclado | Gamepad |
+|---|---|---|
+| Andar | WASD ou setas | Analógico esquerdo |
+| Investida (depois de pegar o café) | Espaço | Gatilho direito (RT/R2) |
 
 Depois de clonar o repositório pela primeira vez, rode `git lfs install` (uma vez por máquina) e `git lfs pull` para baixar os binários.
 
@@ -62,6 +66,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
 | `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`, `BonusDeAtributo` e `MomentoDoPermanente`. Ver "Atributos e modificadores" abaixo |
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
+| `Assets/Scripts/Habilidades/` | Habilidades ativas (namespace `ColetorDeCristais.Habilidades`): `Investida` e `ParametrosDeInvestida` (C# puro), `DefinicaoInvestida` (ScriptableObject) e `InvestidaDoJogador` (`MonoBehaviour`). Ver "Investida" abaixo |
 | `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
@@ -69,15 +74,16 @@ python -m unittest discover -s ferramentas
 | `Assets/Scripts/Animacao/` | Animação procedural (namespace `ColetorDeCristais.Animacao`): `CalculadoraDeDeformacao`, `ParametrosDeDeformacao` e `PoseDeDeformacao` (C# puro) e `DeformacaoProcedural` (`MonoBehaviour`). Ver "Visual do jogador (montrengo)" abaixo |
 | `Assets/Scripts/Ferramentas/` | Ferramentas de desenvolvimento (namespace `ColetorDeCristais.Ferramentas`): `GravadorDeQuadros`, só da Editor (`#if UNITY_EDITOR`, fica fora do build), grava quadros da câmera do jogo seguindo um `RoteiroDeEntrada` (C# puro, testado). Uso no `ATUALIZACOES.md` |
 | `Assets/Prefabs/Cristal.prefab` | Prefab base do item coletável: trigger, coleta e visual animado (losango ciano) |
-| `Assets/Prefabs/Comida_Carne.prefab`, `Comida_Peixe.prefab`, `Comida_Coxa.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
+| `Assets/Prefabs/Comida_Carne.prefab`, `Comida_Peixe.prefab`, `Comida_Coxa.prefab`, `Comida_Cafe.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
 | `Assets/Prefabs/VisualMontrengo.prefab` | Visual do jogador: o modelo do montrengo com a `DeformacaoProcedural`, sem colisão (ver "Visual do jogador (montrengo)") |
 | `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
 | `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
 | `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
-| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito) e `Coxa`. Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`) |
+| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito), `Coxa` e `Cafe`. Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`) |
+| `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
-| `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
+| `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move` e `Player/Investida`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
 | `Packages/` | `manifest.json` e lock dos pacotes UPM. Inclui `com.unity.pipeline` (liga a CLI à Editor) e `com.unity.test-framework` |
 | `ProjectSettings/` | Configurações do projeto |
@@ -157,6 +163,8 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
   - `TentarCalcularAnguloAlvo(entrada, out angulo)`: ângulo Y para onde olhar (0° = +Z, 90° = +X). Entradas menores que `EntradaMinima` (0,01) não giram o personagem.
   - `GirarEmDirecao(atual, alvo, velocidadeAngular, deltaTempo)`: gira pelo caminho mais curto sem passar do alvo.
 - `MovimentoDoJogador` (`MonoBehaviour`, exige `CharacterController`): lê a ação, chama a calculadora, aplica com `CharacterController.Move` e ajusta a rotação. Não tem lógica própria.
+  - `EntradaAtual`: a última entrada lida (a investida usa como direção).
+  - `Suspenso`: enquanto for `true`, o componente não move nem gira o personagem, mas continua lendo a entrada e chamando `Velocidade.Atualizar` (os efeitos temporários continuam perdendo tempo). A investida liga durante o avanço.
 
 **Decisões técnicas:**
 - A velocidade é um `Atributo` (`MovimentoDoJogador.Velocidade`), criado no `Awake` com o valor base do Inspector e mínimo 0. Itens aplicam modificadores nele. O componente chama `Velocidade.Atualizar(Time.deltaTime)` a cada quadro, então modificadores temporários expiram sozinhos. Mudar o valor base no Inspector durante o Play não tem efeito (use `Velocidade.ValorBase`).
@@ -188,10 +196,10 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
    - **Visual do montrengo:** desligue o `Mesh Renderer` da cápsula e desative o `Nariz`. Arraste o prefab `VisualMontrengo` para dentro do `Jogador`, em (0, -1, 0), que é a base do `Character Controller` (os pés). Detalhes em "Visual do jogador (montrengo)".
 5. **Câmera:** `Main Camera` com *Rotation* (60, 0, 0), *Position* (0, 19,27, -13,06) e *Field of View* 60. Com esses valores, a arena inteira cabe numa tela 16:9.
 
-**Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad.
+**Input System:** o pacote `com.unity.inputsystem` e o asset de ações já vêm no template. Em *Edit > Project Settings > Player > Active Input Handling*, o projeto usa só o Input System novo. Para ver ou mudar os botões, dê dois cliques em `InputSystem_Actions` e abra o mapa **Player > Move**: ele tem os bindings *WASD*, setas e *Left Stick* do gamepad. A ação **Player > Investida** (tipo *Button*) tem *Space* (esquema Keyboard&Mouse) e *Right Trigger* do gamepad (esquema Gamepad).
 
 ## Visual do jogador (montrengo)
-**Como funciona no jogo:** o jogador é desenhado como um monstro de carne de cerca de 2 m de largura e 1,6 m de altura, com olhos em antenas e a boca virada para a frente. Parado, ele pulsa devagar (±4%, um pulso por segundo). Andando, estica e achata no ritmo do passo (até 10%, um ciclo a cada 0,4 s na velocidade base) e se inclina até 12° na direção do movimento. O efeito de andar cresce com a velocidade e o pulso parado some na mesma proporção. Só o desenho muda: colisão, movimento e coleta continuam os da cápsula (`Character Controller` de 2 m de altura e 0,5 m de raio).
+**Como funciona no jogo:** o jogador é desenhado como um monstro de carne de cerca de 2 m de largura e 1,6 m de altura, com olhos em antenas e a boca virada para a frente. Parado, ele pulsa devagar (±4%, um pulso por segundo). Andando, estica e achata no ritmo do passo (até 10%, um ciclo a cada 0,4 s na velocidade base) e se inclina até 12° na direção do movimento. O efeito de andar cresce com a velocidade e o pulso parado some na mesma proporção. Durante a investida, ele estica 30% para a frente e afina na largura e na altura, mantendo o volume; o esticamento entra e sai suavizado, então chega perto de 30% no fim do avanço e volta ao normal logo depois. Só o desenho muda: colisão, movimento e coleta continuam os da cápsula (`Character Controller` de 2 m de altura e 0,5 m de raio).
 
 **Código** (`Assets/Scripts/Animacao/`):
 - `CalculadoraDeDeformacao` (C# puro, testada em EditMode): guarda as fases do pulso e do passo e a velocidade suavizada. `Atualizar(velocidadeLocal, deltaTempo, parametros)` recebe a velocidade no referencial do corpo (x para a direita, y para a frente) e devolve uma `PoseDeDeformacao` (multiplicador de escala e rotação de inclinação). `Reiniciar()` volta ao repouso.
@@ -200,8 +208,9 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
   - O passo avança no ritmo da intensidade, então fica mais lento quando o personagem anda devagar e para quando ele para.
   - A inclinação gira o topo para a direção do movimento (`InclinacaoMaxima × intensidade`).
   - A suavização da velocidade é exponencial (`TempoDeResposta`) e não depende da taxa de quadros.
+  - Investida: `Atualizar(..., emInvestida)` suaviza um fator de 0 a 1 com o mesmo `TempoDeResposta`. Com `c = 1 + EstiramentoDaInvestida × fator`, a escala é multiplicada por `c` na profundidade (Z local, a frente) e por `1/√c` na largura e na altura.
 - `ParametrosDeDeformacao` (struct): os valores acima, validados no construtor (`ArgumentException` fora da faixa).
-- `DeformacaoProcedural` (`MonoBehaviour`, no `LateUpdate`): mede a velocidade pela mudança de posição do objeto, no referencial do pai (o `Jogador`), e aplica a pose sobre a escala e a rotação originais. Não depende do `MovimentoDoJogador`: funciona com qualquer forma de movimento e com modificadores de velocidade. Os campos podem ser ajustados no Inspector durante o Play.
+- `DeformacaoProcedural` (`MonoBehaviour`, no `LateUpdate`): mede a velocidade pela mudança de posição do objeto, no referencial do pai (o `Jogador`), e aplica a pose sobre a escala e a rotação originais. Não depende do `MovimentoDoJogador`: funciona com qualquer forma de movimento e com modificadores de velocidade. Para o esticamento da investida, procura um `InvestidaDoJogador` no pai (opcional; sem ele, não estica). O campo *Estiramento Da Investida* vale 0,3. Os campos podem ser ajustados no Inspector durante o Play.
 
 **Prefab `Assets/Prefabs/VisualMontrengo.prefab`:** a raiz tem a `DeformacaoProcedural` e o pivô na base do corpo, para a deformação não afundar o modelo no chão. O filho `Modelo` é o FBX, com escala 0,429 (maior dimensão de 2 m), centralizado na horizontal e com a base em y = 0. A frente do modelo (a boca) é o +Z do FBX, a mesma frente do `Jogador`.
 
@@ -210,15 +219,16 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 - Texturas com *Max Size* 1024; as `_Normal` como *Normal map*; as `_MetallicSmoothness` sem sRGB. O URP Lit lê a suavidade do alfa do mapa metálico, então os mapas originais Metallic e Roughness foram combinados num só (metálico no RGB, `1 - rugosidade` no alfa). O corpo é bem liso (rugosidade média 0,24, aparência molhada) e os dentes, foscos (0,9). Os mapas Displacement do pacote não são usados.
 
 ## Cristais coletáveis
-**Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe e coxa, do Food Kit da Kenney) de cerca de 0,8 m que giram e flutuam. Ao ser coletado, o item some na hora. Na Arena há 5 itens: carne no centro, onde o jogador nasce e por isso é coletada logo no início, peixe nos cantos noroeste e sudeste, e coxa nos cantos nordeste e sudoeste, em (±6, ±6). O prefab base `Cristal` (losango ciano) continua no projeto. A coleta ainda não tem som nem contagem na tela.
+**Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe, coxa e xícara de café, do Food Kit da Kenney) de cerca de 0,8 m que giram e flutuam. Ao ser coletado, o item some na hora. Na Arena há 6 itens: carne no centro, onde o jogador nasce e por isso é coletada logo no início, peixe nos cantos noroeste e sudeste, coxa nos cantos nordeste e sudoeste, em (±6, ±6), e o café em (0, 6), ao norte do centro. A posição do café é provisória, para teste. O prefab base `Cristal` (losango ciano) continua no projeto. A coleta ainda não tem som nem contagem na tela.
 
 **Efeitos das comidas:**
 | Comida | Definição | Efeito |
 |---|---|---|
 | Coxa | `Coxa` (`coxa`) | **Velocidade:** +30% por 5 s; quando esse efeito acaba, +0,3 m/s permanente. Pegar outra coxa durante o efeito soma mais 30% e reinicia os 5 s, e os +0,3 m/s de cada coxa entram juntos no fim. Na velocidade base (3,5 m/s): 4,55 m/s por 5 s e depois 3,8 m/s; duas coxas seguidas: 5,6 m/s e depois 4,1 m/s. |
+| Café | `Cafe` (`cafe`) | **Libera a investida** até o fim da partida (ver "Investida"). Pegar outro café não muda nada. |
 | Carne, peixe | `CristalBase` (`cristal-base`) | Nenhum (só contam). |
 
-Os valores ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem ser ajustados no Inspector.
+Os valores da coxa ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem ser ajustados no Inspector.
 
 **Visuais por Prefab Variant:** cada comida é uma *Prefab Variant* de `Cristal` (`Comida_Carne`, `Comida_Peixe`, `Comida_Coxa`). A variante herda tudo do prefab base: trigger, `CristalColetavel` com a definição `CristalBase` e `GiroEFlutuacao`. Ela muda só o visual: em `Visual`, *Scale* (1, 1, 1), a `Gema` desativada e um filho `Comida` com o modelo, escalado para que a maior dimensão tenha 0,8 m e centralizado no `Visual`. Mudanças de lógica no prefab base valem para todas as comidas. Para criar uma variante na Editor, clique com o botão direito em `Cristal.prefab` e escolha *Create > Prefab Variant*. Depois, edite o `Visual` da variante.
 
@@ -233,6 +243,7 @@ Os valores ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem
 - `DefinicaoCristal` (ScriptableObject): `Identificador` (único e estável, usado na contagem), `NomeExibicao` e uma lista de `Efeitos`.
 - `EfeitoDeCristal` (ScriptableObject abstrato): **ponto de extensão** para os efeitos (velocidade, ímã, investida). Cada efeito é uma subclasse com `Aplicar(ColetorDoJogador coletor)`, criada como asset e colocada na lista de `Efeitos` de uma definição. A lista da `CristalBase` está vazia.
 - `EfeitoDeVelocidade` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Velocidade*): campos da parte temporária (*Tipo Temporario*, *Valor Temporario*, *Duracao*, *Grupo*) e da permanente (*Tipo Permanente*, *Valor Permanente*, *Momento*). Monta um `BonusDeAtributo` e o aplica em `MovimentoDoJogador.Velocidade` do jogador que coletou, com o próprio asset como origem. Escreve a nova velocidade no Console. Sem `MovimentoDoJogador` no coletor, registra um erro e não aplica nada. Valores inválidos no asset (ex.: parte temporária sem grupo) geram um aviso no Inspector (`OnValidate`) e, na coleta, um erro no Console, sem aplicar o efeito. `AplicarEm(atributo)` aplica o bônus num atributo qualquer e devolve se aplicou.
+- `EfeitoLiberarInvestida` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Liberar Investida*): chama `InvestidaDoJogador.Liberar()` no jogador que coletou e escreve "investida liberada" no Console. Sem `InvestidaDoJogador` no coletor, registra um erro e não faz nada.
 
 *Componentes* (finos):
 - `CristalColetavel`: no `OnTriggerEnter`, procura um `ColetorDoJogador` em quem entrou. Se a regra deixar, registra a coleta e destrói o cristal.
@@ -261,6 +272,41 @@ Os valores ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem
 6. **Coxa com velocidade:** em `Assets/Dados/Cristais/Efeitos`, *Create > Coletor de Cristais > Efeitos > Velocidade* (`VelocidadeCoxa`): *Tipo Temporario* `PercentualAditivo`, *Valor Temporario* 0,3, *Duracao* 5, *Grupo* `coxa-velocidade`, *Tipo Permanente* `Plano`, *Valor Permanente* 0,3, *Momento* `AoFimDoTemporario`. Crie a definição `Assets/Dados/Cristais/Coxa` (*Identificador* `coxa`, *Nome Exibicao* `Coxa`) com `VelocidadeCoxa` na lista de *Efeitos*. Na variante `Comida_Coxa`, aponte o *Definicao* do `Cristal Coletavel` para `Coxa`.
 
 Ao apertar Play, o item do centro é coletado logo de cara e o Console mostra "Cristal coletado: Cristal Base (cristal-base). Total: 1.". Ande até os outros para coletá-los. Ao pegar uma coxa, o Console mostra "VelocidadeCoxa: velocidade agora 4,55 m/s.".
+
+7. **Café que libera a investida:** em `Assets/Dados/Cristais/Efeitos`, *Create > Coletor de Cristais > Efeitos > Liberar Investida* (`LiberarInvestida`, sem campos). Crie a definição `Assets/Dados/Cristais/Cafe` (*Identificador* `cafe`, *Nome Exibicao* `Café`) com `LiberarInvestida` na lista de *Efeitos*. Crie a variante `Comida_Cafe` como as outras comidas, com o modelo `cup-coffee` do Food Kit, e aponte o *Definicao* para `Cafe`. Na cena, coloque uma instância em `Cristais`, na posição (0; 0,8; 6).
+
+## Investida
+**Como funciona no jogo:** a investida é a primeira habilidade ativa. Ela começa bloqueada e é liberada ao pegar o café. Com o botão (Espaço ou gatilho direito), o personagem avança rápido em linha reta:
+- **Velocidade:** 5 × a velocidade de movimento do momento, **durante 0,25 s**. Os bônus de velocidade (ex.: a coxa) aumentam a investida.
+- **Distância:** `5 × velocidade × 0,25 s`. Na velocidade base de 3,5 m/s, **4,375 m**. Com a coxa ativa (4,55 m/s), 5,69 m; depois do fim do efeito da coxa (3,8 m/s), 4,75 m.
+- **Direção:** a do controle no momento do botão; sem direção no controle, para onde o personagem está virado. O personagem vira na hora para a direção da investida, e ela não muda no meio.
+- **Paredes:** a investida usa a mesma física do andar (`CharacterController`), então para na parede, sem atravessar. Na arena, uma investida para leste que começa em x = 7,5 (a 2,5 m da face da mureta) para em x = 9,42, encostada na mureta, depois de 1,92 m em vez de 4,375 m.
+- **Recarga:** 5 s, contados **desde o início** da investida (0,25 s de avanço + 4,75 s de espera). Durante a recarga, o botão não faz nada.
+- Durante o avanço, o movimento normal fica suspenso. Os efeitos temporários (ex.: os 5 s da coxa) continuam contando.
+- Ainda não há indicação na tela da recarga nem de que a investida foi liberada.
+
+Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajustados no Inspector.
+
+**Código** (`Assets/Scripts/Habilidades/`):
+- `ParametrosDeInvestida` (struct, C# puro): `MultiplicadorDeVelocidade` (> 0), `Duracao` (> 0) e `Recarga` (≥ 0), validados no construtor (`ArgumentException`). `Distancia(velocidadeDeMovimento)` = velocidade × multiplicador × duração (velocidade negativa conta como zero).
+- `Investida` (C# puro, testada em EditMode): o estado da habilidade.
+  - `Liberar()`, `Liberada`, `EmAndamento`, `RecargaRestante`, `Pronta` e `Velocidade` (zero fora de uma investida).
+  - `TentarIniciar(direcao, velocidadeDeMovimento, parametros)`: só começa se estiver pronta, com direção horizontal e velocidade maior que zero. Assim, um personagem parado por um modificador não gasta a recarga. A direção é achatada no chão (y ignorado) e normalizada. A velocidade fica fixa até o fim.
+  - `Atualizar(deltaTempo)`: avança a investida e a recarga e devolve o deslocamento do quadro. O último quadro usa só o tempo que faltava, então a distância total é exata, em qualquer taxa de quadros.
+  - `CalcularDirecao(entrada, frente, entradaMinima)` (estático): a entrada do controle, se for maior que o mínimo; senão, a frente do personagem no chão (+Z se a frente for vertical).
+  - Valores não finitos ou tempo negativo geram `ArgumentException`.
+- `DefinicaoInvestida` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Investida*): *Multiplicador De Velocidade* 5, *Duracao* 0,25 e *Recarga* 5. `Parametros` monta o `ParametrosDeInvestida`.
+- `InvestidaDoJogador` (`MonoBehaviour`, no `Jogador`, exige `CharacterController` e `MovimentoDoJogador`): lê o botão (*Acao Investida*, `Player/Investida`), chama `TentarIniciar()` e aplica o deslocamento com `CharacterController.Move`. Enquanto a investida está em andamento, liga `MovimentoDoJogador.Suspenso`. `TentarIniciar()` é público para testes pela CLI. `Liberar()` é chamado pelo efeito do café, e `EmInvestida` é lido pela `DeformacaoProcedural`.
+
+**Decisões técnicas:**
+- `InvestidaDoJogador` roda antes do `MovimentoDoJogador` (`[DefaultExecutionOrder(-10)]`). Assim, no quadro em que a investida começa, o movimento normal já fica suspenso e os dois não movem o personagem juntos.
+- A liberação fica no componente, não num atributo: é um sim ou não que vale até o fim da partida.
+
+**Como foi montado na Editor:**
+1. **Ação:** em `InputSystem_Actions`, no mapa *Player*, adicione a ação `Investida` (*Action Type* *Button*), com os bindings *Space [Keyboard]* (esquema Keyboard&Mouse) e *Right Trigger [Gamepad]* (esquema Gamepad). Salve o asset.
+2. **Valores:** em `Assets/Dados/Habilidades`, *Create > Coletor de Cristais > Definição de Investida* (`Investida`), com os valores padrão.
+3. **Jogador:** adicione `Investida Do Jogador` ao `Jogador`. Em *Acao Investida*, escolha `Player/Investida`; em *Definicao*, o asset `Investida`.
+4. **Item:** o café (passo 7 de "Cristais coletáveis").
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (uma subpasta e um sub-namespace por sistema).
