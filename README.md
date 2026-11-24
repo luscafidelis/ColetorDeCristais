@@ -69,7 +69,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
 | `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`, `BonusDeAtributo` e `MomentoDoPermanente`. Ver "Atributos e modificadores" abaixo |
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
-| `Assets/Scripts/Habilidades/` | Habilidades do jogador (namespace `ColetorDeCristais.Habilidades`). Investida: `Investida` e `ParametrosDeInvestida` (C# puro), `DefinicaoInvestida` (ScriptableObject) e `InvestidaDoJogador` (`MonoBehaviour`). Ímã: `Ima` e `ParametrosDeIma` (C# puro), `DefinicaoIma` (ScriptableObject) e `ImaDoJogador` (`MonoBehaviour`). Ver "Investida" e "Ímã" abaixo |
+| `Assets/Scripts/Habilidades/` | Habilidades do jogador (namespace `ColetorDeCristais.Habilidades`). Investida: `Investida`, `ParametrosDeInvestida`, `MalhaDeAnel` e `PulsoDoIndicador` (C# puro), `DefinicaoInvestida` (ScriptableObject), `InvestidaDoJogador` e `IndicadorDaInvestida` (`MonoBehaviour`). Ímã: `Ima` e `ParametrosDeIma` (C# puro), `DefinicaoIma` (ScriptableObject) e `ImaDoJogador` (`MonoBehaviour`). Ver "Investida" e "Ímã" abaixo |
 | `Assets/Scripts/Partida/` | Partida em ondas (namespace `ColetorDeCristais.Partida`): `CicloDaPartida`, `ParametrosDaPartida`, `EstadoDaPartida`, `ComposicaoDaOnda` , `GeradorDePosicoes` e `RegraDoFimAntecipado` (C# puro), `DefinicaoPartida` (ScriptableObject), `ControladorDaPartida` e `MensagensDaPartida` (`MonoBehaviour`). Ver "Partida, ondas e chefes" abaixo |
 | `Assets/Scripts/Corpo/` | Corpo do personagem (namespace `ColetorDeCristais.Corpo`): `RegraDeTamanho`, `Tranco`, `Invulnerabilidade`, `DanoNoCorpo`, `ParametrosDeDano`, `ResultadoDaBatida` e `SorteioDeDrop` (C# puro), `DefinicaoCorpo` (ScriptableObject) e `CorpoDoJogador` (`MonoBehaviour`). Ver "Corpo e tamanho" abaixo |
 | `Assets/Scripts/Nivel/` | Elementos de nível (namespace `ColetorDeCristais.Nivel`): `Retangulo`, `VaiEVem`, `Empurrao`, `RegraDeQueda` e `EstadoDaPrateleira` (C# puro), `DefinicaoNivel` (ScriptableObject), `ControladorDoNivel`, `CarrinhoVaiEVem`, `PrateleiraSecreta` e `ImpactoDaInvestida` (`MonoBehaviour`). Ver "Mercado (arena 0)" abaixo |
@@ -94,7 +94,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) e `Ima` (`DefinicaoIma`) |
 | `Assets/Dados/Partida/` | Assets `DefinicaoPartida`: `Partida` (a Arena, 3 ondas) e `PartidaTutorial` (o mercado, 1 onda): cronômetro, ondas e itens novos de cada onda |
 | `Assets/Dados/Nivel/` | Asset `Mercado` (`DefinicaoNivel`): o vão, as áreas sem itens novos, a velocidade dos carrinhos e os produtos das prateleiras |
-| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal`, `Vao` (quase preto, o fosso do vão) e `CarneEstragada` (verde-acinzentado, cor chapada) |
+| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal`, `Vao` (quase preto, o fosso do vão) e `CarneEstragada` (verde-acinzentado, cor chapada); URP Unlit: `AnelInvestida` (ciano, o anel da investida) |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move` e `Player/Investida`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
@@ -345,9 +345,9 @@ Os valores ficam no asset `Assets/Dados/Corpo/Corpo` (*Tamanho Inicial*, *Tamanh
 - **Paredes:** a investida usa a mesma física do andar (`CharacterController`), então para na parede, sem atravessar. Na arena, uma investida para leste que começa em x = 7,5 (a 2,5 m da face da mureta) para em x = 9,42, encostada na mureta, depois de 1,92 m em vez de 4,375 m.
 - **Recarga:** 5 s, contados **desde o início** da investida (0,25 s de avanço + 4,75 s de espera). Durante a recarga, o botão não faz nada.
 - Durante o avanço, o movimento normal fica suspenso. Os efeitos temporários (ex.: os 5 s da coxa) continuam contando.
-- Ainda não há indicação na tela da recarga nem de que a investida foi liberada.
+- **Anel da investida:** um anel ciano fino no chão, em volta do montrengo, aparece quando a investida está pronta. Ele some com a investida bloqueada (antes do café), durante o avanço e na recarga, e fora das ondas. No momento em que ela fica pronta (ao pegar o café e no fim de cada recarga), o anel dá um pulso: cresce até 1,3× e volta em 0,3 s. O anel acompanha o tamanho do montrengo (raio de 1 a 1,2 m na escala 1).
 
-Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajustados no Inspector.
+Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajustados no Inspector. Os do anel ficam no componente `Indicador Da Investida`, no objeto `Jogador/AnelDaInvestida`.
 
 **Código** (`Assets/Scripts/Habilidades/`):
 - `ParametrosDeInvestida` (struct, C# puro): `MultiplicadorDeVelocidade` (> 0), `Duracao` (> 0) e `Recarga` (≥ 0), validados no construtor (`ArgumentException`). `Distancia(velocidadeDeMovimento)` = velocidade × multiplicador × duração (velocidade negativa conta como zero).
@@ -360,16 +360,21 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajust
   - Valores não finitos ou tempo negativo geram `ArgumentException`.
 - `DefinicaoInvestida` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Investida*): *Multiplicador De Velocidade* 5, *Duracao* 0,25 e *Recarga* 5. `Parametros` monta o `ParametrosDeInvestida`.
 - `InvestidaDoJogador` (`MonoBehaviour`, no `Jogador`, exige `CharacterController` e `MovimentoDoJogador`): lê o botão (*Acao Investida*, `Player/Investida`), chama `TentarIniciar()` e aplica o deslocamento com `CharacterController.Move`. Liga `MovimentoDoJogador.Suspenso` no início da investida e desliga no fim (ou ao ser desativado), sem escrever na flag nos outros quadros. A direção vem de `MovimentoDoJogador.LerEntrada()`, lida no quadro do botão. `TentarIniciar()` é público para testes pela CLI. `Liberar()` é chamado pelo efeito do café, e `EmInvestida` é lido pela `DeformacaoProcedural`.
+- `MalhaDeAnel` (estática, C# pura): `Gerar(raioInterno, raioExterno, segmentos, out vertices, out triangulos)` monta um anel plano no plano XZ, centrado na origem, com os triângulos virados para cima. Valores inválidos geram `ArgumentException`.
+- `PulsoDoIndicador` (C# puro): `Atualizar(pronta, deltaTempo)` atualiza `Visivel` (só com a investida pronta) e `Escala` (meia senoide de 1 ao pico e de volta a 1, começando a cada passagem de "não pronta" para "pronta"); `EmPulso` diz se o pulso está acontecendo. Deixar de estar pronta cancela o pulso.
+- `IndicadorDaInvestida` (`MonoBehaviour`, no filho `AnelDaInvestida` do `Jogador`, exige `MeshFilter` e `MeshRenderer`): gera a malha no `Awake` e, no `LateUpdate`, lê `InvestidaDoJogador.Investida.Pronta` (falso com o componente desligado), liga ou desliga o `MeshRenderer` e aplica a escala do pulso. Fica na altura do chão (*Altura Do Chao* 0,02, no mundo) e não gira com o personagem; como é filho do `Jogador`, cresce com o tamanho. Campos: *Investida* (vazio: procura no pai), *Raio Interno* 1, *Raio Externo* 1,2, *Segmentos* 48, *Altura Do Chao* 0,02, *Escala Do Pulso* 1,3 e *Duracao Do Pulso* 0,3. Valores inválidos registram um erro e desligam o componente.
 
 **Decisões técnicas:**
 - `InvestidaDoJogador` roda antes do `MovimentoDoJogador` (`[DefaultExecutionOrder(-10)]`). Assim, no quadro em que a investida começa, o movimento normal já fica suspenso e os dois não movem o personagem juntos.
 - A liberação fica no componente, não num atributo: é um sim ou não que vale até o fim da partida.
+- O `MeshRenderer` do anel fica desligado na cena e só o `IndicadorDaInvestida` o liga. Assim, o pisca-pisca do `CorpoDoJogador` (que só mexe nos desenhos ligados no início) não interfere no anel. O anel não faz sombra.
 
 **Como foi montado na Editor:**
 1. **Ação:** em `InputSystem_Actions`, no mapa *Player*, adicione a ação `Investida` (*Action Type* *Button*), com os bindings *Space [Keyboard]* (esquema Keyboard&Mouse) e *Right Trigger [Gamepad]* (esquema Gamepad). Salve o asset.
 2. **Valores:** em `Assets/Dados/Habilidades`, *Create > Coletor de Cristais > Definição de Investida* (`Investida`), com os valores padrão.
 3. **Jogador:** adicione `Investida Do Jogador` ao `Jogador`. Em *Acao Investida*, escolha `Player/Investida`; em *Definicao*, o asset `Investida`.
 4. **Item:** o café (passo 7 de "Cristais coletáveis").
+5. **Anel:** material `Assets/Materiais/AnelInvestida` (URP Unlit, ciano (0,2; 0,9; 1)). No `Jogador`, um filho vazio `AnelDaInvestida` com `Mesh Filter`, `Mesh Renderer` (desligado, material `AnelInvestida`, sem sombras) e `Indicador Da Investida` (*Investida* o `Jogador`).
 
 ## Ímã
 **Como funciona no jogo:** o ímã é a primeira habilidade passiva. Ele começa bloqueado e é liberado, até o fim da partida, ao pegar a rosquinha. Depois disso, sem botão, os itens perto do personagem são puxados até ele e coletados normalmente (pelo mesmo trigger de sempre). Cada tipo de item tem um nível de atração (`AtracaoDoIma` na definição):
