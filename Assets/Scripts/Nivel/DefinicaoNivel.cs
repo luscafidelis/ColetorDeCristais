@@ -27,6 +27,10 @@ namespace ColetorDeCristais.Nivel
         [Tooltip("Áreas onde nenhum item novo é sorteado, além dos vãos (ex.: prateleiras, área bônus). Desenhe com folga.")]
         [SerializeField] private List<Retangulo> areasSemItensNovos = new List<Retangulo>();
 
+        [Tooltip("Áreas cujos itens não contam para o fim antecipado da onda (ex.: a área bônus). Só valem com " +
+                 "'Encerrar Ao Coletar Tudo' ligado na DefinicaoPartida.")]
+        [SerializeField] private List<Retangulo> areasForaDoFimAntecipado = new List<Retangulo>();
+
         [Header("Carrinhos")]
         [Tooltip("Velocidade dos carrinhos no vai e vem, em m/s.")]
         [Min(0.1f)]
@@ -75,6 +79,9 @@ namespace ColetorDeCristais.Nivel
                 return zonas;
             }
         }
+
+        /// <summary>Áreas cujos itens não contam para o fim antecipado da onda.</summary>
+        public IReadOnlyList<Retangulo> AreasForaDoFimAntecipado => areasForaDoFimAntecipado;
 
         /// <summary>Velocidade dos carrinhos.</summary>
         public float VelocidadeDosCarrinhos => velocidadeDosCarrinhos;

@@ -21,6 +21,8 @@ namespace ColetorDeCristais.Partida
     /// <item>Fora de uma onda (chefe, vitória, derrota), desliga o movimento, a investida, o ímã, a coleta e o corpo
     /// (tranco e pisca-pisca) do jogador.
     /// Os efeitos temporários também param, porque perdem tempo no <see cref="MovimentoDoJogador"/>.</item>
+    /// <item>Com <see cref="DefinicaoPartida.EncerrarAoColetarTudo"/> (no tutorial), a onda acaba mais cedo quando não
+    /// falta nenhum item que conta (<see cref="RegraDoFimAntecipado"/>; as áreas fora da contagem vêm do <i>Nivel</i>).</item>
     /// <item>Os chefes ainda não existem: na vez de um chefe, qualquer tecla conta como chefe derrotado.</item>
     /// <item>Depois do fim (vitória ou derrota), qualquer tecla recarrega a cena.</item>
     /// <item>A derrota acontece por <see cref="DerrotarJogador"/>, para o futuro sistema de vida chamar.</item>
@@ -44,6 +46,7 @@ namespace ColetorDeCristais.Partida
         private Behaviour[] _controlesDoJogador = Array.Empty<Behaviour>();
         private IDisposable _escutaDeTecla;
         private float _esperaRestante;
+        private readonly List<Vector2> _itensQueFaltam = new List<Vector2>();
 
         /// <summary>Estado da partida (onda, tempo, fase). Nulo se o componente não tiver definição.</summary>
         public CicloDaPartida Ciclo { get; private set; }
@@ -87,7 +90,7 @@ namespace ColetorDeCristais.Partida
         {
             if (Ciclo.EmOnda)
             {
-                if (Ciclo.Atualizar(Time.deltaTime))
+                if (Ciclo.Atualizar(Time.deltaTime) || (definicao.EncerrarAoColetarTudo && TudoColetado() && Ciclo.EncerrarOnda()))
                 {
                     EntrarEmEspera();
                 }
@@ -134,6 +137,23 @@ namespace ColetorDeCristais.Partida
             {
                 EntrarEmEspera(); // vitória
             }
+        }
+
+        // Fim antecipado: nenhum item que conta (fora das áreas ignoradas do nível) ainda no chão ou caindo.
+        private bool TudoColetado()
+        {
+            _itensQueFaltam.Clear();
+            foreach (var cristal in CristalColetavel.Ativos)
+            {
+                if (!cristal.Coletado)
+                {
+                    var p = cristal.transform.position;
+                    _itensQueFaltam.Add(new Vector2(p.x, p.z));
+                }
+            }
+
+            return RegraDoFimAntecipado.TudoColetado(
+                _itensQueFaltam, QuedaDoItem.EmQueda, nivel != null ? nivel.AreasForaDoFimAntecipado : null);
         }
 
         /// <summary>Registra a derrota do jogador (ex.: vida zerada). Sem efeito se a partida já acabou.</summary>

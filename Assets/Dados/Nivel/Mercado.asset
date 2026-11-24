@@ -30,6 +30,9 @@ MonoBehaviour:
     tamanho: {x: 17.2, y: 1.5}
   - centro: {x: 0, y: 8.5}
     tamanho: {x: 20, y: 3}
+  areasForaDoFimAntecipado:
+  - centro: {x: 0, y: 8.5}
+    tamanho: {x: 20, y: 3}
   velocidadeDosCarrinhos: 2
   produtos:
   - {fileID: 8107996872110256798, guid: 04ddab2f22123e048a7f210384275a7b, type: 3}

@@ -24,6 +24,10 @@ namespace ColetorDeCristais.Partida
         [Min(0f)]
         [SerializeField] private float esperaAntesDeContinuar = 0.5f;
 
+        [Tooltip("Encerra a onda mais cedo quando o jogador coleta todos os itens que contam (no tutorial). Os itens das " +
+                 "áreas fora do fim antecipado do nível (ex.: a área bônus) não contam.")]
+        [SerializeField] private bool encerrarAoColetarTudo;
+
         [Header("Itens novos a cada onda (a partir da segunda)")]
         [Tooltip("Cristais de experiência na primeira onda; dobram a cada onda (4, 8, 16...).")]
         [Min(0)]
@@ -53,6 +57,9 @@ namespace ColetorDeCristais.Partida
         /// <summary>Duração e quantidade de ondas.</summary>
         /// <exception cref="System.ArgumentException">Se algum valor for inválido.</exception>
         public ParametrosDaPartida Parametros => new ParametrosDaPartida(duracaoDaOnda, quantidadeDeOndas);
+
+        /// <summary>Indica se a onda acaba mais cedo quando o jogador coleta todos os itens que contam.</summary>
+        public bool EncerrarAoColetarTudo => encerrarAoColetarTudo;
 
         /// <summary>Segundos em que as teclas são ignoradas depois de uma mudança de fase.</summary>
         public float EsperaAntesDeContinuar => esperaAntesDeContinuar;

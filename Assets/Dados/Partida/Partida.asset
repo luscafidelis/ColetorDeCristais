@@ -15,6 +15,7 @@ MonoBehaviour:
   duracaoDaOnda: 120
   quantidadeDeOndas: 3
   esperaAntesDeContinuar: 0.5
+  encerrarAoColetarTudo: 0
   cristaisDeExperienciaNaPrimeiraOnda: 4
   prefabDeExperiencia: {fileID: 5846569277992934267, guid: a3f6d6cce8046e042a4cda176dca93bd, type: 3}
   comidasPorOnda:

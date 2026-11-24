@@ -9,7 +9,8 @@ namespace ColetorDeCristais.Partida
     /// <remarks>
     /// <list type="bullet">
     /// <item>Começa na onda 1, com o tempo cheio. O tempo só corre em <see cref="EstadoDaPartida.EmOnda"/>.</item>
-    /// <item>Quando o tempo acaba, vem o chefe: o da onda, ou o da arena na última onda.</item>
+    /// <item>Quando o tempo acaba (ou a onda é encerrada antes, por <see cref="EncerrarOnda"/>), vem o chefe: o da onda,
+    /// ou o da arena na última onda.</item>
     /// <item><see cref="DerrotarChefe"/> passa para a próxima onda (tempo cheio) ou, depois do chefe da arena, para a vitória.</item>
     /// <item><see cref="DerrotarJogador"/> leva à derrota (ex.: vida zerada) a partir de qualquer fase em jogo.</item>
     /// <item>Vitória e derrota encerram a partida; <see cref="Reiniciar"/> volta ao começo.</item>
@@ -69,6 +70,23 @@ namespace ColetorDeCristais.Partida
                 return false;
             }
 
+            Estado = Onda < _parametros.QuantidadeDeOndas ? EstadoDaPartida.ChefeDaOnda : EstadoDaPartida.ChefeDaArena;
+            return true;
+        }
+
+        /// <summary>
+        /// Encerra a onda atual agora (ex.: no tutorial, quando o jogador coletou tudo): zera o tempo e passa para o
+        /// chefe, como se o tempo tivesse acabado. Sem efeito fora de uma onda.
+        /// </summary>
+        /// <returns><c>true</c> se a onda foi encerrada.</returns>
+        public bool EncerrarOnda()
+        {
+            if (!EmOnda)
+            {
+                return false;
+            }
+
+            TempoRestante = 0f;
             Estado = Onda < _parametros.QuantidadeDeOndas ? EstadoDaPartida.ChefeDaOnda : EstadoDaPartida.ChefeDaArena;
             return true;
         }
