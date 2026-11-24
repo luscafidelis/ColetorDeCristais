@@ -182,6 +182,39 @@ A cada nova onda, os itens que sobraram continuam lá e **entram itens novos em 
 
 ---
 
+## 11. O minimercado (arena 0)
+
+**Para quem joga:** o jogo agora começa num **minimercado**, a arena 0, que serve de tutorial. O montrengo nasce no **açougue**, ao sul. Ao norte ficam **3 corredores** entre prateleiras, cada um com um **carrinho de compras** que vai e volta e **empurra** quem estiver na frente. Depois deles vem um **vão de 3 m** na largura toda do mercado. **Cair no vão é fim de jogo**. Para atravessar, é preciso pegar o **café** no fim do corredor do meio e usar a **investida** perto da borda (a até 1,375 m dela na velocidade base, a até 2,69 m com a coxa ativa). Do outro lado fica a **área bônus**, com a rosquinha e 10 cristais de experiência. O mercado tem uma onda só de 2 minutos, e depois dela vem o chefe da arena (por enquanto só a mensagem). A planta é provisória.
+
+![O mercado visto de cima: o açougue embaixo, os três corredores com carrinhos, o vão escuro e a área bônus junto da parede do fundo](docs/atualizacoes/mercado.png)
+
+![O montrengo usa a investida perto da borda e atravessa o vão até a área bônus, enquanto os carrinhos andam nos corredores](docs/atualizacoes/investida-no-vao.png)
+
+Há também um **segredo**: uma investida contra uma prateleira derruba um produto no corredor (lata, refrigerante, garrafa ou biscoito), uma vez por prateleira. O produto é coletado e contado, mas ainda não tem efeito.
+
+**Por dentro:**
+- Nova cena `Mercado`, a primeira do build; a `Arena` continua como a segunda.
+- Novo sistema `Nivel` (C# puro): `Retangulo` (áreas no chão), `VaiEVem` (posição dos carrinhos pelo tempo acumulado), `Empurrao` (quanto o carrinho empurra o personagem), `RegraDeQueda` (cai quem está sobre o vão fora de uma investida) e `EstadoDaPrateleira` (o segredo, uma vez por prateleira, e onde o produto cai).
+- Componentes `ControladorDoNivel` (queda, que leva à derrota da partida), `CarrinhoVaiEVem`, `PrateleiraSecreta` e `ImpactoDaInvestida`. Valores no ScriptableObject `DefinicaoNivel` (asset `Mercado`); a partida do mercado é o asset `PartidaTutorial`, com 1 onda.
+- O `GeradorDePosicoes` agora respeita áreas proibidas: os itens novos não entram nos vãos, nas prateleiras nem na área bônus.
+- `InvestidaDoJogador.AplicandoInvestida` diz quando uma batida veio da investida.
+
+**Validação:** 310 testes EditMode passando, incluindo:
+- a travessia do vão com a investida do jogo, conferida a 30, 60 e 144 quadros por segundo: atravessa a partir de 1,37 m da borda, cai a partir de 1,38 m, e atravessa de mais longe com a coxa;
+- a queda, o vai e vem igual em qualquer taxa de quadros e o empurrão (na frente, na quina, de lado e na volta);
+- as prateleiras (só na investida, uma vez só, produto longe do personagem) e as áreas proibidas do sorteio.
+
+Em Play Mode, pela CLI:
+- uma investida a 0,2 m da borda atravessou e terminou em z = 8,17;
+- uma investida a 1,5 m da borda e uma entrada andando no vão terminaram em "Derrota", com o personagem afundando, e qualquer tecla recomeçou o mercado;
+- uma investida contra uma prateleira derrubou uma lata 1,5 m ao lado do personagem; a segunda investida e um encontrão andando não derrubaram nada;
+- os três carrinhos empurraram o personagem até o fim do percurso, sem tirá-lo do chão;
+- o fim do tempo levou ao chefe da arena e depois à vitória, e os carrinhos pararam fora da onda.
+
+O teste jogando com teclado ou gamepad ainda não foi feito.
+
+---
+
 ## Como registrar uma nova atualização
 1. Acrescente uma seção no fim, com o próximo número, seguindo o mesmo formato: **Para quem joga**, **Por dentro** e **Validação**, com o número de testes passando.
 2. Não registre aqui planejamento, cronograma ou dados pessoais (veja a regra no `CLAUDE.md`).

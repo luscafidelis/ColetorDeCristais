@@ -35,6 +35,13 @@ namespace ColetorDeCristais.Habilidades
         /// <summary>Indica se o personagem está no meio de uma investida.</summary>
         public bool EmInvestida => Investida.EmAndamento;
 
+        /// <summary>
+        /// Verdadeiro só durante o <c>CharacterController.Move</c> do avanço da investida: as batidas
+        /// (<c>OnControllerColliderHit</c>) que acontecem nesse momento são da investida. Inclui o último quadro,
+        /// quando <see cref="EmInvestida"/> já ficou falso.
+        /// </summary>
+        public bool AplicandoInvestida { get; private set; }
+
         /// <summary>Libera a investida (chamado pelo efeito do item coletável).</summary>
         public void Liberar() => Investida.Liberar();
 
@@ -87,7 +94,9 @@ namespace ColetorDeCristais.Habilidades
             var deslocamento = Investida.Atualizar(Time.deltaTime);
             if (deslocamento != Vector3.zero)
             {
+                AplicandoInvestida = true;
                 _controlador.Move(deslocamento);
+                AplicandoInvestida = false;
             }
 
             AjustarSuspensao(Investida.EmAndamento);

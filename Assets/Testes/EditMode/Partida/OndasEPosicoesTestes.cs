@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ColetorDeCristais.Nivel;
 using ColetorDeCristais.Partida;
 using NUnit.Framework;
 using UnityEngine;
@@ -91,6 +92,32 @@ namespace ColetorDeCristais.Testes.Partida
                     Assert.That(Vector2.Distance(p, posicoes[j]), Is.GreaterThanOrEqualTo(2f), "longe das outras novas");
                 }
             }
+        }
+
+        [Test]
+        public void Posicoes_ForaDasAreasProibidas()
+        {
+            // O vão do mercado (z de 4 a 7, a largura toda) e uma prateleira; um retângulo inválido é ignorado.
+            var vao = Retangulo.PelosCantos(new Vector2(-10f, 4f), new Vector2(10f, 7f));
+            var prateleira = Retangulo.PelosCantos(new Vector2(-3.5f, -5f), new Vector2(-2.5f, 2f));
+            var proibidas = new List<Retangulo> { vao, prateleira, default };
+
+            var posicoes = GeradorDePosicoes.Gerar(30, 8f, Vector2.zero, null, 1.5f, new Random(11), proibidas: proibidas);
+
+            Assert.AreEqual(30, posicoes.Count);
+            foreach (var p in posicoes)
+            {
+                Assert.IsFalse(vao.Contem(p), $"{p} no vão");
+                Assert.IsFalse(prateleira.Contem(p), $"{p} na prateleira");
+            }
+        }
+
+        [Test]
+        public void Posicoes_TudoProibido_NaoDevolveNenhuma()
+        {
+            var tudo = new List<Retangulo> { new Retangulo(Vector2.zero, new Vector2(20f, 20f)) };
+
+            Assert.AreEqual(0, GeradorDePosicoes.Gerar(5, 8f, new Vector2(50f, 50f), null, 1.5f, new Random(2), 20, tudo).Count);
         }
 
         [Test]

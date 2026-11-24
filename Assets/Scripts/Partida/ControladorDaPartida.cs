@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ColetorDeCristais.Cristais;
 using ColetorDeCristais.Habilidades;
 using ColetorDeCristais.Movimento;
+using ColetorDeCristais.Nivel;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
@@ -33,6 +34,9 @@ namespace ColetorDeCristais.Partida
 
         [Tooltip("Pai dos itens novos de cada onda (o objeto Cristais da cena).")]
         [SerializeField] private Transform grupoDeItens;
+
+        [Tooltip("Nível da cena (opcional): os itens novos não entram nos vãos nem nas áreas sem itens dele.")]
+        [SerializeField] private DefinicaoNivel nivel;
 
         private readonly System.Random _sorteio = new System.Random();
         private Behaviour[] _controlesDoJogador = Array.Empty<Behaviour>();
@@ -195,7 +199,8 @@ namespace ColetorDeCristais.Partida
             var posicaoDoJogador = jogador.transform.position;
             var posicoes = GeradorDePosicoes.Gerar(
                 prefabs.Count, definicao.LimiteDaArea, new Vector2(posicaoDoJogador.x, posicaoDoJogador.z),
-                ocupadas, definicao.DistanciaMinima, _sorteio);
+                ocupadas, definicao.DistanciaMinima, _sorteio,
+                proibidas: nivel != null ? nivel.ZonasSemItensNovos : null);
             if (posicoes.Count < prefabs.Count)
             {
                 Debug.LogWarning($"Partida: só coube {posicoes.Count} de {prefabs.Count} itens novos na onda {onda}.", this);

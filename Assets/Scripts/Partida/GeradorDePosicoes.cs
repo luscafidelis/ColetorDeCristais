@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ColetorDeCristais.Nivel;
 using UnityEngine;
 using Random = System.Random;
 
@@ -7,7 +8,8 @@ namespace ColetorDeCristais.Partida
 {
     /// <summary>
     /// Sorteia posições no chão (x, z) para itens novos, em C# puro: dentro de uma área quadrada e a uma
-    /// distância mínima do jogador, dos itens que já existem e umas das outras.
+    /// distância mínima do jogador, dos itens que já existem e umas das outras, e fora das áreas proibidas
+    /// do nível (vão, prateleiras, área bônus).
     /// </summary>
     /// <remarks>
     /// Usa tentativas aleatórias: cada posição sorteada só é aceita se respeitar as distâncias.
@@ -24,6 +26,8 @@ namespace ColetorDeCristais.Partida
         /// <param name="distanciaMinima">Distância mínima até o jogador, os itens existentes e entre as novas (zero ou mais).</param>
         /// <param name="sorteio">Gerador de números aleatórios.</param>
         /// <param name="tentativasPorPosicao">Quantos sorteios tentar por posição antes de desistir dela.</param>
+        /// <param name="proibidas">Áreas onde nenhum item novo entra (nulo: nenhuma). Desenhe-as já com a folga desejada;
+        /// retângulos inválidos são ignorados.</param>
         /// <returns>As posições sorteadas (pode ter menos que o pedido).</returns>
         /// <exception cref="ArgumentException">Se algum valor estiver fora da faixa.</exception>
         public static List<Vector2> Gerar(
@@ -33,7 +37,8 @@ namespace ColetorDeCristais.Partida
             IReadOnlyList<Vector2> ocupadas,
             float distanciaMinima,
             Random sorteio,
-            int tentativasPorPosicao = 100)
+            int tentativasPorPosicao = 100,
+            IReadOnlyList<Retangulo> proibidas = null)
         {
             if (quantidade < 0)
             {
@@ -67,7 +72,7 @@ namespace ColetorDeCristais.Partida
                 for (var tentativa = 0; tentativa < tentativasPorPosicao; tentativa++)
                 {
                     var candidata = new Vector2(Sortear(sorteio, limite), Sortear(sorteio, limite));
-                    if (Livre(candidata, jogador, ocupadas, novas, minimaAoQuadrado))
+                    if (ForaDasProibidas(candidata, proibidas) && Livre(candidata, jogador, ocupadas, novas, minimaAoQuadrado))
                     {
                         novas.Add(candidata);
                         break;
@@ -79,6 +84,24 @@ namespace ColetorDeCristais.Partida
         }
 
         private static float Sortear(Random sorteio, float limite) => (float)(sorteio.NextDouble() * 2.0 - 1.0) * limite;
+
+        private static bool ForaDasProibidas(Vector2 candidata, IReadOnlyList<Retangulo> proibidas)
+        {
+            if (proibidas == null)
+            {
+                return true;
+            }
+
+            for (var i = 0; i < proibidas.Count; i++)
+            {
+                if (proibidas[i].Valido && proibidas[i].Contem(candidata))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         private static bool Livre(Vector2 candidata, Vector2 jogador, IReadOnlyList<Vector2> ocupadas, List<Vector2> novas, float minimaAoQuadrado)
         {

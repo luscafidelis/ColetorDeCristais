@@ -8,9 +8,11 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 - **Habilidade passiva:** ímã, que puxa cristais próximos.
 - **Habilidade ativa:** investida, com tempo de recarga.
 
+O jogo começa no **minimercado** (arena 0), que serve de tutorial: corredores entre prateleiras, carrinhos de compras que empurram o personagem e um vão que só se atravessa com a investida. Cair no vão é fim de jogo.
+
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; a rosquinha libera o ímã, que puxa os itens próximos até o personagem (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido); carne e peixe ainda não têm efeito, e os cristais de experiência ainda não dão experiência. A partida tem 3 ondas de 120 s, com cronômetro regressivo no topo da tela; a cada nova onda entram itens novos em posições sorteadas. Os chefes, os inimigos e a vida ainda não existem: na vez de um chefe, qualquer tecla conta como vitória sobre ele, e ainda não dá para perder. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; a rosquinha libera o ímã, que puxa os itens próximos até o personagem (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido); carne e peixe ainda não têm efeito, e os cristais de experiência ainda não dão experiência. A partida tem 3 ondas de 120 s, com cronômetro regressivo no topo da tela; a cada nova onda entram itens novos em posições sorteadas. Os chefes, os inimigos e a vida ainda não existem: na vez de um chefe, qualquer tecla conta como vitória sobre ele, e a única forma de perder é cair no vão do mercado. O mercado (arena 0) tem 1 onda, 3 corredores com carrinhos que empurram o personagem, um vão de 3 m que só se atravessa com a investida e, do outro lado, uma área bônus com a rosquinha e 10 cristais de experiência; uma investida contra uma prateleira derruba um produto (ainda sem efeito). A planta do mercado é provisória. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -28,7 +30,7 @@ Na raiz do projeto:
 unity open .
 unity status --until-ready --project-path .
 ```
-Na Editor, abra `Assets/Scenes/Arena.unity` e aperte Play. Clique na janela Game para ela receber o teclado.
+Na Editor, abra `Assets/Scenes/Mercado.unity` (a arena 0, primeira cena do build) ou `Assets/Scenes/Arena.unity` e aperte Play. Clique na janela Game para ela receber o teclado.
 
 **Controles:**
 | Ação | Teclado | Gamepad |
@@ -69,8 +71,10 @@ python -m unittest discover -s ferramentas
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
 | `Assets/Scripts/Habilidades/` | Habilidades do jogador (namespace `ColetorDeCristais.Habilidades`). Investida: `Investida` e `ParametrosDeInvestida` (C# puro), `DefinicaoInvestida` (ScriptableObject) e `InvestidaDoJogador` (`MonoBehaviour`). Ímã: `Ima` e `ParametrosDeIma` (C# puro), `DefinicaoIma` (ScriptableObject) e `ImaDoJogador` (`MonoBehaviour`). Ver "Investida" e "Ímã" abaixo |
 | `Assets/Scripts/Partida/` | Partida em ondas (namespace `ColetorDeCristais.Partida`): `CicloDaPartida`, `ParametrosDaPartida`, `EstadoDaPartida`, `ComposicaoDaOnda` e `GeradorDePosicoes` (C# puro), `DefinicaoPartida` (ScriptableObject), `ControladorDaPartida` e `MensagensDaPartida` (`MonoBehaviour`). Ver "Partida, ondas e chefes" abaixo |
+| `Assets/Scripts/Nivel/` | Elementos de nível (namespace `ColetorDeCristais.Nivel`): `Retangulo`, `VaiEVem`, `Empurrao`, `RegraDeQueda` e `EstadoDaPrateleira` (C# puro), `DefinicaoNivel` (ScriptableObject), `ControladorDoNivel`, `CarrinhoVaiEVem`, `PrateleiraSecreta` e `ImpactoDaInvestida` (`MonoBehaviour`). Ver "Mercado (arena 0)" abaixo |
 | `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
-| `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
+| `Assets/Scenes/Mercado.unity` | Arena 0, o tutorial (primeira cena do Build Profile): o minimercado, jogador, câmera, luz. Ver "Mercado (arena 0)" |
+| `Assets/Scenes/Arena.unity` | A arena de 20×20 m (segunda cena do Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
 | `Assets/Scripts/Cristais/` | Cristais coletáveis (namespace `ColetorDeCristais.Cristais`): lógica pura (`EstadoDeColeta`, `ContadorDeColeta`, `CalculadoraDeFlutuacao`), dados (`DefinicaoCristal`, `EfeitoDeCristal`) e componentes (`CristalColetavel`, `ColetorDoJogador`, `GiroEFlutuacao`). Ver "Cristais coletáveis" abaixo |
 | `Assets/Scripts/Animacao/` | Animação procedural (namespace `ColetorDeCristais.Animacao`): `CalculadoraDeDeformacao`, `ParametrosDeDeformacao` e `PoseDeDeformacao` (C# puro) e `DeformacaoProcedural` (`MonoBehaviour`). Ver "Visual do jogador (montrengo)" abaixo |
@@ -80,12 +84,15 @@ python -m unittest discover -s ferramentas
 | `Assets/Prefabs/Cristal_Experiencia.prefab` | Prefab Variant de `Cristal` para os cristais de experiência: definição `Experiencia` e visual com 1/4 do tamanho (ver "Cristais coletáveis") |
 | `Assets/Prefabs/VisualMontrengo.prefab` | Visual do jogador: o modelo do montrengo com a `DeformacaoProcedural`, sem colisão (ver "Visual do jogador (montrengo)") |
 | `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
+| `Assets/Prefabs/MercadoVisualKenney.prefab` | Visual do mercado: o mesmo da Arena, sem as placas de piso do vão |
+| `Assets/Prefabs/Produto_Lata.prefab`, `Produto_Refrigerante.prefab`, `Produto_Garrafa.prefab`, `Produto_Biscoito.prefab` | Prefab Variants de `Cristal` com modelos do Food Kit: os produtos que caem das prateleiras do mercado |
 | `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
 | `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
-| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito), `Coxa`, `Cafe`, `Rosquinha` e `Experiencia` (cristais de experiência). Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`, `LiberarIma`) |
+| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito), `Coxa`, `Cafe`, `Rosquinha`, `Experiencia` (cristais de experiência) e os produtos das prateleiras, sem efeito: `Lata`, `Refrigerante`, `Garrafa` e `Biscoito`. Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`, `LiberarIma`) |
 | `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) e `Ima` (`DefinicaoIma`) |
-| `Assets/Dados/Partida/` | Asset `Partida` (`DefinicaoPartida`): cronômetro, ondas e itens novos de cada onda |
-| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
+| `Assets/Dados/Partida/` | Assets `DefinicaoPartida`: `Partida` (a Arena, 3 ondas) e `PartidaTutorial` (o mercado, 1 onda): cronômetro, ondas e itens novos de cada onda |
+| `Assets/Dados/Nivel/` | Asset `Mercado` (`DefinicaoNivel`): o vão, as áreas sem itens novos, a velocidade dos carrinhos e os produtos das prateleiras |
+| `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` e `Vao` (quase preto, o fosso do vão) |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move` e `Player/Investida`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | Readme do template da Unity (pode ser removido quando atrapalhar) |
@@ -238,6 +245,7 @@ As posições do café, da rosquinha e dos cristais de experiência são provis�
 | Café | `Cafe` (`cafe`) | **Libera a investida** até o fim da partida (ver "Investida"). Pegar outro café não muda nada. | Nenhuma |
 | Rosquinha | `Rosquinha` (`rosquinha`) | **Libera o ímã** até o fim da partida (ver "Ímã"). Pegar outra rosquinha não muda nada. | Nenhuma |
 | Carne, peixe | `CristalBase` (`cristal-base`) | Nenhum (só contam). | Reduzida |
+| Lata, refrigerante, garrafa, biscoito | `Lata`, `Refrigerante`, `Garrafa`, `Biscoito` | Nenhum por enquanto (só contam). Caem das prateleiras do mercado (ver "Mercado (arena 0)"). | Reduzida |
 | Cristal de experiência | `Experiencia` (`experiencia`) | Nenhum por enquanto (só conta). | Completa |
 
 Os valores da coxa ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem ser ajustados no Inspector.
@@ -366,7 +374,7 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados n
 
 ## Partida, ondas e chefes
 **Como funciona no jogo:**
-- **Ondas:** cada arena tem **3 ondas de 120 s**. O cronômetro é regressivo e aparece no topo da tela, junto com a onda (ex.: "Onda 1/3   1:54"). O objetivo é sobreviver até o tempo acabar.
+- **Ondas:** a Arena tem **3 ondas de 120 s**; o mercado (arena 0), 1. O cronômetro é regressivo e aparece no topo da tela, junto com a onda (ex.: "Onda 1/3   1:54"). O objetivo é sobreviver até o tempo acabar.
 - **Chefes:** quando o tempo de uma onda acaba, vem o **chefe da onda**; na 3ª onda, no lugar dele, vem o **chefe da arena**. Os chefes ainda não existem: aparece a mensagem "Chefe da onda N!" ou "Chefe da arena!", e **qualquer tecla** (ou botão) conta como chefe derrotado.
 - **Próxima onda:** depois do chefe da onda, começa a próxima onda, com o tempo cheio. O jogador fica onde está e mantém as habilidades liberadas e os bônus. Os itens que sobraram ficam na arena, e entram itens novos em posições sorteadas:
   - as mesmas comidas da primeira onda: 1 carne, 2 peixes e 2 coxas;
@@ -374,12 +382,12 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados n
   - um item de habilidade, café ou rosquinha, sorteado. Pegar de novo uma habilidade já liberada ainda não muda nada.
 - **Posições sorteadas:** dentro da área de -8 a 8 m (2 m das paredes), a pelo menos 1,5 m do jogador, dos itens que sobraram e uns dos outros. Se a arena estiver cheia, entram menos itens (um aviso vai para o Console). Na ordem de prioridade: o item de habilidade, as comidas e por último os cristais. Com esses valores, cabem cerca de 80 itens na arena ao mesmo tempo: numa 3ª onda sem nada coletado antes, entram os 22 itens novos e ficam 46 na arena.
 - **Vitória:** derrotar o chefe da arena mostra "Arena concluída!". Ainda não há outra arena.
-- **Derrota:** acontece quando o jogador é derrotado (ficar sem vida, quando a vida existir). Por enquanto nada no jogo provoca a derrota, mas a partida já sabe tratá-la ("Derrota").
+- **Derrota:** acontece quando o jogador cai num vão (no mercado) e, no futuro, quando ficar sem vida. Aparece "Derrota".
 - **Fora de uma onda** (chefe, vitória ou derrota), o jogador fica parado: não anda, não usa a investida, o ímã não puxa e nada é coletado. Uma investida em andamento para ali (a recarga continua), e um item que estiver encostado no personagem é coletado quando a onda seguinte começa. Os efeitos temporários (ex.: os 5 s da coxa) também param de contar.
 - **Recomeçar:** depois da vitória ou da derrota, qualquer tecla recomeça a arena do zero (a cena é recarregada).
 - Depois de cada mudança de fase, as teclas são ignoradas por 0,5 s, para a mensagem não ser pulada sem querer; a instrução "Aperte qualquer tecla" só aparece depois disso.
 
-Os valores ficam no asset `Assets/Dados/Partida/Partida` e podem ser ajustados no Inspector.
+Os valores ficam nos assets `Assets/Dados/Partida/Partida` (Arena) e `PartidaTutorial` (mercado, igual com *Quantidade De Ondas* 1) e podem ser ajustados no Inspector.
 
 **Código** (`Assets/Scripts/Partida/`):
 - `ParametrosDaPartida` (struct): `DuracaoDaOnda` (> 0) e `QuantidadeDeOndas` (≥ 1), validados no construtor (`ArgumentException`).
@@ -391,9 +399,9 @@ Os valores ficam no asset `Assets/Dados/Partida/Partida` e podem ser ajustados n
   - `Reiniciar()`: onda 1 com o tempo cheio.
   - `FormatarTempo(segundos)` (estático): "m:ss", arredondando para cima ("2:00" no início, "0:00" só quando acabou).
 - `ComposicaoDaOnda` (estática, C# pura): `CristaisDeExperiencia(onda, naPrimeiraOnda)` (dobra a cada onda), `TrazItensNovos(onda)` (só a partir da 2ª) e `SortearItemDeHabilidade(quantidade, sorteio)`.
-- `GeradorDePosicoes` (estático, C# puro): `Gerar(quantidade, limite, jogador, ocupadas, distanciaMinima, sorteio)` sorteia posições no chão respeitando a área e as distâncias; com a área cheia, devolve menos posições. Com a mesma semente, o resultado é o mesmo.
+- `GeradorDePosicoes` (estático, C# puro): `Gerar(quantidade, limite, jogador, ocupadas, distanciaMinima, sorteio, tentativasPorPosicao, proibidas)` sorteia posições no chão respeitando a área, as distâncias e as áreas proibidas do nível (retângulos `Retangulo`; os inválidos são ignorados); com a área cheia, devolve menos posições. Com a mesma semente, o resultado é o mesmo.
 - `DefinicaoPartida` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Partida*): *Duracao Da Onda* 120, *Quantidade De Ondas* 3, *Espera Antes De Continuar* 0,5, *Cristais De Experiencia Na Primeira Onda* 4, *Prefab De Experiencia* (`Cristal_Experiencia`), *Comidas Por Onda* (`Comida_Carne`, `Comida_Peixe` ×2, `Comida_Coxa` ×2), *Itens De Habilidade* (`Comida_Cafe`, `Comida_Rosquinha`), *Limite Da Area* 8, *Distancia Minima* 1,5 e *Altura Dos Itens* 0,8.
-- `ControladorDaPartida` (`MonoBehaviour`, no objeto `Partida`): corre o cronômetro com `Time.deltaTime`, liga e desliga os componentes do jogador (`MovimentoDoJogador`, `InvestidaDoJogador`, `ImaDoJogador` e `ColetorDoJogador`) e, fora de uma onda, escuta qualquer tecla (`InputSystem.onAnyButtonPress`). `Continuar()` faz o que a tecla faz (público para testes pela CLI); `DerrotarJogador()` é o ponto para o futuro sistema de vida. Coloca os itens novos com `Instantiate` dentro do objeto `Cristais`.
+- `ControladorDaPartida` (`MonoBehaviour`, no objeto `Partida`): corre o cronômetro com `Time.deltaTime`, liga e desliga os componentes do jogador (`MovimentoDoJogador`, `InvestidaDoJogador`, `ImaDoJogador` e `ColetorDoJogador`) e, fora de uma onda, escuta qualquer tecla (`InputSystem.onAnyButtonPress`). `Continuar()` faz o que a tecla faz (público para testes pela CLI); `DerrotarJogador()` registra a derrota (chamado pela queda no vão e, no futuro, pela vida). Coloca os itens novos com `Instantiate` dentro do objeto `Cristais`; com um *Nivel* (`DefinicaoNivel`, opcional), eles não entram nos vãos nem nas áreas sem itens dele. Valores inválidos no asset registram um erro e desligam o componente.
 - `MensagensDaPartida` (`MonoBehaviour`, no objeto `Partida`): **interface mínima e provisória**, até o HUD completo. Cria no `Awake` um Canvas de uGUI em *Screen Space - Camera* na câmera principal, com dois textos (`Text` com a fonte embutida `LegacyRuntime.ttf`): o cronômetro no topo e a mensagem da fase no centro. Como o Canvas é desenhado pela câmera, os textos aparecem nas capturas da câmera. `TextoDaMensagem(estado, onda, aguardandoTecla)` (estático, testado) monta o texto central.
 - `CristalColetavel` só coleta se o `ColetorDoJogador` estiver ligado (`isActiveAndEnabled`): é assim que a coleta para fora das ondas.
 
@@ -405,6 +413,62 @@ Os valores ficam no asset `Assets/Dados/Partida/Partida` e podem ser ajustados n
 **Como foi montado na Editor:**
 1. **Valores:** pasta `Assets/Dados/Partida`, *Create > Coletor de Cristais > Definição de Partida* (`Partida`). Preencha *Prefab De Experiencia*, *Comidas Por Onda* e *Itens De Habilidade* com os prefabs listados acima.
 2. **Cena:** um GameObject vazio `Partida` na raiz, com `Controlador Da Partida` (*Definicao* `Partida`, *Jogador* o objeto `Jogador`, *Grupo De Itens* o objeto `Cristais`) e `Mensagens Da Partida`.
+
+## Mercado (arena 0)
+**Como funciona no jogo:** o jogo começa num minimercado, a arena 0, que serve de tutorial. A planta é **provisória**: a definitiva vai seguir um desenho do desenvolvedor.
+
+![O mercado visto pela câmera do jogo](docs/atualizacoes/mercado.png)
+
+- **Planta** (20×20 m, com a mesma câmera da Arena), de sul a norte:
+  - **açougue**, onde o personagem começa (z de -10 a -5), com um balcão de freezers junto da parede sul;
+  - **3 corredores** de cerca de 4,4 m de largura entre prateleiras, de z = -4,6 a 1,8: o do meio (x de -2,3 a 2,3) e os dois laterais (x de ±4,5 a ±8,9);
+  - um **corredor transversal** (z de 1,8 a 4);
+  - o **vão**, de 3 m, na largura toda (z de 4 a 7);
+  - a **área bônus**, junto da parede norte (z de 7 a 10).
+- **Partida:** 1 onda de 120 s. Quando o tempo acaba, vem o chefe da arena (por enquanto só a mensagem) e depois "Arena concluída!".
+- **Vão:** cai quem está com o centro sobre o vão sem estar numa investida, e **cair é fim de jogo** ("Derrota"); o personagem afunda 5 m no fosso. Durante a investida ele passa por cima, mas cai se ela terminar sobre o vão. Por isso o vão **só se atravessa com a investida** (liberada pelo café):
+
+  | Velocidade | Investida | Começar a até |
+  |---|---|---|
+  | Base (3,5 m/s) | 4,375 m | 1,375 m da borda |
+  | Com a coxa ativa (+30%, 4,55 m/s) | 5,69 m | 2,69 m da borda |
+
+  Começando mais longe, a investida termina sobre o vão. A volta funciona do mesmo jeito.
+- **Carrinhos:** um carrinho de compras por corredor, em vai e vem a 2 m/s entre z = -4 e 0,5 (4,5 m), os três em momentos diferentes do ciclo. Quem fica na frente de um carrinho é empurrado até o fim do percurso dele; encostar de lado não faz nada. Fora da onda, os carrinhos param.
+- **Itens:** carne no ponto de partida (coletada logo no início), 2 coxas no açougue, 2 peixes e 4 cristais de experiência nos corredores, o café no fim do corredor do meio e, na área bônus, a rosquinha e 10 cristais de experiência. Os cristais da área bônus ficam a mais de 4 m da borda do vão, fora do alcance do ímã de quem está do outro lado. Com 1 onda, nenhum item novo é sorteado.
+- **Segredo das prateleiras:** uma investida contra uma prateleira derruba um produto sorteado (lata, refrigerante, garrafa ou biscoito), **uma vez por prateleira** (são 30, uma por peça). Andando, nada cai. O produto cai a 0,8 m da face batida e 1,5 m para um lado sorteado, longe o bastante para não ser coletado na hora. Ele é coletado e contado, mas **ainda não tem efeito** (ímã reduzido, como as comidas com efeito previsto).
+
+Os valores ficam no asset `Assets/Dados/Nivel/Mercado` e podem ser ajustados no Inspector.
+
+**Código** (`Assets/Scripts/Nivel/`):
+- `Retangulo` (struct serializável, C# puro): retângulo no chão alinhado aos eixos (`x` = X do mundo, `y` = Z do mundo), usado no vão, nas bases das prateleiras e dos carrinhos e nas áreas sem itens. `PelosCantos`, `Minimo`, `Maximo`, `Contem` (a borda conta), `PontoMaisProximo`, `DistanciaAte`, `ComCentro` e `Valido` (falso com tamanho zero, como um item novo de lista no Inspector).
+- `VaiEVem` (estático, C# puro): `Posicao(inicio, fim, velocidade, tempo, fase)` e `Percorrido(...)`. A posição vem direto do tempo acumulado (em `double`), então é a mesma em qualquer taxa de quadros; a `fase` (0 a 1) adianta o ciclo.
+- `Empurrao` (estático, C# puro): `Calcular(obstaculo, movimento, personagem, raio, folga)`. Se, com o obstáculo na posição nova, o círculo do personagem ficou sobreposto a ele, devolve o deslocamento na direção do movimento do obstáculo que tira o personagem de lá, mais a folga. A saída do retângulo "engordado" pelo raio (convexo) é achada por busca binária, então funciona também na quina.
+- `RegraDeQueda` (estática, C# pura): `Caiu(posicao, emInvestida, vaos)` e `Descida(tempo, gravidade, profundidade)` (queda livre com limite, só o desenho).
+- `EstadoDaPrateleira` (C# puro): `TentarDerrubar(emInvestida)` (só na primeira batida durante uma investida), `SortearProduto`, `PosicaoDoProduto(prateleira, personagem, afastamento, deslocamentoLateral)` e `NormalDaFace`.
+- `DefinicaoNivel` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Nível*): *Vaos* (o do mercado: centro (0; 5,5), tamanho (20; 3)), *Gravidade Da Queda* 20, *Profundidade Da Queda* 5, *Areas Sem Itens Novos* (as prateleiras, o balcão e a área bônus), *Velocidade Dos Carrinhos* 2, *Produtos* (os 4 `Produto_*`), *Afastamento Do Produto* 0,8, *Deslocamento Lateral Do Produto* 1,5 e *Altura Do Produto* 0,8. `ZonasSemItensNovos` junta os vãos e as áreas.
+- `ControladorDoNivel` (`MonoBehaviour`, no objeto `Nivel`): no `LateUpdate`, depois da investida andar no quadro, aplica a `RegraDeQueda` durante a onda; ao cair, chama `ControladorDaPartida.DerrotarJogador()` e afunda o jogador. `EmJogo` diz se a partida está numa onda. Também guarda o sorteio e as referências que os carrinhos e as prateleiras usam.
+- `CarrinhoVaiEVem` (`MonoBehaviour`, em cada carrinho, com `BoxCollider` e `Rigidbody` cinemático): *Ponto De Volta* (0, 0, 4,5) e *Fase* (0, 1/3 e 2/3). A cada quadro em jogo, calcula a posição nova, empurra o jogador com `CharacterController.Move` e só depois anda.
+- `PrateleiraSecreta` (`MonoBehaviour`, em cada peça de prateleira, com `BoxCollider`): `ReceberBatida(personagem, emInvestida)` derruba o produto (instanciado dentro de `Cristais`).
+- `ImpactoDaInvestida` (`MonoBehaviour`, no `Jogador`): no `OnControllerColliderHit`, avisa a `PrateleiraSecreta` só quando a batida veio do deslocamento da investida (`InvestidaDoJogador.AplicandoInvestida`, verdadeiro durante esse `Move`, inclusive no último quadro do avanço).
+
+**Decisões técnicas:**
+- O jogo não tem gravidade (o `CharacterController` só anda no plano), então a queda é uma regra sobre a posição, e a descida é só visual. O fosso não tem colisão.
+- O `CharacterController` não é empurrado por corpos cinemáticos, então o empurrão é calculado. O carrinho empurra antes de andar e a folga inclui a pele (*Skin Width*) do `CharacterController`: se o carrinho entrasse no personagem primeiro, o `CharacterController` resolveria a sobreposição subindo em cima dele.
+- Os carrinhos não giram: a base deles é um retângulo alinhado aos eixos.
+- As peças do Mini Shop são pequenas para o montrengo (2 m), então foram aumentadas: prateleiras ×1,6 (1,28 m de comprimento, 1,42 m de altura e 1,12 m de profundidade), carrinhos ×3 (base de 1,05 × 1,6 m) e freezers ×2.
+- Cada peça de prateleira tem a própria caixa de colisão e o próprio segredo. As fileiras do meio são duas peças de costas uma para a outra, uma para cada corredor.
+
+**Como foi montado na Editor:**
+1. **Valores:** `PartidaTutorial` é uma cópia de `Partida` com *Quantidade De Ondas* 1. Em `Assets/Dados/Nivel`, *Create > Coletor de Cristais > Definição de Nível* (`Mercado`), com os valores acima.
+2. **Produtos:** assets `DefinicaoCristal` `Lata`, `Refrigerante`, `Garrafa` e `Biscoito` (sem efeitos, ímã `Reduzida`) e Prefab Variants de `Cristal` com `can`, `soda-can`, `soda-bottle` e `cookie` do Food Kit, na mesma receita das comidas (maior dimensão 0,8 m).
+3. **Cena:** `Mercado.unity` é uma cópia da `Arena.unity`. O objeto `Arena` virou `Mercado`, com o visual `MercadoVisualKenney` (sem as 60 placas de piso de z = 4 a 7). Na raiz, um objeto `Nivel` com `Controlador Do Nivel` (*Definicao* `Mercado`, *Jogador*, *Partida* e *Grupo De Itens* `Cristais`) e os filhos:
+   - `Vao`: o fosso, com cubos sem colisão e o material `Vao`: fundo em y = -6 e quatro paredes;
+   - `Acougue`: uma caixa de colisão de 16 × 1,8 × 0,96 m junto da parede sul e 8 `freezers-standing` (×2);
+   - `Prateleiras`: 6 fileiras de 5 peças (`shelf-boxes` e `shelf-bags` alternadas, ×1,6), em x = ±9,44 (paredes), ±3,96 e ±2,84 (meio), de z = -4 a 1,12, cada uma com `Box Collider` e `Prateleira Secreta`;
+   - `Carrinhos`: 3 `shopping-cart` (×3) em x = -6,7, 0 e 6,7, z = -4, cada um com `Box Collider` do tamanho do modelo, `Rigidbody` cinemático e `Carrinho Vai E Vem`.
+4. **Jogador** em (0, 1, -7), com `Impacto Da Investida`. Na `Partida`, *Definicao* `PartidaTutorial` e *Nivel* `Mercado`.
+5. **Build Profile:** `Mercado` primeiro, `Arena` depois.
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (uma subpasta e um sub-namespace por sistema).
