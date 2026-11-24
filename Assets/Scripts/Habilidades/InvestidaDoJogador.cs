@@ -67,6 +67,10 @@ namespace ColetorDeCristais.Habilidades
                 acaoInvestida.action.Disable();
             }
 
+            // Desligada no meio de uma investida (ex.: jogador travado no fim da onda), ela para ali:
+            // sem isso, o resto do avanço aconteceria sozinho quando o componente voltasse.
+            Investida.Cancelar();
+
             if (_movimento != null)
             {
                 AjustarSuspensao(false);

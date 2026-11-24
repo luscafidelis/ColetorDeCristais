@@ -73,6 +73,13 @@ namespace ColetorDeCristais.Habilidades
             return true;
         }
 
+        /// <summary>
+        /// Interrompe a investida em andamento (ex.: o jogador foi travado no fim de uma onda).
+        /// O resto do avanço é descartado; a recarga continua, porque a investida já foi usada.
+        /// Sem efeito fora de uma investida.
+        /// </summary>
+        public void Cancelar() => _tempoRestante = 0f;
+
         /// <summary>Avança o tempo da investida e da recarga.</summary>
         /// <param name="deltaTempo">Segundos desde o último quadro (zero ou mais).</param>
         /// <returns>Deslocamento a aplicar neste quadro (zero fora de uma investida).</returns>

@@ -46,8 +46,19 @@ namespace ColetorDeCristais.Cristais
 
         private void OnDisable() => _ativos.Remove(this);
 
-        private void OnTriggerEnter(Collider outro)
+        private void OnTriggerEnter(Collider outro) => TentarSerColetado(outro);
+
+        // Também enquanto encosta: um item que já estava no jogador quando a coleta foi desligada
+        // (ex.: fim da onda) é coletado assim que ela volta, sem precisar sair e entrar de novo.
+        private void OnTriggerStay(Collider outro) => TentarSerColetado(outro);
+
+        private void TentarSerColetado(Collider outro)
         {
+            if (_estado.Coletado)
+            {
+                return;
+            }
+
             var coletor = outro.GetComponentInParent<ColetorDoJogador>();
             // Um coletor desligado (ex.: partida fora de uma onda) não coleta.
             if (!_estado.TentarColetar(coletor != null && coletor.isActiveAndEnabled))

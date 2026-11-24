@@ -163,7 +163,7 @@ Com o ímã liberado, o personagem desce na direção dos dois cristais de exper
 
 ## 10. Ondas, cronômetro e chefes
 
-**Para quem joga:** a partida agora tem um objetivo: **sobreviver até o tempo acabar**. Cada arena tem **3 ondas de 2 minutos**, e o cronômetro regressivo fica no topo da tela. Quando o tempo de uma onda acaba, vem o **chefe da onda**; na terceira, vem o **chefe da arena** no lugar dele. Os chefes ainda não existem, então por enquanto aparece só a mensagem, e **qualquer tecla** conta como chefe derrotado. Enquanto a mensagem está na tela, o personagem fica parado e nada é coletado.
+**Para quem joga:** a partida agora tem um objetivo: **sobreviver até o tempo acabar**. Cada arena tem **3 ondas de 2 minutos**, e o cronômetro regressivo fica no topo da tela. Quando o tempo de uma onda acaba, vem o **chefe da onda**; na terceira, vem o **chefe da arena** no lugar dele. Os chefes ainda não existem, então por enquanto aparece só a mensagem, e **qualquer tecla** conta como chefe derrotado. Enquanto a mensagem está na tela, o personagem fica parado e nada é coletado; uma investida em andamento para ali.
 
 ![O cronômetro em 0:00 no topo e a mensagem "Chefe da onda 1!" no centro da arena, com a instrução para apertar qualquer tecla](docs/atualizacoes/chefe-da-onda.png)
 
@@ -175,9 +175,10 @@ A cada nova onda, os itens que sobraram continuam lá e **entram itens novos em 
 - Novo sistema `Partida`: `CicloDaPartida` (C# puro) controla a onda, o cronômetro e as fases (onda, chefe da onda, chefe da arena, vitória, derrota). `ComposicaoDaOnda` diz quantos itens cada onda traz e `GeradorDePosicoes` sorteia onde eles entram, a 1,5 m do jogador e dos outros itens e a 2 m das paredes.
 - Valores no ScriptableObject `DefinicaoPartida` (asset `Partida`).
 - `ControladorDaPartida` liga e desliga o jogador, escuta qualquer tecla e recarrega a cena para recomeçar. `MensagensDaPartida` é uma interface mínima e provisória, até o HUD completo.
-- `CristalColetavel` só coleta com o `ColetorDoJogador` ligado.
+- `CristalColetavel` só coleta com o `ColetorDoJogador` ligado e também coleta no `OnTriggerStay`, para o item que já encostava no jogador travado.
+- `Investida.Cancelar()`: o `InvestidaDoJogador` desligado interrompe a investida, em vez de terminá-la quando volta.
 
-**Validação:** 245 testes EditMode passando, incluindo o fim do tempo igual em 1, 30 ou 60 quadros por segundo, a sequência de ondas e chefes, a vitória, a derrota, o recomeço, a formatação do cronômetro, a quantidade de itens por onda e as distâncias das posições sorteadas. Em Play Mode, pela CLI, adiantando o cronômetro: no fim da onda 1 aparece o chefe e o personagem fica travado (posto sobre um cristal, não coleta); a onda 2 começa com 120 s e 14 itens novos (1 de habilidade, 5 comidas e 8 cristais), a pelo menos 1,5 m uns dos outros; depois da 3ª onda vem o chefe da arena e depois a vitória; a derrota, chamada direto, mostra a mensagem; nos dois casos a arena recomeça do zero. Numa 3ª onda sem nada coletado antes, entraram os 22 itens novos (46 na arena). O teste jogando com teclado ou gamepad ainda não foi feito.
+**Validação:** 255 testes EditMode passando, incluindo o fim do tempo igual em 1, 30 ou 60 quadros por segundo, a sequência de ondas e chefes, a vitória, a derrota, o recomeço, a formatação do cronômetro, a investida cancelada, a quantidade de itens por onda e as distâncias das posições sorteadas. Em Play Mode, pela CLI, adiantando o cronômetro: no fim da onda 1 aparece o chefe e o personagem fica travado (posto sobre um cristal, não coleta); a onda 2 começa com 120 s e 14 itens novos (1 de habilidade, 5 comidas e 8 cristais), a pelo menos 1,5 m uns dos outros; depois da 3ª onda vem o chefe da arena e depois a vitória; a derrota, chamada direto, mostra a mensagem; nos dois casos a arena recomeça do zero. Uma investida começada no fim da onda parou em 0,95 m (de 4,38 m) e não continuou depois do chefe; um item posto sob o jogador travado não foi coletado durante a mensagem e foi coletado assim que a onda seguinte começou. Numa 3ª onda sem nada coletado antes, entraram os 22 itens novos (46 na arena). O teste jogando com teclado ou gamepad ainda não foi feito.
 
 ---
 

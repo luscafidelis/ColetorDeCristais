@@ -28,7 +28,16 @@ namespace ColetorDeCristais.Testes.Partida
         {
             Assert.Throws<ArgumentException>(() => ComposicaoDaOnda.CristaisDeExperiencia(0, 4));
             Assert.Throws<ArgumentException>(() => ComposicaoDaOnda.CristaisDeExperiencia(1, -1));
-            Assert.Throws<OverflowException>(() => ComposicaoDaOnda.CristaisDeExperiencia(40, 4));
+            Assert.Throws<ArgumentException>(() => ComposicaoDaOnda.CristaisDeExperiencia(40, 4));
+            Assert.Throws<ArgumentException>(() => ComposicaoDaOnda.CristaisDeExperiencia(32, 1), "2^31 não cabe");
+            Assert.Throws<ArgumentException>(() => ComposicaoDaOnda.CristaisDeExperiencia(31, 2), "2 × 2^30 não cabe");
+        }
+
+        [Test]
+        public void CristaisDeExperiencia_NoLimite_AindaDobra()
+        {
+            Assert.AreEqual(1 << 30, ComposicaoDaOnda.CristaisDeExperiencia(31, 1));
+            Assert.AreEqual(0, ComposicaoDaOnda.CristaisDeExperiencia(40, 0), "sem cristais na primeira onda, nenhuma onda tem");
         }
 
         [Test]

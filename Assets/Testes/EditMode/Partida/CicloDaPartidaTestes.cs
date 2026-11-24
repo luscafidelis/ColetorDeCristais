@@ -210,5 +210,17 @@ namespace ColetorDeCristais.Testes.Partida
         {
             Assert.AreEqual(esperado, CicloDaPartida.FormatarTempo(segundos));
         }
+
+        [TestCase(120f, 120)]
+        [TestCase(119.2f, 120)]
+        [TestCase(0.05f, 1)]
+        [TestCase(0f, 0)]
+        [TestCase(-1f, 0)]
+        [TestCase(float.NaN, 0)]
+        [TestCase(1e9f, 359999)]
+        public void SegundosExibidos_ArredondaParaCimaENaFaixa(float segundos, int esperado)
+        {
+            Assert.AreEqual(esperado, CicloDaPartida.SegundosExibidos(segundos));
+        }
     }
 }

@@ -259,7 +259,7 @@ Os valores da coxa ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa`
 - `EfeitoLiberarIma` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Liberar Ímã*): o mesmo para o ímã, com `ImaDoJogador.Liberar()` ("ímã liberado" no Console).
 
 *Componentes* (finos):
-- `CristalColetavel`: no `OnTriggerEnter`, procura um `ColetorDoJogador` em quem entrou. Se a regra deixar, registra a coleta e destrói o cristal. `CristalColetavel.Ativos` lista os cristais ativos na cena (cada um entra no `OnEnable` e sai no `OnDisable`); o ímã usa essa lista.
+- `CristalColetavel`: no `OnTriggerEnter` e no `OnTriggerStay`, procura um `ColetorDoJogador` em quem encosta. Se a regra deixar (coletor ligado e item ainda não coletado), registra a coleta e destrói o cristal. O `OnTriggerStay` cobre o item que já encostava no jogador quando a coleta estava desligada: ele é coletado assim que ela volta. `CristalColetavel.Ativos` lista os cristais ativos na cena (cada um entra no `OnEnable` e sai no `OnDisable`); o ímã usa essa lista.
 - `ColetorDoJogador` (no `Jogador`): guarda o `ContadorDeColeta` (`Contador`), escreve "Cristal coletado: …" no Console e aplica os efeitos da definição, em ordem. Se um efeito lançar exceção, ela vai para o Console (`Debug.LogException`) e os outros efeitos são aplicados mesmo assim: a coleta é contada e o item some. É por ele que outras partes do jogo (ex.: interface) leem a contagem.
 - `GiroEFlutuacao`: anima um objeto, por padrão a 90°/s, 0,15 m de amplitude e período de 2 s.
 
@@ -309,6 +309,7 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajust
   - `Liberar()`, `Liberada`, `EmAndamento`, `RecargaRestante`, `Pronta` e `Velocidade` (zero fora de uma investida).
   - `TentarIniciar(direcao, velocidadeDeMovimento, parametros)`: só começa se estiver pronta, com direção horizontal e velocidade maior que zero. Assim, um personagem parado por um modificador não gasta a recarga. A direção é achatada no chão (y ignorado) e normalizada. A velocidade fica fixa até o fim.
   - `Atualizar(deltaTempo)`: avança a investida e a recarga e devolve o deslocamento do quadro. O último quadro usa só o tempo que faltava, então a distância total é exata, em qualquer taxa de quadros.
+  - `Cancelar()`: interrompe a investida em andamento e descarta o resto do avanço; a recarga continua. O `InvestidaDoJogador` chama ao ser desligado (ex.: jogador travado no fim da onda), para o avanço não terminar sozinho quando ele volta.
   - `CalcularDirecao(entrada, frente, entradaMinima)` (estático): a entrada do controle, se for maior que o mínimo; senão, a frente do personagem no chão (+Z se a frente for vertical).
   - Valores não finitos ou tempo negativo geram `ArgumentException`.
 - `DefinicaoInvestida` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Investida*): *Multiplicador De Velocidade* 5, *Duracao* 0,25 e *Recarga* 5. `Parametros` monta o `ParametrosDeInvestida`.
@@ -374,7 +375,7 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados n
 - **Posições sorteadas:** dentro da área de -8 a 8 m (2 m das paredes), a pelo menos 1,5 m do jogador, dos itens que sobraram e uns dos outros. Se a arena estiver cheia, entram menos itens (um aviso vai para o Console). Na ordem de prioridade: o item de habilidade, as comidas e por último os cristais. Com esses valores, cabem cerca de 80 itens na arena ao mesmo tempo: numa 3ª onda sem nada coletado antes, entram os 22 itens novos e ficam 46 na arena.
 - **Vitória:** derrotar o chefe da arena mostra "Arena concluída!". Ainda não há outra arena.
 - **Derrota:** acontece quando o jogador é derrotado (ficar sem vida, quando a vida existir). Por enquanto nada no jogo provoca a derrota, mas a partida já sabe tratá-la ("Derrota").
-- **Fora de uma onda** (chefe, vitória ou derrota), o jogador fica parado: não anda, não usa a investida, o ímã não puxa e nada é coletado. Os efeitos temporários (ex.: os 5 s da coxa) também param de contar.
+- **Fora de uma onda** (chefe, vitória ou derrota), o jogador fica parado: não anda, não usa a investida, o ímã não puxa e nada é coletado. Uma investida em andamento para ali (a recarga continua), e um item que estiver encostado no personagem é coletado quando a onda seguinte começa. Os efeitos temporários (ex.: os 5 s da coxa) também param de contar.
 - **Recomeçar:** depois da vitória ou da derrota, qualquer tecla recomeça a arena do zero (a cena é recarregada).
 - Depois de cada mudança de fase, as teclas são ignoradas por 0,5 s, para a mensagem não ser pulada sem querer; a instrução "Aperte qualquer tecla" só aparece depois disso.
 

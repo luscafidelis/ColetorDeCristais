@@ -54,7 +54,17 @@ namespace ColetorDeCristais.Partida
                 return;
             }
 
-            Ciclo = new CicloDaPartida(definicao.Parametros);
+            try
+            {
+                Ciclo = new CicloDaPartida(definicao.Parametros);
+            }
+            catch (ArgumentException erro)
+            {
+                Debug.LogError($"{name}: valores inválidos em {definicao.name} ({erro.Message}); a partida não vai funcionar.", this);
+                enabled = false;
+                return;
+            }
+
             _controlesDoJogador = new Behaviour[]
             {
                 jogador.GetComponent<MovimentoDoJogador>(),

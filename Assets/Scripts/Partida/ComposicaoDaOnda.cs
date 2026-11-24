@@ -29,7 +29,19 @@ namespace ColetorDeCristais.Partida
                 throw new ArgumentException("A quantidade não pode ser negativa.", nameof(naPrimeiraOnda));
             }
 
-            return checked(naPrimeiraOnda * (1 << Math.Min(onda - 1, 30)));
+            if (naPrimeiraOnda == 0)
+            {
+                return 0;
+            }
+
+            // Expoente acima de 30 já passa de int.MaxValue, mesmo com 1 cristal na primeira onda.
+            var expoente = onda - 1;
+            if (expoente > 30 || ((long)naPrimeiraOnda << expoente) > int.MaxValue)
+            {
+                throw new ArgumentException($"Cristais de experiência demais na onda {onda} (não cabe num int).", nameof(onda));
+            }
+
+            return naPrimeiraOnda << expoente;
         }
 
         /// <summary>Indica se a onda traz itens novos (só a partir da segunda; a primeira usa os itens da cena).</summary>

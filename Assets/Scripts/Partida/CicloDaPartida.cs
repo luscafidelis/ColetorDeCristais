@@ -121,8 +121,15 @@ namespace ColetorDeCristais.Partida
         /// </summary>
         public static string FormatarTempo(float segundos)
         {
-            var inteiros = float.IsNaN(segundos) ? 0 : (int)Math.Ceiling(Math.Max(0f, Math.Min(segundos, 359999f)));
+            var inteiros = SegundosExibidos(segundos);
             return $"{inteiros / 60}:{inteiros % 60:00}";
         }
+
+        /// <summary>
+        /// Segundos inteiros que o cronômetro mostra (arredondados para cima, de 0 a 359999).
+        /// Só muda uma vez por segundo, então serve para saber quando refazer o texto.
+        /// </summary>
+        public static int SegundosExibidos(float segundos) =>
+            float.IsNaN(segundos) ? 0 : (int)Math.Ceiling(Math.Max(0f, Math.Min(segundos, 359999f)));
     }
 }

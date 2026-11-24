@@ -145,6 +145,33 @@ namespace ColetorDeCristais.Testes.Habilidades
         }
 
         [Test]
+        public void Cancelar_DescartaORestoDoAvanco_EMantemARecarga()
+        {
+            var investida = Liberada();
+            investida.TentarIniciar(Vector3.forward, 3.5f, DoJogo);
+            investida.Atualizar(0.1f);
+
+            investida.Cancelar();
+
+            Assert.IsFalse(investida.EmAndamento);
+            Assert.AreEqual(Vector3.zero, investida.Velocidade);
+            Assert.AreEqual(Vector3.zero, investida.Atualizar(0.1f), "o resto do avanço não volta");
+            Assert.AreEqual(4.8f, investida.RecargaRestante, Tolerancia, "a recarga segue contando");
+            Assert.IsFalse(investida.TentarIniciar(Vector3.forward, 3.5f, DoJogo), "em recarga");
+        }
+
+        [Test]
+        public void Cancelar_SemInvestida_NaoMudaNada()
+        {
+            var investida = Liberada();
+
+            investida.Cancelar();
+
+            Assert.IsTrue(investida.Pronta);
+            Assert.AreEqual(0f, investida.RecargaRestante);
+        }
+
+        [Test]
         public void DuranteOAvanco_NaoReinicia()
         {
             var investida = Liberada();

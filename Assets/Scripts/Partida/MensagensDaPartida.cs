@@ -21,6 +21,13 @@ namespace ColetorDeCristais.Partida
         private Text _cronometro;
         private Text _mensagem;
 
+        // O que está na tela agora (-1 / nulo: nada mostrado ainda).
+        private int _segundosExibidos = -1;
+        private int _ondaDoCronometro = -1;
+        private EstadoDaPartida? _estadoDaMensagem;
+        private int _ondaDaMensagem = -1;
+        private bool _aguardandoNaMensagem;
+
         private void Awake()
         {
             _controlador = GetComponent<ControladorDaPartida>();
@@ -51,8 +58,24 @@ namespace ColetorDeCristais.Partida
                 return;
             }
 
-            _cronometro.text = $"Onda {ciclo.Onda}/{ciclo.QuantidadeDeOndas}   {CicloDaPartida.FormatarTempo(ciclo.TempoRestante)}";
-            _mensagem.text = TextoDaMensagem(ciclo.Estado, ciclo.Onda, _controlador.AguardandoTecla);
+            // Os textos só são refeitos quando o que mostram muda (o cronômetro, uma vez por segundo),
+            // para não criar strings novas a cada quadro.
+            var segundos = CicloDaPartida.SegundosExibidos(ciclo.TempoRestante);
+            if (segundos != _segundosExibidos || ciclo.Onda != _ondaDoCronometro)
+            {
+                _segundosExibidos = segundos;
+                _ondaDoCronometro = ciclo.Onda;
+                _cronometro.text = $"Onda {ciclo.Onda}/{ciclo.QuantidadeDeOndas}   {CicloDaPartida.FormatarTempo(ciclo.TempoRestante)}";
+            }
+
+            var aguardando = _controlador.AguardandoTecla;
+            if (ciclo.Estado != _estadoDaMensagem || ciclo.Onda != _ondaDaMensagem || aguardando != _aguardandoNaMensagem)
+            {
+                _estadoDaMensagem = ciclo.Estado;
+                _ondaDaMensagem = ciclo.Onda;
+                _aguardandoNaMensagem = aguardando;
+                _mensagem.text = TextoDaMensagem(ciclo.Estado, ciclo.Onda, aguardando);
+            }
         }
 
         /// <summary>Texto central de cada fase (vazio durante a onda).</summary>
