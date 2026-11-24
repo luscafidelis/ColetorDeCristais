@@ -1,3 +1,4 @@
+using ColetorDeCristais.Corpo;
 using ColetorDeCristais.Habilidades;
 using ColetorDeCristais.Partida;
 using UnityEngine;
@@ -40,6 +41,9 @@ namespace ColetorDeCristais.Nivel
         /// <summary>Controle de física do jogador (nulo se faltar).</summary>
         public CharacterController ControleDoJogador { get; private set; }
 
+        /// <summary>Corpo do jogador (nulo se faltar): recebe as batidas dos carrinhos.</summary>
+        public CorpoDoJogador CorpoDoJogador { get; private set; }
+
         /// <summary>Investida do jogador (nula se faltar).</summary>
         public InvestidaDoJogador InvestidaDoJogador { get; private set; }
 
@@ -66,6 +70,7 @@ namespace ColetorDeCristais.Nivel
 
             ControleDoJogador = jogador.GetComponent<CharacterController>();
             InvestidaDoJogador = jogador.GetComponent<InvestidaDoJogador>();
+            CorpoDoJogador = jogador.GetComponent<CorpoDoJogador>();
         }
 
         private void LateUpdate()

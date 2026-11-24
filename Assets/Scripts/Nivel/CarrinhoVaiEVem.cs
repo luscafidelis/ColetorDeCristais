@@ -13,6 +13,8 @@ namespace ColetorDeCristais.Nivel
     /// <item>A cada quadro, calcula o <see cref="Empurrao"/> com a base do <c>BoxCollider</c> na posição nova e o raio
     /// (mais a pele) do <c>CharacterController</c> do jogador, move o jogador com <c>CharacterController.Move</c>
     /// (as paredes e prateleiras seguram o personagem) e só depois anda.</item>
+    /// <item>Quando empurra (bateu de frente), também dá a batida no <see cref="ColetorDeCristais.Corpo.CorpoDoJogador"/>:
+    /// dano, tranco na direção do movimento do carrinho e invulnerabilidade. Encostar de lado não faz nada.</item>
     /// <item>A base é um retângulo alinhado aos eixos: o carrinho não gira.</item>
     /// </list>
     /// </remarks>
@@ -84,9 +86,18 @@ namespace ColetorDeCristais.Nivel
             // Usa a maior entre a pele com e sem escala: sobrar folga só empurra um pouco mais.
             var pele = controle.skinWidth * Mathf.Max(1f, Mathf.Abs(escala.x));
             var empurrao = Empurrao.Calcular(baseDoCarrinho, movimento, new Vector2(jogador.x, jogador.z), raio, pele + 0.01f);
-            if (empurrao != Vector2.zero)
+            if (empurrao == Vector2.zero)
             {
-                controle.Move(new Vector3(empurrao.x, 0f, empurrao.y));
+                return;
+            }
+
+            controle.Move(new Vector3(empurrao.x, 0f, empurrao.y));
+            // Bateu de frente: o personagem leva dano e é jogado para trás, na direção em que o carrinho anda.
+            // O empurrão continua a cada quadro, para o carrinho nunca entrar no personagem.
+            var corpo = _nivel.CorpoDoJogador;
+            if (corpo != null)
+            {
+                corpo.ReceberBatida(movimento);
             }
         }
     }

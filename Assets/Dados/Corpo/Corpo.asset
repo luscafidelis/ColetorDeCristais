@@ -13,3 +13,9 @@ MonoBehaviour:
   m_Name: Corpo
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Corpo.DefinicaoCorpo
   tamanhoInicial: 0.33333334
+  tamanhoMinimo: 0.0625
+  danoDaBatida: 0.16666667
+  distanciaDoTranco: 3
+  duracaoDoTranco: 0.25
+  tempoDeInvulnerabilidade: 1
+  piscadasPorSegundo: 10

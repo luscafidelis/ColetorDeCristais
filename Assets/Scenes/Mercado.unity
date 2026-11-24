@@ -1185,7 +1185,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5abd4913bbe0084da0063a8d58e0258, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Nivel.CarrinhoVaiEVem
-  pontoDeVolta: {x: 0, y: 0, z: 4.5}
+  pontoDeVolta: {x: 0, y: 0, z: 6}
   fase: 0.6666667
 --- !u!54 &208561940
 Rigidbody:
@@ -5120,7 +5120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5abd4913bbe0084da0063a8d58e0258, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Nivel.CarrinhoVaiEVem
-  pontoDeVolta: {x: 0, y: 0, z: 4.5}
+  pontoDeVolta: {x: 0, y: 0, z: 6}
   fase: 0.33333334
 --- !u!54 &1092585381
 Rigidbody:
@@ -8294,7 +8294,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5abd4913bbe0084da0063a8d58e0258, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Nivel.CarrinhoVaiEVem
-  pontoDeVolta: {x: 0, y: 0, z: 4.5}
+  pontoDeVolta: {x: 0, y: 0, z: 6}
   fase: 0
 --- !u!54 &2041196750
 Rigidbody:
@@ -9044,6 +9044,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Corpo.CorpoDoJogador
   definicao: {fileID: 11400000, guid: b2f07dd35d30b75408d991032e415f90, type: 2}
+  partida: {fileID: 26875648}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -29,5 +29,8 @@ namespace ColetorDeCristais.Corpo
 
             return alturaNaEscalaUm * tamanho;
         }
+
+        /// <summary>Indica se o personagem foi derrotado por ficar pequeno demais (abaixo do mínimo; igual não conta).</summary>
+        public static bool Derrotado(float tamanho, float minimo) => tamanho < minimo;
     }
 }

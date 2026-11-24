@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ColetorDeCristais.Corpo;
 using ColetorDeCristais.Cristais;
 using ColetorDeCristais.Habilidades;
 using ColetorDeCristais.Movimento;
@@ -17,7 +18,8 @@ namespace ColetorDeCristais.Partida
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
-    /// <item>Fora de uma onda (chefe, vitória, derrota), desliga o movimento, a investida, o ímã e a coleta do jogador.
+    /// <item>Fora de uma onda (chefe, vitória, derrota), desliga o movimento, a investida, o ímã, a coleta e o corpo
+    /// (tranco e pisca-pisca) do jogador.
     /// Os efeitos temporários também param, porque perdem tempo no <see cref="MovimentoDoJogador"/>.</item>
     /// <item>Os chefes ainda não existem: na vez de um chefe, qualquer tecla conta como chefe derrotado.</item>
     /// <item>Depois do fim (vitória ou derrota), qualquer tecla recarrega a cena.</item>
@@ -29,7 +31,7 @@ namespace ColetorDeCristais.Partida
         [Tooltip("Valores da partida (asset DefinicaoPartida).")]
         [SerializeField] private DefinicaoPartida definicao;
 
-        [Tooltip("O jogador (objeto com MovimentoDoJogador, InvestidaDoJogador, ImaDoJogador e ColetorDoJogador).")]
+        [Tooltip("O jogador (objeto com MovimentoDoJogador, InvestidaDoJogador, ImaDoJogador, ColetorDoJogador e CorpoDoJogador).")]
         [SerializeField] private GameObject jogador;
 
         [Tooltip("Pai dos itens novos de cada onda (o objeto Cristais da cena).")]
@@ -75,6 +77,7 @@ namespace ColetorDeCristais.Partida
                 jogador.GetComponent<InvestidaDoJogador>(),
                 jogador.GetComponent<ImaDoJogador>(),
                 jogador.GetComponent<ColetorDoJogador>(),
+                jogador.GetComponent<CorpoDoJogador>(),
             };
         }
 
