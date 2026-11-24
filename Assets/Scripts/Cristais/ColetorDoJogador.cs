@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ColetorDeCristais.Cristais
@@ -29,9 +30,19 @@ namespace ColetorDeCristais.Cristais
 
             foreach (var efeito in definicao.Efeitos)
             {
-                if (efeito != null)
+                if (efeito == null)
+                {
+                    continue;
+                }
+
+                // Um efeito com erro não pode impedir os outros nem a coleta (o cristal ainda precisa sumir).
+                try
                 {
                     efeito.Aplicar(this);
+                }
+                catch (Exception excecao)
+                {
+                    Debug.LogException(excecao, efeito);
                 }
             }
         }

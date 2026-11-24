@@ -77,6 +77,22 @@ namespace ColetorDeCristais.Testes.Atributos
         }
 
         [Test]
+        public void GrupoSoComEspacos_EhTratadoComoSemGrupo()
+        {
+            var modificador = Modificador.Plano(1f, duracao: 1f, grupo: "   ");
+
+            Assert.IsNull(modificador.Grupo);
+        }
+
+        [Test]
+        public void Grupo_EspacosNasPontasSaoRemovidos()
+        {
+            var modificador = Modificador.Plano(1f, duracao: 1f, grupo: " coxa ");
+
+            Assert.AreEqual("coxa", modificador.Grupo);
+        }
+
+        [Test]
         public void TipoDesconhecido_LancaExcecao()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new Modificador(1f, (TipoModificador)99));

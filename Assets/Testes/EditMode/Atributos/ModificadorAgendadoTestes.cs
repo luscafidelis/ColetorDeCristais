@@ -139,5 +139,46 @@ namespace ColetorDeCristais.Testes.Atributos
             atributo.AgendarAoFimDoGrupo(Grupo, modificador);
             Assert.Throws<InvalidOperationException>(() => atributo.AgendarAoFimDoGrupo(Grupo, modificador), "já agendado");
         }
+
+        [Test]
+        public void AdicionarUmModificadorAgendado_LancaExcecaoNaHora_EOFimDoGrupoContinuaFuncionando()
+        {
+            var atributo = new Atributo(10f);
+            atributo.AdicionarModificador(Modificador.Plano(5f, duracao: 3f, grupo: Grupo));
+            var agendado = Modificador.Plano(1f);
+            atributo.AgendarAoFimDoGrupo(Grupo, agendado);
+
+            Assert.Throws<InvalidOperationException>(() => atributo.AdicionarModificador(agendado));
+
+            Assert.DoesNotThrow(() => atributo.Atualizar(3f));
+            Assert.AreEqual(11f, atributo.ValorFinal, Tolerancia);
+        }
+
+        [Test]
+        public void Agendar_GrupoComEspacosNasPontas_EsperaOMesmoGrupo()
+        {
+            var atributo = new Atributo(10f);
+            atributo.AdicionarModificador(Modificador.Plano(5f, duracao: 3f, grupo: Grupo));
+
+            atributo.AgendarAoFimDoGrupo($"  {Grupo} ", Modificador.Plano(1f));
+
+            Assert.AreEqual(15f, atributo.ValorFinal, Tolerancia, "o agendado espera o fim do grupo");
+            Assert.AreEqual(Grupo, atributo.ModificadoresAgendados[0].grupo);
+
+            atributo.Atualizar(3f);
+            Assert.AreEqual(11f, atributo.ValorFinal, Tolerancia);
+        }
+
+        [Test]
+        public void Listas_NaoPodemSerAlteradasPorFora()
+        {
+            var atributo = new Atributo(10f);
+            atributo.AdicionarModificador(Modificador.Plano(5f, duracao: 3f, grupo: Grupo));
+            atributo.AgendarAoFimDoGrupo(Grupo, Modificador.Plano(1f));
+
+            Assert.IsNotInstanceOf<System.Collections.Generic.List<(string, Modificador)>>(atributo.ModificadoresAgendados);
+            Assert.IsNotInstanceOf<System.Collections.Generic.List<Modificador>>(atributo.Modificadores);
+            Assert.AreEqual(1, atributo.ModificadoresAgendados.Count, "a vista acompanha o estado interno");
+        }
     }
 }

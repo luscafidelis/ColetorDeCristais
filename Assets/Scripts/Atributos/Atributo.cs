@@ -31,6 +31,8 @@ namespace ColetorDeCristais.Atributos
         private readonly List<Modificador> _modificadores = new List<Modificador>();
         private readonly Dictionary<Modificador, float> _tempoRestante = new Dictionary<Modificador, float>();
         private readonly List<(string grupo, Modificador modificador)> _agendados = new List<(string, Modificador)>();
+        private readonly IReadOnlyList<Modificador> _modificadoresSomenteLeitura;
+        private readonly IReadOnlyList<(string grupo, Modificador modificador)> _agendadosSomenteLeitura;
         private float _valorBase;
         private float _valorFinalEmCache;
         private bool _precisaRecalcular = true;
@@ -54,6 +56,8 @@ namespace ColetorDeCristais.Atributos
 
             ValorMinimo = valorMinimo;
             ValorMaximo = valorMaximo;
+            _modificadoresSomenteLeitura = _modificadores.AsReadOnly();
+            _agendadosSomenteLeitura = _agendados.AsReadOnly();
             ValorBase = valorBase;
         }
 
@@ -81,10 +85,10 @@ namespace ColetorDeCristais.Atributos
         }
 
         /// <summary>Modificadores ativos, na ordem em que foram adicionados.</summary>
-        public IReadOnlyList<Modificador> Modificadores => _modificadores;
+        public IReadOnlyList<Modificador> Modificadores => _modificadoresSomenteLeitura;
 
         /// <summary>Modificadores agendados (ainda fora do cálculo), com o grupo cujo fim eles esperam.</summary>
-        public IReadOnlyList<(string grupo, Modificador modificador)> ModificadoresAgendados => _agendados;
+        public IReadOnlyList<(string grupo, Modificador modificador)> ModificadoresAgendados => _agendadosSomenteLeitura;
 
         /// <summary>Valor com todos os modificadores aplicados e limitado ao intervalo do atributo.</summary>
         public float ValorFinal
@@ -108,7 +112,7 @@ namespace ColetorDeCristais.Atributos
         /// (os efeitos continuam somados).
         /// </summary>
         /// <exception cref="ArgumentNullException">Se o modificador for <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">Se a mesma instância já estiver no atributo.</exception>
+        /// <exception cref="InvalidOperationException">Se a mesma instância já estiver no atributo ou agendada.</exception>
         public void AdicionarModificador(Modificador modificador)
         {
             if (modificador == null)
@@ -121,6 +125,17 @@ namespace ColetorDeCristais.Atributos
                 throw new InvalidOperationException("Este modificador já foi adicionado ao atributo.");
             }
 
+            if (EstaAgendado(modificador))
+            {
+                throw new InvalidOperationException("Este modificador está agendado; ele entra sozinho no fim do grupo.");
+            }
+
+            Incluir(modificador);
+        }
+
+        /// <summary>Coloca o modificador no cálculo (sem as validações públicas); usado também pelos agendados.</summary>
+        private void Incluir(Modificador modificador)
+        {
             if (modificador.EhTemporario)
             {
                 var duracao = modificador.Duracao.Value;
@@ -177,7 +192,7 @@ namespace ColetorDeCristais.Atributos
         /// A verificação acontece aqui e sempre que um modificador sai do atributo (expirou no <see cref="Atualizar"/> ou foi removido).
         /// Renovar o grupo (coletar de novo) adia todos os agendados do grupo para o novo fim.
         /// </remarks>
-        /// <param name="grupo">Grupo dos temporários; não pode ser vazio.</param>
+        /// <param name="grupo">Grupo dos temporários; não pode ser vazio. Espaços nas pontas são ignorados, como em <see cref="Modificador.Grupo"/>.</param>
         /// <param name="modificador">Modificador que vai entrar; não pode já estar no atributo nem agendado.</param>
         /// <exception cref="ArgumentException">Se o grupo for vazio.</exception>
         /// <exception cref="ArgumentNullException">Se o grupo ou o modificador for <c>null</c>.</exception>
@@ -189,7 +204,8 @@ namespace ColetorDeCristais.Atributos
                 throw new ArgumentNullException(nameof(grupo));
             }
 
-            if (grupo.Trim().Length == 0)
+            var grupoNormalizado = grupo.Trim();
+            if (grupoNormalizado.Length == 0)
             {
                 throw new ArgumentException("O grupo não pode ser vazio.", nameof(grupo));
             }
@@ -199,12 +215,12 @@ namespace ColetorDeCristais.Atributos
                 throw new ArgumentNullException(nameof(modificador));
             }
 
-            if (_modificadores.Contains(modificador) || _agendados.Exists(agendado => agendado.modificador == modificador))
+            if (_modificadores.Contains(modificador) || EstaAgendado(modificador))
             {
                 throw new InvalidOperationException("Este modificador já está no atributo ou agendado.");
             }
 
-            _agendados.Add((grupo, modificador));
+            _agendados.Add((grupoNormalizado, modificador));
             AplicarAgendadosSemGrupoAtivo();
         }
 
@@ -266,6 +282,9 @@ namespace ColetorDeCristais.Atributos
             return false;
         }
 
+        private bool EstaAgendado(Modificador modificador) =>
+            _agendados.Exists(agendado => agendado.modificador == modificador);
+
         private bool GrupoTemTemporarioAtivo(string grupo)
         {
             foreach (var modificador in _modificadores)
@@ -291,7 +310,7 @@ namespace ColetorDeCristais.Atributos
                 }
 
                 _agendados.RemoveAt(indice);
-                AdicionarModificador(modificador);
+                Incluir(modificador);
             }
         }
 

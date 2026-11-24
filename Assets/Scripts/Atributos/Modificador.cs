@@ -47,7 +47,7 @@ namespace ColetorDeCristais.Atributos
         /// <param name="tipo">Forma de aplicação.</param>
         /// <param name="origem">Quem criou o modificador, ou <c>null</c>.</param>
         /// <param name="duracao">Duração em segundos (maior que zero e finita), ou <c>null</c> para permanente.</param>
-        /// <param name="grupo">Grupo de renovação, só para temporários; <c>null</c> ou vazio para nenhum.</param>
+        /// <param name="grupo">Grupo de renovação, só para temporários; <c>null</c>, vazio ou só espaços para nenhum. Espaços nas pontas são removidos.</param>
         /// <exception cref="ArgumentException">
         /// Se o valor não for finito, se a duração não for finita e positiva, ou se houver grupo sem duração.
         /// </exception>
@@ -69,7 +69,7 @@ namespace ColetorDeCristais.Atributos
                 throw new ArgumentException("A duração precisa ser um número finito maior que zero.", nameof(duracao));
             }
 
-            var grupoNormalizado = string.IsNullOrEmpty(grupo) ? null : grupo;
+            var grupoNormalizado = string.IsNullOrWhiteSpace(grupo) ? null : grupo.Trim();
             if (grupoNormalizado != null && !duracao.HasValue)
             {
                 throw new ArgumentException("Só modificadores temporários (com duração) podem ter grupo.", nameof(grupo));
