@@ -3,14 +3,14 @@
 Jogo 3D em Unity sobre coletar cristais numa arena.
 
 ## O jogo
-Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. Cada cristal é um item com um efeito:
+Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. A partida é em ondas: o objetivo é sobreviver até o tempo da onda acabar; aí vem o chefe da onda, que precisa ser derrotado para passar para a próxima. Cada arena tem 3 ondas, e a última termina no chefe da arena. Cada cristal é um item com um efeito:
 - **Atributo:** aumenta a velocidade.
 - **Habilidade passiva:** ímã, que puxa cristais próximos.
 - **Habilidade ativa:** investida, com tempo de recarga.
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; a rosquinha libera o ímã, que puxa os itens próximos até o personagem (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido); carne e peixe ainda não têm efeito, e os cristais de experiência ainda não dão experiência. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o montrengo estica para a frente; a rosquinha libera o ímã, que puxa os itens próximos até o personagem (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido); carne e peixe ainda não têm efeito, e os cristais de experiência ainda não dão experiência. A partida tem 3 ondas de 120 s, com cronômetro regressivo no topo da tela; a cada nova onda entram itens novos em posições sorteadas. Os chefes, os inimigos e a vida ainda não existem: na vez de um chefe, qualquer tecla conta como vitória sobre ele, e ainda não dá para perder. Contagem, recarga e efeitos na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -35,6 +35,7 @@ Na Editor, abra `Assets/Scenes/Arena.unity` e aperte Play. Clique na janela Game
 |---|---|---|
 | Andar | WASD ou setas | Analógico esquerdo |
 | Investida (depois de pegar o café) | Espaço | Gatilho direito (RT/R2) |
+| Continuar (na vez do chefe) ou recomeçar (no fim) | Qualquer tecla | Qualquer botão |
 
 Depois de clonar o repositório pela primeira vez, rode `git lfs install` (uma vez por máquina) e `git lfs pull` para baixar os binários.
 
@@ -62,11 +63,12 @@ python -m unittest discover -s ferramentas
 ## Estrutura de pastas
 | Caminho | Conteúdo |
 |---|---|
-| `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais` |
+| `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais`. Referencia `Unity.InputSystem` e `UnityEngine.UI` (uGUI, usado na interface mínima da partida) |
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
 | `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`, `BonusDeAtributo` e `MomentoDoPermanente`. Ver "Atributos e modificadores" abaixo |
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
 | `Assets/Scripts/Habilidades/` | Habilidades do jogador (namespace `ColetorDeCristais.Habilidades`). Investida: `Investida` e `ParametrosDeInvestida` (C# puro), `DefinicaoInvestida` (ScriptableObject) e `InvestidaDoJogador` (`MonoBehaviour`). Ímã: `Ima` e `ParametrosDeIma` (C# puro), `DefinicaoIma` (ScriptableObject) e `ImaDoJogador` (`MonoBehaviour`). Ver "Investida" e "Ímã" abaixo |
+| `Assets/Scripts/Partida/` | Partida em ondas (namespace `ColetorDeCristais.Partida`): `CicloDaPartida`, `ParametrosDaPartida`, `EstadoDaPartida`, `ComposicaoDaOnda` e `GeradorDePosicoes` (C# puro), `DefinicaoPartida` (ScriptableObject), `ControladorDaPartida` e `MensagensDaPartida` (`MonoBehaviour`). Ver "Partida, ondas e chefes" abaixo |
 | `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
 | `Assets/Scenes/SampleScene.unity` | Cena de exemplo do template, fora do build; serviu de base para a Arena |
@@ -82,6 +84,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
 | `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito), `Coxa`, `Cafe`, `Rosquinha` e `Experiencia` (cristais de experiência). Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`, `LiberarIma`) |
 | `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) e `Ima` (`DefinicaoIma`) |
+| `Assets/Dados/Partida/` | Asset `Partida` (`DefinicaoPartida`): cronômetro, ondas e itens novos de cada onda |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move` e `Player/Investida`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
@@ -359,6 +362,48 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados n
 1. **Valores:** em `Assets/Dados/Habilidades`, *Create > Coletor de Cristais > Definição de Ímã* (`Ima`), com os valores padrão.
 2. **Jogador:** adicione `Ima Do Jogador` ao `Jogador` e, em *Definicao*, escolha o asset `Ima`.
 3. **Itens:** a rosquinha, os cristais de experiência e os níveis de atração (passos 8 a 10 de "Cristais coletáveis").
+
+## Partida, ondas e chefes
+**Como funciona no jogo:**
+- **Ondas:** cada arena tem **3 ondas de 120 s**. O cronômetro é regressivo e aparece no topo da tela, junto com a onda (ex.: "Onda 1/3   1:54"). O objetivo é sobreviver até o tempo acabar.
+- **Chefes:** quando o tempo de uma onda acaba, vem o **chefe da onda**; na 3ª onda, no lugar dele, vem o **chefe da arena**. Os chefes ainda não existem: aparece a mensagem "Chefe da onda N!" ou "Chefe da arena!", e **qualquer tecla** (ou botão) conta como chefe derrotado.
+- **Próxima onda:** depois do chefe da onda, começa a próxima onda, com o tempo cheio. O jogador fica onde está e mantém as habilidades liberadas e os bônus. Os itens que sobraram ficam na arena, e entram itens novos em posições sorteadas:
+  - as mesmas comidas da primeira onda: 1 carne, 2 peixes e 2 coxas;
+  - os cristais de experiência dobram a cada onda: 4 na primeira (os da cena), 8 na segunda, 16 na terceira;
+  - um item de habilidade, café ou rosquinha, sorteado. Pegar de novo uma habilidade já liberada ainda não muda nada.
+- **Posições sorteadas:** dentro da área de -8 a 8 m (2 m das paredes), a pelo menos 1,5 m do jogador, dos itens que sobraram e uns dos outros. Se a arena estiver cheia, entram menos itens (um aviso vai para o Console). Na ordem de prioridade: o item de habilidade, as comidas e por último os cristais. Com esses valores, cabem cerca de 80 itens na arena ao mesmo tempo: numa 3ª onda sem nada coletado antes, entram os 22 itens novos e ficam 46 na arena.
+- **Vitória:** derrotar o chefe da arena mostra "Arena concluída!". Ainda não há outra arena.
+- **Derrota:** acontece quando o jogador é derrotado (ficar sem vida, quando a vida existir). Por enquanto nada no jogo provoca a derrota, mas a partida já sabe tratá-la ("Derrota").
+- **Fora de uma onda** (chefe, vitória ou derrota), o jogador fica parado: não anda, não usa a investida, o ímã não puxa e nada é coletado. Os efeitos temporários (ex.: os 5 s da coxa) também param de contar.
+- **Recomeçar:** depois da vitória ou da derrota, qualquer tecla recomeça a arena do zero (a cena é recarregada).
+- Depois de cada mudança de fase, as teclas são ignoradas por 0,5 s, para a mensagem não ser pulada sem querer; a instrução "Aperte qualquer tecla" só aparece depois disso.
+
+Os valores ficam no asset `Assets/Dados/Partida/Partida` e podem ser ajustados no Inspector.
+
+**Código** (`Assets/Scripts/Partida/`):
+- `ParametrosDaPartida` (struct): `DuracaoDaOnda` (> 0) e `QuantidadeDeOndas` (≥ 1), validados no construtor (`ArgumentException`).
+- `EstadoDaPartida` (enum): `EmOnda`, `ChefeDaOnda`, `ChefeDaArena`, `Vitoria` e `Derrota`.
+- `CicloDaPartida` (C# puro, testado em EditMode): `Onda`, `TempoRestante`, `Estado`, `EmOnda`, `EmChefe` e `Encerrada`.
+  - `Atualizar(deltaTempo)`: o cronômetro só corre durante a onda e não fica negativo; devolve `true` no passo em que o tempo acaba (a fase vira chefe). O fim do tempo não depende da taxa de quadros.
+  - `DerrotarChefe()`: começa a próxima onda (tempo cheio) ou, depois do chefe da arena, a vitória.
+  - `DerrotarJogador()`: derrota, a partir de qualquer fase em jogo. Depois do fim, nada muda o estado.
+  - `Reiniciar()`: onda 1 com o tempo cheio.
+  - `FormatarTempo(segundos)` (estático): "m:ss", arredondando para cima ("2:00" no início, "0:00" só quando acabou).
+- `ComposicaoDaOnda` (estática, C# pura): `CristaisDeExperiencia(onda, naPrimeiraOnda)` (dobra a cada onda), `TrazItensNovos(onda)` (só a partir da 2ª) e `SortearItemDeHabilidade(quantidade, sorteio)`.
+- `GeradorDePosicoes` (estático, C# puro): `Gerar(quantidade, limite, jogador, ocupadas, distanciaMinima, sorteio)` sorteia posições no chão respeitando a área e as distâncias; com a área cheia, devolve menos posições. Com a mesma semente, o resultado é o mesmo.
+- `DefinicaoPartida` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Partida*): *Duracao Da Onda* 120, *Quantidade De Ondas* 3, *Espera Antes De Continuar* 0,5, *Cristais De Experiencia Na Primeira Onda* 4, *Prefab De Experiencia* (`Cristal_Experiencia`), *Comidas Por Onda* (`Comida_Carne`, `Comida_Peixe` ×2, `Comida_Coxa` ×2), *Itens De Habilidade* (`Comida_Cafe`, `Comida_Rosquinha`), *Limite Da Area* 8, *Distancia Minima* 1,5 e *Altura Dos Itens* 0,8.
+- `ControladorDaPartida` (`MonoBehaviour`, no objeto `Partida`): corre o cronômetro com `Time.deltaTime`, liga e desliga os componentes do jogador (`MovimentoDoJogador`, `InvestidaDoJogador`, `ImaDoJogador` e `ColetorDoJogador`) e, fora de uma onda, escuta qualquer tecla (`InputSystem.onAnyButtonPress`). `Continuar()` faz o que a tecla faz (público para testes pela CLI); `DerrotarJogador()` é o ponto para o futuro sistema de vida. Coloca os itens novos com `Instantiate` dentro do objeto `Cristais`.
+- `MensagensDaPartida` (`MonoBehaviour`, no objeto `Partida`): **interface mínima e provisória**, até o HUD completo. Cria no `Awake` um Canvas de uGUI em *Screen Space - Camera* na câmera principal, com dois textos (`Text` com a fonte embutida `LegacyRuntime.ttf`): o cronômetro no topo e a mensagem da fase no centro. Como o Canvas é desenhado pela câmera, os textos aparecem nas capturas da câmera. `TextoDaMensagem(estado, onda, aguardandoTecla)` (estático, testado) monta o texto central.
+- `CristalColetavel` só coleta se o `ColetorDoJogador` estiver ligado (`isActiveAndEnabled`): é assim que a coleta para fora das ondas.
+
+**Decisões técnicas:**
+- O jogador é travado desligando os componentes dele, sem cada sistema precisar saber da partida. Os efeitos temporários param junto porque perdem tempo no `MovimentoDoJogador`.
+- Recomeçar recarrega a cena: tudo volta ao estado inicial (itens, habilidades, bônus e contagem) sem código de limpeza.
+- A primeira onda usa os itens colocados na cena; as seguintes sorteiam posições com `System.Random` sem semente fixa, então cada partida é diferente.
+
+**Como foi montado na Editor:**
+1. **Valores:** pasta `Assets/Dados/Partida`, *Create > Coletor de Cristais > Definição de Partida* (`Partida`). Preencha *Prefab De Experiencia*, *Comidas Por Onda* e *Itens De Habilidade* com os prefabs listados acima.
+2. **Cena:** um GameObject vazio `Partida` na raiz, com `Controlador Da Partida` (*Definicao* `Partida`, *Jogador* o objeto `Jogador`, *Grupo De Itens* o objeto `Cristais`) e `Mensagens Da Partida`.
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (uma subpasta e um sub-namespace por sistema).

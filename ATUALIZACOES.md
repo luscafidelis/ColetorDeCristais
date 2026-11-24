@@ -161,6 +161,26 @@ Com o ímã liberado, o personagem desce na direção dos dois cristais de exper
 
 ---
 
+## 10. Ondas, cronômetro e chefes
+
+**Para quem joga:** a partida agora tem um objetivo: **sobreviver até o tempo acabar**. Cada arena tem **3 ondas de 2 minutos**, e o cronômetro regressivo fica no topo da tela. Quando o tempo de uma onda acaba, vem o **chefe da onda**; na terceira, vem o **chefe da arena** no lugar dele. Os chefes ainda não existem, então por enquanto aparece só a mensagem, e **qualquer tecla** conta como chefe derrotado. Enquanto a mensagem está na tela, o personagem fica parado e nada é coletado.
+
+![O cronômetro em 0:00 no topo e a mensagem "Chefe da onda 1!" no centro da arena, com a instrução para apertar qualquer tecla](docs/atualizacoes/chefe-da-onda.png)
+
+A cada nova onda, os itens que sobraram continuam lá e **entram itens novos em lugares sorteados**: as mesmas comidas da primeira onda, os cristais de experiência **em dobro** (8 na segunda onda, 16 na terceira) e um café ou uma rosquinha. Vencer o chefe da arena mostra "Arena concluída!", e qualquer tecla recomeça a arena do zero. A derrota já está prevista para quando o personagem ficar sem vida, mas a vida ainda não existe, então por enquanto não dá para perder.
+
+![A arena cheia de itens na terceira onda, com a mensagem "Arena concluída!" e a instrução para recomeçar](docs/atualizacoes/arena-concluida.png)
+
+**Por dentro:**
+- Novo sistema `Partida`: `CicloDaPartida` (C# puro) controla a onda, o cronômetro e as fases (onda, chefe da onda, chefe da arena, vitória, derrota). `ComposicaoDaOnda` diz quantos itens cada onda traz e `GeradorDePosicoes` sorteia onde eles entram, a 1,5 m do jogador e dos outros itens e a 2 m das paredes.
+- Valores no ScriptableObject `DefinicaoPartida` (asset `Partida`).
+- `ControladorDaPartida` liga e desliga o jogador, escuta qualquer tecla e recarrega a cena para recomeçar. `MensagensDaPartida` é uma interface mínima e provisória, até o HUD completo.
+- `CristalColetavel` só coleta com o `ColetorDoJogador` ligado.
+
+**Validação:** 245 testes EditMode passando, incluindo o fim do tempo igual em 1, 30 ou 60 quadros por segundo, a sequência de ondas e chefes, a vitória, a derrota, o recomeço, a formatação do cronômetro, a quantidade de itens por onda e as distâncias das posições sorteadas. Em Play Mode, pela CLI, adiantando o cronômetro: no fim da onda 1 aparece o chefe e o personagem fica travado (posto sobre um cristal, não coleta); a onda 2 começa com 120 s e 14 itens novos (1 de habilidade, 5 comidas e 8 cristais), a pelo menos 1,5 m uns dos outros; depois da 3ª onda vem o chefe da arena e depois a vitória; a derrota, chamada direto, mostra a mensagem; nos dois casos a arena recomeça do zero. Numa 3ª onda sem nada coletado antes, entraram os 22 itens novos (46 na arena). O teste jogando com teclado ou gamepad ainda não foi feito.
+
+---
+
 ## Como registrar uma nova atualização
 1. Acrescente uma seção no fim, com o próximo número, seguindo o mesmo formato: **Para quem joga**, **Por dentro** e **Validação**, com o número de testes passando.
 2. Não registre aqui planejamento, cronograma ou dados pessoais (veja a regra no `CLAUDE.md`).

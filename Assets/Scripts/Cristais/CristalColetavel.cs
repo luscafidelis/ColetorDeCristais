@@ -49,7 +49,8 @@ namespace ColetorDeCristais.Cristais
         private void OnTriggerEnter(Collider outro)
         {
             var coletor = outro.GetComponentInParent<ColetorDoJogador>();
-            if (!_estado.TentarColetar(coletor != null))
+            // Um coletor desligado (ex.: partida fora de uma onda) não coleta.
+            if (!_estado.TentarColetar(coletor != null && coletor.isActiveAndEnabled))
             {
                 return;
             }

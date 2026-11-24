@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65f5a1b773f9f904da35f7b9665a1ab7, type: 3}
+  m_Name: Partida
+  m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Partida.DefinicaoPartida
+  duracaoDaOnda: 120
+  quantidadeDeOndas: 3
+  esperaAntesDeContinuar: 0.5
+  cristaisDeExperienciaNaPrimeiraOnda: 4
+  prefabDeExperiencia: {fileID: 5846569277992934267, guid: a3f6d6cce8046e042a4cda176dca93bd, type: 3}
+  comidasPorOnda:
+  - {fileID: 4283690500632034485, guid: 6936ad3d04d7eb74f99467444e46c529, type: 3}
+  - {fileID: 1966659248233612908, guid: e6021aec5c0b92c4e9a7ef750f65fd6f, type: 3}
+  - {fileID: 1966659248233612908, guid: e6021aec5c0b92c4e9a7ef750f65fd6f, type: 3}
+  - {fileID: 4162997455831434228, guid: 27c95fb9bbde3da4a9f98f9ada813139, type: 3}
+  - {fileID: 4162997455831434228, guid: 27c95fb9bbde3da4a9f98f9ada813139, type: 3}
+  itensDeHabilidade:
+  - {fileID: 6246851991290842109, guid: 567a865a9419cd64381e256c2f6841a9, type: 3}
+  - {fileID: 629636490179178267, guid: f822e4b56c46f45428a4bc6b048178e4, type: 3}
+  limiteDaArea: 8
+  distanciaMinima: 1.5
+  alturaDosItens: 0.8
