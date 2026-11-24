@@ -21,11 +21,16 @@ namespace ColetorDeCristais.Atributos
     /// Modificadores temporários só perdem tempo quando <see cref="Atualizar"/> é chamado
     /// (ex.: uma vez por quadro, com o tempo do quadro). Ao chegar a zero, são removidos.
     /// </para>
+    /// <para>
+    /// Um modificador pode ser agendado para o fim de um grupo (<see cref="AgendarAoFimDoGrupo"/>):
+    /// ele entra no atributo quando o grupo não tem mais temporários ativos.
+    /// </para>
     /// </remarks>
     public sealed class Atributo
     {
         private readonly List<Modificador> _modificadores = new List<Modificador>();
         private readonly Dictionary<Modificador, float> _tempoRestante = new Dictionary<Modificador, float>();
+        private readonly List<(string grupo, Modificador modificador)> _agendados = new List<(string, Modificador)>();
         private float _valorBase;
         private float _valorFinalEmCache;
         private bool _precisaRecalcular = true;
@@ -77,6 +82,9 @@ namespace ColetorDeCristais.Atributos
 
         /// <summary>Modificadores ativos, na ordem em que foram adicionados.</summary>
         public IReadOnlyList<Modificador> Modificadores => _modificadores;
+
+        /// <summary>Modificadores agendados (ainda fora do cálculo), com o grupo cujo fim eles esperam.</summary>
+        public IReadOnlyList<(string grupo, Modificador modificador)> ModificadoresAgendados => _agendados;
 
         /// <summary>Valor com todos os modificadores aplicados e limitado ao intervalo do atributo.</summary>
         public float ValorFinal
@@ -139,12 +147,16 @@ namespace ColetorDeCristais.Atributos
 
             _tempoRestante.Remove(modificador);
             _precisaRecalcular = true;
+            AplicarAgendadosSemGrupoAtivo();
             return true;
         }
 
-        /// <summary>Remove todos os modificadores cuja <see cref="Modificador.Origem"/> é a origem informada.</summary>
+        /// <summary>
+        /// Remove todos os modificadores cuja <see cref="Modificador.Origem"/> é a origem informada,
+        /// inclusive os agendados (que não entram na contagem).
+        /// </summary>
         /// <param name="origem">Origem a remover; <c>null</c> não remove nada.</param>
-        /// <returns>Quantidade de modificadores removidos.</returns>
+        /// <returns>Quantidade de modificadores removidos do atributo.</returns>
         public int RemoverModificadoresDaOrigem(object origem)
         {
             if (origem == null)
@@ -152,12 +164,54 @@ namespace ColetorDeCristais.Atributos
                 return 0;
             }
 
+            _agendados.RemoveAll(agendado => Equals(agendado.modificador.Origem, origem));
             return RemoverOnde(modificador => Equals(modificador.Origem, origem));
         }
 
-        /// <summary>Remove todos os modificadores, permanentes e temporários.</summary>
+        /// <summary>
+        /// Agenda um modificador para entrar no atributo quando o grupo informado não tiver mais
+        /// modificadores temporários ativos (ex.: um bônus permanente que só vale depois que o efeito temporário acaba).
+        /// Se o grupo já não tiver temporários ativos, o modificador entra na hora.
+        /// </summary>
+        /// <remarks>
+        /// A verificação acontece aqui e sempre que um modificador sai do atributo (expirou no <see cref="Atualizar"/> ou foi removido).
+        /// Renovar o grupo (coletar de novo) adia todos os agendados do grupo para o novo fim.
+        /// </remarks>
+        /// <param name="grupo">Grupo dos temporários; não pode ser vazio.</param>
+        /// <param name="modificador">Modificador que vai entrar; não pode já estar no atributo nem agendado.</param>
+        /// <exception cref="ArgumentException">Se o grupo for vazio.</exception>
+        /// <exception cref="ArgumentNullException">Se o grupo ou o modificador for <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">Se o modificador já estiver no atributo ou agendado.</exception>
+        public void AgendarAoFimDoGrupo(string grupo, Modificador modificador)
+        {
+            if (grupo == null)
+            {
+                throw new ArgumentNullException(nameof(grupo));
+            }
+
+            if (grupo.Trim().Length == 0)
+            {
+                throw new ArgumentException("O grupo não pode ser vazio.", nameof(grupo));
+            }
+
+            if (modificador == null)
+            {
+                throw new ArgumentNullException(nameof(modificador));
+            }
+
+            if (_modificadores.Contains(modificador) || _agendados.Exists(agendado => agendado.modificador == modificador))
+            {
+                throw new InvalidOperationException("Este modificador já está no atributo ou agendado.");
+            }
+
+            _agendados.Add((grupo, modificador));
+            AplicarAgendadosSemGrupoAtivo();
+        }
+
+        /// <summary>Remove todos os modificadores, permanentes e temporários, e os agendados.</summary>
         public void RemoverTodosModificadores()
         {
+            _agendados.Clear();
             if (_modificadores.Count == 0)
             {
                 return;
@@ -170,7 +224,8 @@ namespace ColetorDeCristais.Atributos
 
         /// <summary>
         /// Avança o tempo dos modificadores temporários e remove os que chegaram a zero.
-        /// Modificadores permanentes não são afetados.
+        /// Modificadores permanentes não são afetados. Depois, os agendados cujo grupo
+        /// ficou sem temporários entram no atributo.
         /// </summary>
         /// <param name="deltaTempo">Tempo decorrido em segundos; finito e maior ou igual a zero.</param>
         /// <returns>Quantidade de modificadores que expiraram nesta chamada.</returns>
@@ -211,6 +266,35 @@ namespace ColetorDeCristais.Atributos
             return false;
         }
 
+        private bool GrupoTemTemporarioAtivo(string grupo)
+        {
+            foreach (var modificador in _modificadores)
+            {
+                if (modificador.Grupo == grupo && _tempoRestante.ContainsKey(modificador))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void AplicarAgendadosSemGrupoAtivo()
+        {
+            for (var indice = 0; indice < _agendados.Count;)
+            {
+                var (grupo, modificador) = _agendados[indice];
+                if (GrupoTemTemporarioAtivo(grupo))
+                {
+                    indice++;
+                    continue;
+                }
+
+                _agendados.RemoveAt(indice);
+                AdicionarModificador(modificador);
+            }
+        }
+
         private void RenovarGrupo(string grupo, float duracao)
         {
             foreach (var existente in _modificadores)
@@ -241,6 +325,7 @@ namespace ColetorDeCristais.Atributos
             if (removidos > 0)
             {
                 _precisaRecalcular = true;
+                AplicarAgendadosSemGrupoAtivo();
             }
 
             return removidos;

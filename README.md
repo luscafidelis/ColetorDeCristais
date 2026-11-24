@@ -10,7 +10,7 @@ Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. 
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); o item coletável base (some ao ser coletado e é contado, ainda sem efeito), com visual de comida (carne, peixe e coxa) numa arena de piso e paredes de supermercado, com modelos da Kenney. Efeitos dos cristais, contagem na tela e sons ainda não foram implementados.
+> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o "montrengo", modelo de Joppe Monnens) que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); carne e peixe ainda não têm efeito. Contagem e efeitos na tela e sons ainda não foram implementados.
 
 ## Requisitos
 | Item | Versão |
@@ -60,7 +60,7 @@ python -m unittest discover -s ferramentas
 |---|---|
 | `Assets/Scripts/` | Código do jogo. Assembly `ColetorDeCristais` (`ColetorDeCristais.asmdef`), namespace `ColetorDeCristais` |
 | `Assets/Scripts/InformacoesDoProjeto.cs` | Classe mínima (nome do jogo), criada com o projeto para validar a estrutura de testes |
-| `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`. Ver "Atributos e modificadores" abaixo |
+| `Assets/Scripts/Atributos/` | Sistema de atributos em C# puro (namespace `ColetorDeCristais.Atributos`): `Atributo`, `Modificador`, `TipoModificador`, `BonusDeAtributo` e `MomentoDoPermanente`. Ver "Atributos e modificadores" abaixo |
 | `Assets/Scripts/Movimento/` | Movimento do personagem (namespace `ColetorDeCristais.Movimento`): `CalculadoraDeMovimento` (cálculos puros) e `MovimentoDoJogador` (`MonoBehaviour`). Ver "Movimento do personagem" abaixo |
 | `Assets/Testes/EditMode/` | Testes EditMode. Assembly `ColetorDeCristais.Testes.EditMode`, namespace `ColetorDeCristais.Testes`; referencia `ColetorDeCristais` e só compila na Editor. Subpastas espelham as de `Assets/Scripts/` (ex.: `Atributos/`, `Movimento/`) |
 | `Assets/Scenes/Arena.unity` | Cena do jogo (única cena no Build Profile): arena, jogador, câmera, luz |
@@ -74,7 +74,7 @@ python -m unittest discover -s ferramentas
 | `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
 | `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
 | `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
-| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal` (por enquanto, `CristalBase`) |
+| `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `CristalBase` (carne e peixe, sem efeito) e `Coxa`. Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`) |
 | `Assets/Materiais/` | Materiais URP Lit: `Chao`, `Mureta`, `Jogador`, `NarizJogador`, `Cristal` |
 | `Assets/Settings/` | Assets do URP (pipelines PC e Mobile, renderers, volume profiles) |
 | `Assets/InputSystem_Actions.inputactions` | Ações do Input System (vindas do template). O personagem usa `Player/Move`. É o asset de ações do projeto (*Project Settings > Input System Package*) |
@@ -116,6 +116,14 @@ final = limitar(final, ValorMinimo, ValorMaximo)
 - `TentarObterTempoRestante(modificador, out tempo)` informa quanto falta (útil para a interface).
 - **Renovação por grupo:** quando dois cristais temporários com o mesmo modificador são coletados, o tempo reseta e os modificadores se somam. Um temporário pode ter um `grupo` (texto, ex.: o tipo de cristal). Ao adicionar um temporário de um grupo que já está ativo, **todos** os temporários desse grupo voltam à duração completa do novo modificador, e os efeitos continuam somados. Por isso eles expiram juntos. Temporários sem grupo têm tempos independentes. Grupo só é aceito em temporários (`ArgumentException` em permanentes).
 
+**Agendados para o fim de um grupo:** `AgendarAoFimDoGrupo(grupo, modificador)` guarda um modificador fora do cálculo até o grupo não ter mais temporários ativos. Aí ele entra no atributo (ex.: um bônus permanente que só vale depois que o efeito temporário acaba). Se o grupo já não tiver temporários, ele entra na hora. Renovar o grupo adia todos os agendados dele para o novo fim. A verificação acontece sempre que um modificador sai do atributo (expirou ou foi removido). `ModificadoresAgendados` lista os que estão esperando. `RemoverModificadoresDaOrigem` também descarta os agendados da origem, e `RemoverTodosModificadores` descarta todos.
+
+**Bônus de itens (`BonusDeAtributo`):** descreve o que um item faz num atributo, em duas partes opcionais (valor zero desliga a parte):
+- **temporária:** tipo, valor, duração e grupo (obrigatórios quando há parte temporária);
+- **permanente:** tipo, valor e `MomentoDoPermanente`: `AoAplicar` (entra junto) ou `AoFimDoTemporario` (agendada para o fim do grupo da parte temporária).
+
+`AplicarEm(atributo, origem)` cria modificadores novos a cada chamada. Coletar de novo durante o efeito soma a parte temporária e reinicia o tempo (regra do grupo). Com `AoFimDoTemporario`, cada coleta agenda mais uma parte permanente, e todas entram juntas no fim. Combinações inválidas (temporário sem duração ou sem grupo, permanente esperando um temporário que não existe, valores não finitos) geram `ArgumentException`.
+
 **Exemplo** (números ilustrativos, não são valores de jogo):
 ```csharp
 var velocidade = new Atributo(valorBase: 5f, valorMinimo: 0f);
@@ -130,6 +138,12 @@ velocidade.AdicionarModificador(Modificador.Plano(1f, duracao: 4f, grupo: "crist
 velocidade.Atualizar(3f);                                                                         // falta 1 s
 velocidade.AdicionarModificador(Modificador.Plano(1f, duracao: 4f, grupo: "cristal-velocidade")); // 7, os dois com 4 s
 velocidade.Atualizar(4f);                                                                         // os dois expiram: 5
+
+// Bônus com parte permanente que só entra no fim do temporário
+var bonusDeItem = new BonusDeAtributo(TipoModificador.PercentualAditivo, 0.5f, 2f, "item",
+                                      TipoModificador.Plano, 1f, MomentoDoPermanente.AoFimDoTemporario);
+bonusDeItem.AplicarEm(velocidade); // 7,5 (5 × 1,5); o +1 fica agendado
+velocidade.Atualizar(2f);          // o temporário expira e o +1 entra: 6
 ```
 
 Os valores concretos de cada atributo e item (base, bônus, limites, durações e quais cristais são temporários) não fazem parte deste sistema: ficam nos componentes e assets que o usam.
@@ -198,6 +212,14 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 ## Cristais coletáveis
 **Como funciona no jogo:** os itens coletáveis são comidas (carne crua, peixe e coxa, do Food Kit da Kenney) de cerca de 0,8 m que giram e flutuam. Ao ser coletado, o item some na hora. Na Arena há 5 itens: carne no centro, onde o jogador nasce e por isso é coletada logo no início, peixe nos cantos noroeste e sudeste, e coxa nos cantos nordeste e sudoeste, em (±6, ±6). O prefab base `Cristal` (losango ciano) continua no projeto. A coleta ainda não tem som nem contagem na tela.
 
+**Efeitos das comidas:**
+| Comida | Definição | Efeito |
+|---|---|---|
+| Coxa | `Coxa` (`coxa`) | **Velocidade:** +30% por 5 s; quando esse efeito acaba, +0,3 m/s permanente. Pegar outra coxa durante o efeito soma mais 30% e reinicia os 5 s, e os +0,3 m/s de cada coxa entram juntos no fim. Na velocidade base (3,5 m/s): 4,55 m/s por 5 s e depois 3,8 m/s; duas coxas seguidas: 5,6 m/s e depois 4,1 m/s. |
+| Carne, peixe | `CristalBase` (`cristal-base`) | Nenhum (só contam). |
+
+Os valores ficam no asset `Assets/Dados/Cristais/Efeitos/VelocidadeCoxa` e podem ser ajustados no Inspector.
+
 **Visuais por Prefab Variant:** cada comida é uma *Prefab Variant* de `Cristal` (`Comida_Carne`, `Comida_Peixe`, `Comida_Coxa`). A variante herda tudo do prefab base: trigger, `CristalColetavel` com a definição `CristalBase` e `GiroEFlutuacao`. Ela muda só o visual: em `Visual`, *Scale* (1, 1, 1), a `Gema` desativada e um filho `Comida` com o modelo, escalado para que a maior dimensão tenha 0,8 m e centralizado no `Visual`. Mudanças de lógica no prefab base valem para todas as comidas. Para criar uma variante na Editor, clique com o botão direito em `Cristal.prefab` e escolha *Create > Prefab Variant*. Depois, edite o `Visual` da variante.
 
 **Código** (`Assets/Scripts/Cristais/`):
@@ -209,7 +231,8 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 
 *Dados:*
 - `DefinicaoCristal` (ScriptableObject): `Identificador` (único e estável, usado na contagem), `NomeExibicao` e uma lista de `Efeitos`.
-- `EfeitoDeCristal` (ScriptableObject abstrato): **ponto de extensão** para os efeitos (velocidade, ímã, investida). Ainda não existe nenhum efeito concreto e a lista da `CristalBase` está vazia. Cada efeito futuro será uma subclasse com `Aplicar(ColetorDoJogador coletor)`. Essa assinatura é provisória e pode mudar no primeiro efeito real.
+- `EfeitoDeCristal` (ScriptableObject abstrato): **ponto de extensão** para os efeitos (velocidade, ímã, investida). Cada efeito é uma subclasse com `Aplicar(ColetorDoJogador coletor)`, criada como asset e colocada na lista de `Efeitos` de uma definição. A lista da `CristalBase` está vazia.
+- `EfeitoDeVelocidade` (`EfeitoDeCristal`, menu *Create > Coletor de Cristais > Efeitos > Velocidade*): campos da parte temporária (*Tipo Temporario*, *Valor Temporario*, *Duracao*, *Grupo*) e da permanente (*Tipo Permanente*, *Valor Permanente*, *Momento*). Monta um `BonusDeAtributo` e o aplica em `MovimentoDoJogador.Velocidade` do jogador que coletou, com o próprio asset como origem. Escreve a nova velocidade no Console. Sem `MovimentoDoJogador` no coletor, registra um erro e não aplica nada.
 
 *Componentes* (finos):
 - `CristalColetavel`: no `OnTriggerEnter`, procura um `ColetorDoJogador` em quem entrou. Se a regra deixar, registra a coleta e destrói o cristal.
@@ -235,7 +258,9 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
 4. **Jogador:** adicione o componente `Coletor Do Jogador` ao `Jogador`.
 5. **Cena:** um GameObject vazio `Cristais` com 5 instâncias do prefab (arraste de `Assets/Prefabs` para a cena), em y = 0,8: centro (0; 0,8; 0) e cantos (±6; 0,8; ±6).
 
-Ao apertar Play, o cristal do centro é coletado logo de cara e o Console mostra "Cristal coletado: Cristal Base (cristal-base). Total: 1.". Ande até os outros para coletá-los.
+6. **Coxa com velocidade:** em `Assets/Dados/Cristais/Efeitos`, *Create > Coletor de Cristais > Efeitos > Velocidade* (`VelocidadeCoxa`): *Tipo Temporario* `PercentualAditivo`, *Valor Temporario* 0,3, *Duracao* 5, *Grupo* `coxa-velocidade`, *Tipo Permanente* `Plano`, *Valor Permanente* 0,3, *Momento* `AoFimDoTemporario`. Crie a definição `Assets/Dados/Cristais/Coxa` (*Identificador* `coxa`, *Nome Exibicao* `Coxa`) com `VelocidadeCoxa` na lista de *Efeitos*. Na variante `Comida_Coxa`, aponte o *Definicao* do `Cristal Coletavel` para `Coxa`.
+
+Ao apertar Play, o item do centro é coletado logo de cara e o Console mostra "Cristal coletado: Cristal Base (cristal-base). Total: 1.". Ande até os outros para coletá-los. Ao pegar uma coxa, o Console mostra "VelocidadeCoxa: velocidade agora 4,55 m/s.".
 
 ## Convenções
 - Código novo vai em `Assets/Scripts/`, dentro do namespace `ColetorDeCristais` (uma subpasta e um sub-namespace por sistema).

@@ -73,6 +73,52 @@ O personagem andando até um cristal do canto, coletando, e seguindo para o pró
 
 ---
 
+## 5. Visual de supermercado: comidas e arena da Kenney
+
+**Para quem joga:** os itens coletáveis passaram a ser **comidas** com cerca de 0,8 m, que giram e flutuam como os cristais: carne crua no centro, peixe nos cantos noroeste e sudeste e coxa nos cantos nordeste e sudoeste. A arena ganhou **piso em placas e paredes de supermercado**. A coleta e o tamanho da arena (20×20 m) não mudaram.
+
+**Por dentro:**
+- Modelos do Food Kit e do Mini Shop, da Kenney (licença CC0), em `Assets/Terceiros/Kenney/`, com a licença original. Créditos em `CREDITOS.md`.
+- Cada comida é uma *Prefab Variant* do `Cristal` (`Comida_Carne`, `Comida_Peixe`, `Comida_Coxa`): herda o trigger, a coleta e a animação, e troca só o visual.
+- Colisão e visual separados: os cubos da arena continuam segurando o jogador, mas com o desenho desligado. O que aparece é o prefab `ArenaVisualKenney`, com 400 placas de piso, 80 paredes e 4 colunas.
+
+**Validação:** 115 testes EditMode passando. Em Play Mode, as paredes seguraram o personagem no limite da arena, a carne do centro foi coletada ao iniciar e uma coxa de canto foi coletada com o personagem sobre ela, sem erros no Console.
+
+---
+
+## 6. O montrengo
+
+**Para quem joga:** o personagem deixou de ser uma cápsula e virou o **montrengo**, um monstro de carne com olhos em antenas e a boca virada para a frente, com cerca de 2 m de largura e 1,6 m de altura. Parado, ele **pulsa** devagar (±4%, um pulso por segundo). Andando, **estica e achata** no ritmo do passo (até 10%) e **se inclina** até 12° na direção do movimento. Só o desenho mudou: a colisão, o movimento e a coleta continuam os mesmos.
+
+![O montrengo no centro da arena de supermercado, com as comidas nos cantos](docs/atualizacoes/montrengo-na-arena.png)
+
+**Por dentro:**
+- Modelo "Cronenberg Monster Creature", de Joppe Monnens, sob licença CC BY 4.0, que **exige crédito**. Fica em `Assets/Terceiros/JoppeMonnens/CronenbergMonster/`, com a atribuição e a lista de modificações (texturas em 1K, mapas combinados para o URP, materiais recriados). Créditos em `CREDITOS.md`.
+- Prefab `VisualMontrengo`: o modelo com o pivô nos pés, filho do `Jogador`. O desenho da cápsula foi desligado, e o colisor é o mesmo.
+- Animação procedural em C# puro (`Assets/Scripts/Animacao/`): a `CalculadoraDeDeformacao` calcula o pulso, o esticar e achatar (preservando o volume) e a inclinação a partir da velocidade, e a `DeformacaoProcedural` aplica o resultado no visual. Os valores podem ser ajustados no Inspector.
+
+**Validação:** 136 testes EditMode passando. Em Play Mode, parado, o pulso ficou em ±4%. Andando, o corpo achatou (0,975 na altura e 1,013 na largura) e se inclinou 12° para o lado do movimento, sem erros no Console. Teste jogando com o teclado não confirmado.
+
+---
+
+## 7. Coxa que acelera
+
+**Para quem joga:** a coxa é o primeiro item com efeito. Ao pegar uma coxa, o personagem fica **30% mais rápido por 5 segundos**. Quando esse efeito acaba, fica um bônus **permanente de +0,3 m/s**. Pegar outra coxa durante o efeito soma mais 30% e reinicia os 5 segundos, e os bônus permanentes de cada coxa entram juntos no fim. Na velocidade base, isso dá 4,55 m/s por 5 s e depois 3,8 m/s. Carne e peixe continuam sem efeito. Ainda não há indicação na tela de que o efeito está ativo.
+
+O personagem pega a coxa do canto superior direito e desce até o peixe, mais rápido:
+
+![Animação: o personagem pega a coxa do canto superior direito e desce acelerado até o peixe do canto inferior direito](docs/atualizacoes/coxa-velocidade.png)
+
+**Por dentro:**
+- `Atributo` ganhou **modificadores agendados** (`AgendarAoFimDoGrupo`): eles ficam fora do cálculo até o grupo de temporários acabar.
+- `BonusDeAtributo` (C# puro): um bônus de item com parte temporária e parte permanente, que entra junto ou só no fim do temporário.
+- `EfeitoDeVelocidade`: o primeiro efeito concreto de `EfeitoDeCristal`. Ele aplica o bônus em `MovimentoDoJogador.Velocidade`.
+- Novos assets: a definição `Coxa` e o efeito `VelocidadeCoxa`, com os valores ajustáveis no Inspector. A variante `Comida_Coxa` usa a definição `Coxa`.
+
+**Validação:** 156 testes EditMode passando, incluindo o cenário da coxa (uma coxa, duas seguidas e coxa depois do fim do efeito). Em Play Mode, com o personagem posicionado sobre as coxas, a velocidade foi de 3,5 para 4,55 m/s, depois para 3,8 m/s no fim do efeito, para 4,94 m/s com a segunda coxa e para 4,1 m/s no fim. O teste jogando com o teclado ainda não foi feito.
+
+---
+
 ## Como registrar uma nova atualização
 1. Acrescente uma seção no fim, com o próximo número, seguindo o mesmo formato: **Para quem joga**, **Por dentro** e **Validação**, com o número de testes passando.
 2. Não registre aqui planejamento, cronograma ou dados pessoais (veja a regra no `CLAUDE.md`).

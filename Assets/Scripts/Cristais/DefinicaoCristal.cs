@@ -17,7 +17,7 @@ namespace ColetorDeCristais.Cristais
         [Tooltip("Nome legível do cristal.")]
         [SerializeField] private string nomeExibicao = "Cristal";
 
-        [Tooltip("Efeitos aplicados ao jogador na coleta. Vazio por enquanto: os efeitos ainda não existem.")]
+        [Tooltip("Efeitos aplicados ao jogador na coleta, em ordem (ex.: EfeitoDeVelocidade). Pode ficar vazio.")]
         [SerializeField] private List<EfeitoDeCristal> efeitos = new List<EfeitoDeCristal>();
 
         /// <summary>Identificador único do tipo de cristal.</summary>
