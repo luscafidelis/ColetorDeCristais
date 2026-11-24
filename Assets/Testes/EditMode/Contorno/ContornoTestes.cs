@@ -6,7 +6,8 @@ namespace ColetorDeCristais.Testes.Contorno
 {
     /// <summary>
     /// Testes do contorno: a espessura em UV (<see cref="MedidaDoContorno"/>), a lista dos objetos ligados
-    /// (<see cref="ListaSemRepeticao{T}"/>) e quais desenhos entram (<see cref="ContornoDoObjeto.Desenhavel"/>).
+    /// (<see cref="ListaSemRepeticao{T}"/>), quais desenhos entram (<see cref="ContornoDoObjeto.Desenhavel"/>) e com
+    /// quantas partes (<see cref="ContornoDoObjeto.ContagemDePartes"/>).
     /// </summary>
     public class ContornoTestes
     {
@@ -100,6 +101,16 @@ namespace ColetorDeCristais.Testes.Contorno
             {
                 Object.DestroyImmediate(objeto);
             }
+        }
+
+        [TestCase(2, 1, 2)]   // duas submalhas e um material só: as duas entram
+        [TestCase(1, 3, 1)]   // mais materiais que submalhas: não repete a última
+        [TestCase(3, 3, 3)]
+        [TestCase(0, 2, 2)]   // sem malha: uma por material
+        [TestCase(0, 0, 1)]   // no mínimo uma
+        public void Partes_SeguemAsSubmalhas(int subMalhas, int materiais, int esperado)
+        {
+            Assert.AreEqual(esperado, ContornoDoObjeto.ContagemDePartes(subMalhas, materiais));
         }
     }
 }

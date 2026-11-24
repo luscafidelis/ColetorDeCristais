@@ -114,15 +114,18 @@ namespace ColetorDeCristais.Contorno
                     continue;
                 }
 
-                foreach (var desenho in objeto.Desenhos)
+                var desenhos = objeto.Desenhos;
+                var partesDosDesenhos = objeto.PartesDosDesenhos;
+                for (var i = 0; i < desenhos.Count; i++)
                 {
+                    var desenho = desenhos[i];
                     if (!ContornoDoObjeto.Desenhavel(desenho))
                     {
                         continue;
                     }
 
-                    // Uma chamada por parte da malha (uma por material do desenho).
-                    var partes = Mathf.Max(1, desenho.sharedMaterials.Length);
+                    // Uma chamada por parte (submalha) da malha.
+                    var partes = partesDosDesenhos[i];
                     for (var parte = 0; parte < partes; parte++)
                     {
                         comandos.DrawRenderer(desenho, dados.Material, parte, PassadaDaMascara);

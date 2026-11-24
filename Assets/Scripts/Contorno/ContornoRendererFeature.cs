@@ -27,6 +27,9 @@ namespace ColetorDeCristais.Contorno
         [Tooltip("Momento do desenho. Antes dos transparentes, o texto da tela (Canvas na câmera) fica por cima.")]
         [SerializeField] private RenderPassEvent momento = RenderPassEvent.BeforeRenderingTransparents;
 
+        // Avisa só uma vez da falta do shader: o Create roda a cada mudança no Inspector e a cada recarga do renderer.
+        private static bool _avisouSemShader;
+
         private Material _material;
         private PassoDoContorno _passo;
 
@@ -35,6 +38,7 @@ namespace ColetorDeCristais.Contorno
         {
             CoreUtils.Destroy(_material);
             _material = null;
+            _passo = null;
             if (shader == null)
             {
                 shader = Shader.Find(PassoDoContorno.NomeDoShader);
@@ -42,10 +46,16 @@ namespace ColetorDeCristais.Contorno
 
             if (shader == null || !shader.isSupported)
             {
-                Debug.LogWarning($"{name}: shader do contorno ausente ou sem suporte; o contorno não aparece.");
+                if (!_avisouSemShader)
+                {
+                    _avisouSemShader = true;
+                    Debug.LogWarning($"{name}: shader do contorno ausente ou sem suporte; o contorno não aparece.");
+                }
+
                 return;
             }
 
+            _avisouSemShader = false;
             _material = CoreUtils.CreateEngineMaterial(shader);
             _passo = new PassoDoContorno(_material) { renderPassEvent = momento };
         }

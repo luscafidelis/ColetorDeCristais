@@ -51,6 +51,9 @@ namespace ColetorDeCristais.Partida
         /// <summary>Estado da partida (onda, tempo, fase). Nulo se o componente não tiver definição.</summary>
         public CicloDaPartida Ciclo { get; private set; }
 
+        /// <summary>Nível da cena (vãos e áreas sem itens novos). Nulo se não houver.</summary>
+        public DefinicaoNivel Nivel => nivel;
+
         /// <summary>Indica se o jogo já aceita uma tecla para continuar (fora de uma onda e depois da espera).</summary>
         public bool AguardandoTecla => Ciclo != null && !Ciclo.EmOnda && _esperaRestante <= 0f;
 

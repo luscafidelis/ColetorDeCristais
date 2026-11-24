@@ -23,7 +23,7 @@ namespace ColetorDeCristais.Corpo
     /// Abaixo do tamanho mínimo, chama <see cref="ControladorDaPartida.DerrotarJogador"/>.</item>
     /// <item>Uma batida que não derrota tem uma chance (<see cref="DefinicaoCorpo.ChanceDeCarneEstragada"/>) de derrubar
     /// uma carne estragada, que sobe e cai (<see cref="QuedaDoItem"/>) no ponto da batida, enquanto o personagem é
-    /// jogado para longe.</item>
+    /// jogado para longe. Sobre um vão ou uma área sem itens novos do nível, não cai nada.</item>
     /// <item>O <see cref="ControladorDaPartida"/> desliga este componente fora das ondas: o tranco para e o
     /// personagem volta a aparecer.</item>
     /// </list>
@@ -137,7 +137,12 @@ namespace ColetorDeCristais.Corpo
         /// Derruba uma carne estragada onde o personagem está: ela sobe e cai no chão. Chamado por
         /// <see cref="ReceberBatida"/> quando o sorteio acerta; público para testes pela CLI.
         /// </summary>
-        /// <returns>A carne criada, ou nulo se não houver prefab.</returns>
+        /// <remarks>
+        /// Não cai nada se o ponto estiver num vão ou numa área sem itens novos do nível
+        /// (<see cref="ColetorDeCristais.Nivel.DefinicaoNivel.ZonasSemItensNovos"/>, pela partida): um item ali não
+        /// poderia ser coletado e seguraria o fim antecipado da onda.
+        /// </remarks>
+        /// <returns>A carne criada, ou nulo se não houver prefab ou se o ponto não aceitar itens.</returns>
         public GameObject DerrubarCarneEstragada()
         {
             if (definicao == null || definicao.PrefabDaCarneEstragada == null)
@@ -146,6 +151,12 @@ namespace ColetorDeCristais.Corpo
             }
 
             var inicio = transform.position;
+            var zonasProibidas = partida != null && partida.Nivel != null ? partida.Nivel.ZonasSemItensNovos : null;
+            if (!SorteioDeDrop.LocalPermitido(new Vector2(inicio.x, inicio.z), zonasProibidas))
+            {
+                return null;
+            }
+
             var fim = new Vector3(inicio.x, definicao.AlturaDaCarneEstragada, inicio.z);
             var carne = Instantiate(definicao.PrefabDaCarneEstragada, inicio, Quaternion.identity, grupoDeItens);
             QuedaDoItem.Derrubar(carne, inicio, fim, definicao.DuracaoDaQuedaDaCarneEstragada, definicao.AlturaDoArcoDaCarneEstragada);

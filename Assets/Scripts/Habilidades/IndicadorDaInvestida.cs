@@ -1,6 +1,8 @@
 using System;
+using ColetorDeCristais.Corpo;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 
 namespace ColetorDeCristais.Habilidades
 {
@@ -10,8 +12,9 @@ namespace ColetorDeCristais.Habilidades
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
-    /// <item>Fica num filho do <c>Jogador</c>: escala junto com o tamanho do personagem, mas a altura é a do chão
-    /// (<see cref="alturaDoChao"/>, no mundo) e a rotação não segue a do personagem.</item>
+    /// <item>Fica num filho do <c>Jogador</c>: escala junto com o tamanho do personagem, mas a altura é a dos pés
+    /// (a base do <c>CharacterController</c> do pai, mais <see cref="alturaAcimaDosPes"/>) e a rotação não segue a
+    /// do personagem. Sem <c>CharacterController</c>, a altura é <see cref="alturaAcimaDosPes"/> no mundo.</item>
     /// <item>Some com a investida bloqueada, em andamento ou em recarga, e com o <see cref="InvestidaDoJogador"/>
     /// desligado (fora das ondas).</item>
     /// <item>O <c>MeshRenderer</c> fica desligado na cena: o anel só é ligado por este componente, e o pisca-pisca do
@@ -33,8 +36,9 @@ namespace ColetorDeCristais.Habilidades
         [Tooltip("Segmentos da volta do anel.")]
         [SerializeField] private int segmentos = 48;
 
-        [Tooltip("Altura do anel no mundo (m): um pouco acima do chão, para não sumir dentro dele.")]
-        [SerializeField] private float alturaDoChao = 0.02f;
+        [Tooltip("Altura do anel acima dos pés do personagem (m): um pouco acima do chão, para não sumir dentro dele.")]
+        [FormerlySerializedAs("alturaDoChao")]
+        [SerializeField] private float alturaAcimaDosPes = 0.02f;
 
         [Tooltip("Escala no meio do pulso, quando a investida fica pronta (1 = sem pulso).")]
         [SerializeField] private float escalaDoPulso = 1.3f;
@@ -44,6 +48,7 @@ namespace ColetorDeCristais.Habilidades
 
         private MeshRenderer _desenho;
         private Mesh _malha;
+        private CharacterController _controlador;
 
         /// <summary>Estado do anel (visível e escala). Nulo se os valores do Inspector forem inválidos.</summary>
         public PulsoDoIndicador Pulso { get; private set; }
@@ -58,6 +63,8 @@ namespace ColetorDeCristais.Habilidades
             {
                 investida = GetComponentInParent<InvestidaDoJogador>();
             }
+
+            _controlador = GetComponentInParent<CharacterController>();
 
             try
             {
@@ -110,8 +117,20 @@ namespace ColetorDeCristais.Habilidades
             }
 
             var centro = transform.parent != null ? transform.parent.position : transform.position;
-            transform.SetPositionAndRotation(new Vector3(centro.x, alturaDoChao, centro.z), Quaternion.identity);
+            transform.SetPositionAndRotation(new Vector3(centro.x, AlturaDoAnel(), centro.z), Quaternion.identity);
             transform.localScale = Vector3.one * Pulso.Escala;
+        }
+
+        private float AlturaDoAnel()
+        {
+            if (_controlador == null)
+            {
+                return alturaAcimaDosPes;
+            }
+
+            var dono = _controlador.transform;
+            return RegraDeTamanho.AlturaDosPes(dono.position.y, _controlador.center.y, _controlador.height, dono.lossyScale.y)
+                + alturaAcimaDosPes;
         }
     }
 }

@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace ColetorDeCristais.Testes.Corpo
 {
-    /// <summary>Testes da <see cref="RegraDeTamanho"/>: altura do centro para manter os pés no chão.</summary>
+    /// <summary>Testes da <see cref="RegraDeTamanho"/>: altura do centro para manter os pés no chão e altura dos pés.</summary>
     public class RegraDeTamanhoTestes
     {
         [TestCase(1f, 1f, 1f)]
@@ -40,6 +40,16 @@ namespace ColetorDeCristais.Testes.Corpo
         public void AlturaDoCentro_AlturaInvalida_Lanca(float altura)
         {
             Assert.Throws<ArgumentException>(() => RegraDeTamanho.AlturaDoCentro(altura, 1f));
+        }
+
+        [TestCase(1f / 3f, 0f, 2f, 1f / 3f, 0f)]   // o Jogador no tamanho inicial: pés no chão
+        [TestCase(1f, 0f, 2f, 1f, 0f)]
+        [TestCase(1.5f, 0f, 2f, 1f, 0.5f)]          // chão elevado a 0,5 m
+        [TestCase(0f, 1f, 2f, 2f, 0f)]              // centro da cápsula deslocado para cima
+        [TestCase(2f, 0.5f, 3f, 0.5f, 1.5f)]
+        public void AlturaDosPes_BaseDaCapsulaNoMundo(float posicaoY, float centroY, float altura, float escalaY, float esperado)
+        {
+            Assert.AreEqual(esperado, RegraDeTamanho.AlturaDosPes(posicaoY, centroY, altura, escalaY), 1e-6f);
         }
     }
 }

@@ -30,6 +30,16 @@ namespace ColetorDeCristais.Corpo
             return alturaNaEscalaUm * tamanho;
         }
 
+        /// <summary>
+        /// Altura dos pés de um <c>CharacterController</c> no mundo: a base da cápsula, contando a escala do objeto.
+        /// </summary>
+        /// <param name="posicaoY">Altura do objeto no mundo.</param>
+        /// <param name="centroY">Altura do centro da cápsula, local (<c>CharacterController.center.y</c>).</param>
+        /// <param name="altura">Altura da cápsula, local (<c>CharacterController.height</c>).</param>
+        /// <param name="escalaY">Escala do objeto no eixo Y (<c>lossyScale.y</c>).</param>
+        public static float AlturaDosPes(float posicaoY, float centroY, float altura, float escalaY) =>
+            posicaoY + (centroY - altura * 0.5f) * escalaY;
+
         /// <summary>Indica se o personagem foi derrotado por ficar pequeno demais (abaixo do mínimo; igual não conta).</summary>
         public static bool Derrotado(float tamanho, float minimo) => tamanho < minimo;
     }

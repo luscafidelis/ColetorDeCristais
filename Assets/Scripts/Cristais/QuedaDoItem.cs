@@ -10,7 +10,7 @@ namespace ColetorDeCristais.Cristais
     /// <remarks>
     /// Use <see cref="Derrubar"/> logo depois do <c>Instantiate</c>. O componente desliga o <c>Collider</c> e o
     /// <see cref="CristalColetavel"/> do item (que sai da lista <see cref="CristalColetavel.Ativos"/>) e os religa ao
-    /// chegar. O giro e a flutuação do visual (<see cref="GiroEFlutuacao"/>, num filho) continuam durante a queda.
+    /// chegar (só ao chegar: se o item for destruído no meio da queda, eles ficam desligados). O giro e a flutuação do visual (<see cref="GiroEFlutuacao"/>, num filho) continuam durante a queda.
     /// <see cref="EmQueda"/> conta os itens caindo agora.
     /// </remarks>
     public class QuedaDoItem : MonoBehaviour
@@ -23,6 +23,7 @@ namespace ColetorDeCristais.Cristais
         private Collider _colisor;
         private CristalColetavel _coletavel;
         private bool _contado;
+        private bool _terminou;
 
         /// <summary>Quantos itens estão caindo agora (ainda não podem ser coletados).</summary>
         public static int EmQueda { get; private set; }
@@ -74,14 +75,21 @@ namespace ColetorDeCristais.Cristais
             transform.position = TrajetoriaDeQueda.Posicao(_inicio, _fim, _alturaDoArco, _duracao, _tempo);
             if (TrajetoriaDeQueda.Terminou(_duracao, _tempo))
             {
+                _terminou = true;
                 Destroy(this);
             }
         }
 
-        // Ao terminar (ou se o item sumir no meio da queda), o item volta a poder ser coletado e sai da contagem.
+        // Ao terminar, o item volta a poder ser coletado. Se o item inteiro sumir no meio da queda (ex.: a cena
+        // recarrega), a coleta não é religada: religar o CristalColetavel de um objeto sendo destruído o colocaria de
+        // volta na lista Ativos sem OnDisable para tirá-lo. Nos dois casos, sai da contagem.
         private void OnDestroy()
         {
-            DefinirColeta(true);
+            if (_terminou)
+            {
+                DefinirColeta(true);
+            }
+
             if (_contado)
             {
                 EmQueda--;
