@@ -34,12 +34,15 @@ namespace ColetorDeCristais.Movimento
         /// <summary>Velocidade do personagem em m/s. Aplique modificadores aqui (ex.: itens de velocidade).</summary>
         public Atributo Velocidade { get; private set; }
 
-        /// <summary>Última entrada de movimento lida (x → X do mundo, y → Z), mesmo quando suspenso.</summary>
-        public Vector2 EntradaAtual { get; private set; }
+        /// <summary>
+        /// Lê a entrada de movimento agora (x → X do mundo, y → Z), mesmo quando suspenso.
+        /// Lê direto da ação, então quem roda antes deste componente no quadro já recebe a entrada atual.
+        /// </summary>
+        public Vector2 LerEntrada() => acaoMover != null ? acaoMover.action.ReadValue<Vector2>() : Vector2.zero;
 
         /// <summary>
         /// Quando <c>true</c>, o componente não move nem gira o personagem (ex.: durante a investida, que
-        /// faz o próprio deslocamento). A entrada continua sendo lida e os modificadores continuam perdendo tempo.
+        /// faz o próprio deslocamento). Os modificadores continuam perdendo tempo.
         /// </summary>
         public bool Suspenso { get; set; }
 
@@ -74,12 +77,12 @@ namespace ColetorDeCristais.Movimento
             var deltaTempo = Time.deltaTime;
             Velocidade.Atualizar(deltaTempo);
 
-            var entrada = acaoMover != null ? acaoMover.action.ReadValue<Vector2>() : Vector2.zero;
-            EntradaAtual = entrada;
             if (Suspenso)
             {
                 return;
             }
+
+            var entrada = LerEntrada();
 
             var deslocamento = CalculadoraDeMovimento.CalcularDeslocamento(entrada, Velocidade.ValorFinal, deltaTempo);
             _controlador.Move(deslocamento);

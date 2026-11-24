@@ -163,8 +163,8 @@ Os valores concretos de cada atributo e item (base, bônus, limites, durações 
   - `TentarCalcularAnguloAlvo(entrada, out angulo)`: ângulo Y para onde olhar (0° = +Z, 90° = +X). Entradas menores que `EntradaMinima` (0,01) não giram o personagem.
   - `GirarEmDirecao(atual, alvo, velocidadeAngular, deltaTempo)`: gira pelo caminho mais curto sem passar do alvo.
 - `MovimentoDoJogador` (`MonoBehaviour`, exige `CharacterController`): lê a ação, chama a calculadora, aplica com `CharacterController.Move` e ajusta a rotação. Não tem lógica própria.
-  - `EntradaAtual`: a última entrada lida (a investida usa como direção).
-  - `Suspenso`: enquanto for `true`, o componente não move nem gira o personagem, mas continua lendo a entrada e chamando `Velocidade.Atualizar` (os efeitos temporários continuam perdendo tempo). A investida liga durante o avanço.
+  - `LerEntrada()`: lê a entrada de movimento na hora, direto da ação. A investida usa como direção; como ela roda antes deste componente, assim recebe a entrada do próprio quadro.
+  - `Suspenso`: enquanto for `true`, o componente não move nem gira o personagem, mas continua chamando `Velocidade.Atualizar` (os efeitos temporários continuam perdendo tempo). A investida liga no início do avanço e desliga no fim; ela só escreve na flag nessas duas transições.
 
 **Decisões técnicas:**
 - A velocidade é um `Atributo` (`MovimentoDoJogador.Velocidade`), criado no `Awake` com o valor base do Inspector e mínimo 0. Itens aplicam modificadores nele. O componente chama `Velocidade.Atualizar(Time.deltaTime)` a cada quadro, então modificadores temporários expiram sozinhos. Mudar o valor base no Inspector durante o Play não tem efeito (use `Velocidade.ValorBase`).
@@ -296,7 +296,7 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajust
   - `CalcularDirecao(entrada, frente, entradaMinima)` (estático): a entrada do controle, se for maior que o mínimo; senão, a frente do personagem no chão (+Z se a frente for vertical).
   - Valores não finitos ou tempo negativo geram `ArgumentException`.
 - `DefinicaoInvestida` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Investida*): *Multiplicador De Velocidade* 5, *Duracao* 0,25 e *Recarga* 5. `Parametros` monta o `ParametrosDeInvestida`.
-- `InvestidaDoJogador` (`MonoBehaviour`, no `Jogador`, exige `CharacterController` e `MovimentoDoJogador`): lê o botão (*Acao Investida*, `Player/Investida`), chama `TentarIniciar()` e aplica o deslocamento com `CharacterController.Move`. Enquanto a investida está em andamento, liga `MovimentoDoJogador.Suspenso`. `TentarIniciar()` é público para testes pela CLI. `Liberar()` é chamado pelo efeito do café, e `EmInvestida` é lido pela `DeformacaoProcedural`.
+- `InvestidaDoJogador` (`MonoBehaviour`, no `Jogador`, exige `CharacterController` e `MovimentoDoJogador`): lê o botão (*Acao Investida*, `Player/Investida`), chama `TentarIniciar()` e aplica o deslocamento com `CharacterController.Move`. Liga `MovimentoDoJogador.Suspenso` no início da investida e desliga no fim (ou ao ser desativado), sem escrever na flag nos outros quadros. A direção vem de `MovimentoDoJogador.LerEntrada()`, lida no quadro do botão. `TentarIniciar()` é público para testes pela CLI. `Liberar()` é chamado pelo efeito do café, e `EmInvestida` é lido pela `DeformacaoProcedural`.
 
 **Decisões técnicas:**
 - `InvestidaDoJogador` roda antes do `MovimentoDoJogador` (`[DefaultExecutionOrder(-10)]`). Assim, no quadro em que a investida começa, o movimento normal já fica suspenso e os dois não movem o personagem juntos.

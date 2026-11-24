@@ -27,6 +27,7 @@ namespace ColetorDeCristais.Habilidades
 
         private CharacterController _controlador;
         private MovimentoDoJogador _movimento;
+        private bool _suspendeuMovimento;
 
         /// <summary>Estado da habilidade (liberada, em andamento, recarga).</summary>
         public Investida Investida { get; } = new Investida();
@@ -68,7 +69,7 @@ namespace ColetorDeCristais.Habilidades
 
             if (_movimento != null)
             {
-                _movimento.Suspenso = false;
+                AjustarSuspensao(false);
             }
         }
 
@@ -85,7 +86,7 @@ namespace ColetorDeCristais.Habilidades
                 _controlador.Move(deslocamento);
             }
 
-            _movimento.Suspenso = Investida.EmAndamento;
+            AjustarSuspensao(Investida.EmAndamento);
         }
 
         /// <summary>Tenta começar uma investida agora (botão ou chamada direta, ex.: testes pela CLI).</summary>
@@ -97,15 +98,28 @@ namespace ColetorDeCristais.Habilidades
                 return false;
             }
 
-            var direcao = Investida.CalcularDirecao(_movimento.EntradaAtual, transform.forward, CalculadoraDeMovimento.EntradaMinima);
+            var direcao = Investida.CalcularDirecao(_movimento.LerEntrada(), transform.forward, CalculadoraDeMovimento.EntradaMinima);
             if (!Investida.TentarIniciar(direcao, _movimento.Velocidade.ValorFinal, definicao.Parametros))
             {
                 return false;
             }
 
             transform.rotation = Quaternion.LookRotation(direcao, Vector3.up);
-            _movimento.Suspenso = true;
+            AjustarSuspensao(true);
             return true;
+        }
+
+        // Só escreve em MovimentoDoJogador.Suspenso no início e no fim da investida, para não
+        // apagar a cada quadro uma suspensão pedida por outro sistema.
+        private void AjustarSuspensao(bool suspender)
+        {
+            if (suspender == _suspendeuMovimento)
+            {
+                return;
+            }
+
+            _suspendeuMovimento = suspender;
+            _movimento.Suspenso = suspender;
         }
     }
 }
