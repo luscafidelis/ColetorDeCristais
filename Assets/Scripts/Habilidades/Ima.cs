@@ -1,4 +1,5 @@
 using System;
+using ColetorDeCristais.Cristais;
 using UnityEngine;
 
 namespace ColetorDeCristais.Habilidades
@@ -23,6 +24,62 @@ namespace ColetorDeCristais.Habilidades
 
         /// <summary>Libera a habilidade. Chamar de novo não muda nada.</summary>
         public void Liberar() => Liberada = true;
+
+        /// <summary>
+        /// Decide se o ímã puxa um item neste quadro e calcula a nova posição dele.
+        /// Não puxa se o ímã não estiver liberado, se o item já foi coletado, se não tiver nível de atração
+        /// (sem definição), se o nível for <see cref="AtracaoDoIma.Nenhuma"/> ou se estiver fora do raio do nível.
+        /// O caminho livre até o jogador (paredes) é verificado por quem chama, com a física.
+        /// </summary>
+        /// <param name="coletado">Se o item já foi coletado.</param>
+        /// <param name="atracao">Nível de atração do item; <c>null</c> se ele não tiver definição.</param>
+        /// <param name="completa">Valores do nível completo.</param>
+        /// <param name="reduzida">Valores do nível reduzido.</param>
+        /// <param name="item">Posição do item.</param>
+        /// <param name="jogador">Posição do jogador.</param>
+        /// <param name="deltaTempo">Segundos desde o último quadro (zero ou mais).</param>
+        /// <param name="novaPosicao">Nova posição do item; a mesma posição se o retorno for <c>false</c>.</param>
+        /// <returns><c>true</c> se o item deve ser puxado.</returns>
+        /// <exception cref="ArgumentException">Se o tempo for negativo ou não finito, ou se uma posição não for finita.</exception>
+        public bool TentarCalcularPuxao(
+            bool coletado,
+            AtracaoDoIma? atracao,
+            ParametrosDeIma completa,
+            ParametrosDeIma reduzida,
+            Vector3 item,
+            Vector3 jogador,
+            float deltaTempo,
+            out Vector3 novaPosicao)
+        {
+            novaPosicao = item;
+            if (!Liberada || coletado || !atracao.HasValue
+                || !TentarObterParametros(atracao.Value, completa, reduzida, out var parametros)
+                || !EstaNoAlcance(item, jogador, parametros))
+            {
+                return false;
+            }
+
+            novaPosicao = CalcularNovaPosicao(item, jogador, parametros, deltaTempo);
+            return true;
+        }
+
+        /// <summary>Escolhe os valores do nível de atração.</summary>
+        /// <returns><c>false</c> para <see cref="AtracaoDoIma.Nenhuma"/> (ou um nível desconhecido): o ímã não puxa.</returns>
+        public static bool TentarObterParametros(AtracaoDoIma atracao, ParametrosDeIma completa, ParametrosDeIma reduzida, out ParametrosDeIma parametros)
+        {
+            switch (atracao)
+            {
+                case AtracaoDoIma.Completa:
+                    parametros = completa;
+                    return true;
+                case AtracaoDoIma.Reduzida:
+                    parametros = reduzida;
+                    return true;
+                default:
+                    parametros = default;
+                    return false;
+            }
+        }
 
         /// <summary>Distância horizontal (no chão) entre dois pontos.</summary>
         public static float DistanciaHorizontal(Vector3 a, Vector3 b)

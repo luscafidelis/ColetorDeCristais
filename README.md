@@ -331,7 +331,7 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Investida` e podem ser ajust
 | `Nenhuma` | — | — | Itens que liberam habilidades: café, rosquinha |
 
 - **Distância:** medida no chão (a altura não conta), do centro do personagem ao centro do item.
-- **Aceleração:** o item começa na borda do raio a 25% da velocidade e acelera em linha reta até a velocidade cheia junto do personagem. Com o personagem parado, um cristal de experiência na borda chega em cerca de 0,9 s. O item é coletado quando encosta no personagem, a cerca de 1 m do centro dele.
+- **Aceleração:** o item começa na borda do raio a 25% da velocidade e acelera em linha reta até a velocidade cheia junto do personagem. O item é coletado quando encosta no personagem, a cerca de 1 m do centro dele. Com o personagem parado, um cristal de experiência que entra pela borda é coletado em cerca de 0,75 s (sem a coleta, chegaria ao centro em cerca de 0,9 s).
 - **Nível reduzido:** como a coleta já acontece a cerca de 1 m, o raio de 1 m quase não aparece na prática: o item é coletado praticamente ao entrar no raio.
 - **Caminho:** o item anda em linha reta no chão, mantendo a altura. Só é puxado se nada sólido estiver entre ele e o personagem (verificado a cada quadro, na altura do item), então não atravessa paredes nem obstáculos: fica parado até o caminho ficar livre.
 - Ainda não há efeito visual do ímã nem indicação na tela de que ele foi liberado.
@@ -342,12 +342,14 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados n
 - `ParametrosDeIma` (struct, C# puro): `Raio` (> 0), `VelocidadeMaxima` (> 0, junto do jogador) e `FracaoNaBorda` (0 a 1; 1 = velocidade constante), validados no construtor (`ArgumentException`).
 - `Ima` (C# puro, testado em EditMode):
   - `Liberar()` e `Liberada`.
+  - `TentarCalcularPuxao(coletado, atracao, completa, reduzida, item, jogador, deltaTempo, out novaPosicao)`: decide se um item é puxado neste quadro e calcula para onde. Não puxa com o ímã bloqueado, item já coletado, item sem definição (`atracao` nula), nível `Nenhuma` ou fora do raio do nível. O caminho livre (paredes) fica com quem chama.
+  - `TentarObterParametros(atracao, completa, reduzida, out parametros)` (estático): escolhe os valores do nível, ou `false` para `Nenhuma`.
   - `DistanciaHorizontal`, `EstaNoAlcance(item, jogador, parametros)` (na borda conta) e `Velocidade(distancia, parametros)`: `vMax × (f + (1 - f) × (1 - d / R))`.
   - `DistanciaApos(distancia, deltaTempo, parametros)`: resolve o movimento de forma exata (`d(t) = c - (c - d0) × e^(k t)`, com `k = vMax × (1 - f) / R` e `c = R / (1 - f)`; com `f = 1`, `d0 - vMax × t`). Por isso o caminho não depende da taxa de quadros, e a distância nunca fica negativa.
   - `CalcularNovaPosicao(item, jogador, parametros, deltaTempo)`: a nova posição do item, em linha reta no chão na direção do jogador, mantendo a altura e sem passar do jogador. Fora do raio, não mexe.
   - Valores não finitos ou tempo negativo geram `ArgumentException`.
-- `DefinicaoIma` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Ímã*): *Raio Completo* 3, *Velocidade Completa* 6, *Raio Reduzido* 1, *Velocidade Reduzida* 2 e *Fracao Na Borda* 0,25. `TentarObterParametros(atracao, out parametros)` devolve os valores do nível, ou `false` para `Nenhuma`.
-- `ImaDoJogador` (`MonoBehaviour`, no `Jogador`): depois de liberado, percorre `CristalColetavel.Ativos` a cada quadro e move os cristais no alcance com `Ima.CalcularNovaPosicao`. Antes de mover, faz um `Physics.Linecast` do cristal até o jogador, na altura do cristal, ignorando triggers: se acertar algo que não seja o próprio jogador, o cristal não se mexe naquele quadro. `Liberar()` é chamado pelo efeito da rosquinha.
+- `DefinicaoIma` (ScriptableObject, menu *Create > Coletor de Cristais > Definição de Ímã*): *Raio Completo* 3, *Velocidade Completa* 6, *Raio Reduzido* 1, *Velocidade Reduzida* 2 e *Fracao Na Borda* 0,25. `ParametrosCompletos` e `ParametrosReduzidos` montam os `ParametrosDeIma` de cada nível; `TentarObterParametros(atracao, out parametros)` devolve os do nível pedido (escolha do `Ima`), ou `false` para `Nenhuma`.
+- `ImaDoJogador` (`MonoBehaviour`, no `Jogador`): depois de liberado, percorre `CristalColetavel.Ativos` a cada quadro e pergunta a `Ima.TentarCalcularPuxao` se cada cristal é puxado e para onde. Antes de mover, faz um `Physics.Linecast` do cristal até o jogador, na altura do cristal, ignorando triggers: se acertar algo que não seja o próprio jogador, o cristal não se mexe naquele quadro. `Liberar()` é chamado pelo efeito da rosquinha.
 
 **Decisões técnicas:**
 - O nível de atração fica na definição do cristal, e os valores de cada nível ficam num asset só. Um tipo novo de item escolhe o nível sem código novo.

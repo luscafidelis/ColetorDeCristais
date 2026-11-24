@@ -157,7 +157,7 @@ Com o ímã liberado, o personagem desce na direção dos dois cristais de exper
 - `DefinicaoCristal` ganhou `AtracaoDoIma` (`Completa`, `Reduzida` ou `Nenhuma`), e `CristalColetavel` ganhou a lista `Ativos`.
 - Novo efeito `EfeitoLiberarIma`, a definição `Rosquinha` e a variante `Comida_Rosquinha`, com o donut do Food Kit. Nova definição `Experiencia` e variante `Cristal_Experiencia` (o visual do `Cristal` em 1/4 do tamanho, com o mesmo trigger) para os cristais ciano.
 
-**Validação:** 209 testes EditMode passando, incluindo o alcance, a aceleração, o caminho igual com um quadro grande ou muitos pequenos, o item que para no jogador sem passar dele e a escolha dos níveis. Em Play Mode, pela CLI: antes da rosquinha, um cristal a 2,6 m não se mexe; depois dela, ele vem e é coletado; com um bloco entre o cristal e o personagem, ele fica parado, e é puxado e coletado quando o bloco sai; o café a 2 m não se mexe. O teste jogando com teclado ou gamepad ainda não foi feito.
+**Validação:** 212 testes EditMode passando, incluindo o alcance, a aceleração, os casos em que o ímã não puxa (bloqueado, item coletado, sem definição, nível `Nenhuma`, fora do raio), o caminho igual com um quadro grande ou muitos pequenos, o item que para no jogador sem passar dele e a escolha dos níveis. Em Play Mode, pela CLI: antes da rosquinha, um cristal a 2,6 m não se mexe; depois dela, ele vem e é coletado; com um bloco entre o cristal e o personagem, ele fica parado, e é puxado e coletado quando o bloco sai; o café a 2 m não se mexe. O ímã também foi testado jogando com o teclado. O teste com gamepad ainda não foi feito.
 
 ---
 

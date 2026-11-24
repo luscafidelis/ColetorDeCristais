@@ -149,6 +149,57 @@ namespace ColetorDeCristais.Testes.Habilidades
             Assert.AreEqual(item, Ima.CalcularNovaPosicao(item, new Vector3(0f, 1.08f, 0f), Completa, 0.1f));
         }
 
+        // --- Decisão de puxar (TentarCalcularPuxao) ---
+
+        private static readonly Vector3 Jogador = new Vector3(0f, 1.08f, 0f);
+        private static readonly Vector3 ItemA2Metros = new Vector3(2f, 0.8f, 0f);
+
+        private static Ima Liberado()
+        {
+            var ima = new Ima();
+            ima.Liberar();
+            return ima;
+        }
+
+        private static bool Puxar(Ima ima, bool coletado, AtracaoDoIma? atracao, Vector3 item, out Vector3 novaPosicao) =>
+            ima.TentarCalcularPuxao(coletado, atracao, Completa, Reduzida, item, Jogador, 0.1f, out novaPosicao);
+
+        [Test]
+        public void Puxao_Completa_NoRaio_PuxaComOsValoresCompletos()
+        {
+            Assert.IsTrue(Puxar(Liberado(), false, AtracaoDoIma.Completa, ItemA2Metros, out var nova));
+
+            Assert.AreEqual(Ima.DistanciaApos(2f, 0.1f, Completa), Ima.DistanciaHorizontal(nova, Jogador), Tolerancia);
+            Assert.AreEqual(0.8f, nova.y, Tolerancia);
+        }
+
+        [Test]
+        public void Puxao_Reduzida_UsaORaioEAVelocidadeReduzidos()
+        {
+            Assert.IsFalse(Puxar(Liberado(), false, AtracaoDoIma.Reduzida, ItemA2Metros, out _), "2 m está fora do raio de 1 m");
+
+            var item = new Vector3(0.9f, 0.8f, 0f);
+            Assert.IsTrue(Puxar(Liberado(), false, AtracaoDoIma.Reduzida, item, out var nova));
+            Assert.AreEqual(Ima.DistanciaApos(0.9f, 0.1f, Reduzida), Ima.DistanciaHorizontal(nova, Jogador), Tolerancia);
+        }
+
+        [Test]
+        public void Puxao_CasosQueNaoPuxam_DevolvemAMesmaPosicao()
+        {
+            AssertNaoPuxa(new Ima(), false, AtracaoDoIma.Completa, ItemA2Metros, "ímã não liberado");
+            AssertNaoPuxa(Liberado(), true, AtracaoDoIma.Completa, ItemA2Metros, "já coletado");
+            AssertNaoPuxa(Liberado(), false, null, ItemA2Metros, "sem definição");
+            AssertNaoPuxa(Liberado(), false, AtracaoDoIma.Nenhuma, ItemA2Metros, "nível Nenhuma (café, rosquinha)");
+            AssertNaoPuxa(Liberado(), false, AtracaoDoIma.Completa, new Vector3(3.5f, 0.8f, 0f), "fora do raio");
+            AssertNaoPuxa(Liberado(), false, (AtracaoDoIma)99, ItemA2Metros, "nível desconhecido");
+        }
+
+        private static void AssertNaoPuxa(Ima ima, bool coletado, AtracaoDoIma? atracao, Vector3 item, string caso)
+        {
+            Assert.IsFalse(Puxar(ima, coletado, atracao, item, out var nova), caso);
+            Assert.AreEqual(item, nova, caso);
+        }
+
         // --- Validação ---
 
         [Test]

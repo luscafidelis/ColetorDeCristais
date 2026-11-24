@@ -34,25 +34,20 @@ namespace ColetorDeCristais.Habilidades
         [Range(0f, 1f)]
         [SerializeField] private float fracaoNaBorda = 0.25f;
 
-        /// <summary>Os valores do nível de atração pedido.</summary>
+        /// <summary>Valores do nível completo.</summary>
+        /// <exception cref="System.ArgumentException">Se algum valor do asset for inválido.</exception>
+        public ParametrosDeIma ParametrosCompletos => new ParametrosDeIma(raioCompleto, velocidadeCompleta, fracaoNaBorda);
+
+        /// <summary>Valores do nível reduzido.</summary>
+        /// <exception cref="System.ArgumentException">Se algum valor do asset for inválido.</exception>
+        public ParametrosDeIma ParametrosReduzidos => new ParametrosDeIma(raioReduzido, velocidadeReduzida, fracaoNaBorda);
+
+        /// <summary>Os valores do nível de atração pedido (a escolha é a de <see cref="Ima.TentarObterParametros"/>).</summary>
         /// <param name="atracao">Nível de atração do item.</param>
         /// <param name="parametros">Raio e velocidade do nível; padrão se o retorno for <c>false</c>.</param>
         /// <returns><c>false</c> para <see cref="AtracaoDoIma.Nenhuma"/> (o ímã não puxa).</returns>
         /// <exception cref="System.ArgumentException">Se algum valor do asset for inválido.</exception>
-        public bool TentarObterParametros(AtracaoDoIma atracao, out ParametrosDeIma parametros)
-        {
-            switch (atracao)
-            {
-                case AtracaoDoIma.Completa:
-                    parametros = new ParametrosDeIma(raioCompleto, velocidadeCompleta, fracaoNaBorda);
-                    return true;
-                case AtracaoDoIma.Reduzida:
-                    parametros = new ParametrosDeIma(raioReduzido, velocidadeReduzida, fracaoNaBorda);
-                    return true;
-                default:
-                    parametros = default;
-                    return false;
-            }
-        }
+        public bool TentarObterParametros(AtracaoDoIma atracao, out ParametrosDeIma parametros) =>
+            Ima.TentarObterParametros(atracao, ParametrosCompletos, ParametrosReduzidos, out parametros);
     }
 }

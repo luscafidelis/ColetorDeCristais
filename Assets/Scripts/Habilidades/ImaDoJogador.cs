@@ -42,23 +42,19 @@ namespace ColetorDeCristais.Habilidades
 
             var jogador = transform.position;
             var deltaTempo = Time.deltaTime;
+            var completa = definicao.ParametrosCompletos;
+            var reduzida = definicao.ParametrosReduzidos;
             var cristais = CristalColetavel.Ativos;
             for (var i = 0; i < cristais.Count; i++)
             {
                 var cristal = cristais[i];
-                if (cristal.Coletado || cristal.Definicao == null
-                    || !definicao.TentarObterParametros(cristal.Definicao.AtracaoDoIma, out var parametros))
-                {
-                    continue;
-                }
-
+                var atracao = cristal.Definicao != null ? cristal.Definicao.AtracaoDoIma : (AtracaoDoIma?)null;
                 var posicao = cristal.transform.position;
-                if (!Ima.EstaNoAlcance(posicao, jogador, parametros) || !CaminhoLivre(posicao, jogador))
+                if (Ima.TentarCalcularPuxao(cristal.Coletado, atracao, completa, reduzida, posicao, jogador, deltaTempo, out var novaPosicao)
+                    && CaminhoLivre(posicao, jogador))
                 {
-                    continue;
+                    cristal.transform.position = novaPosicao;
                 }
-
-                cristal.transform.position = Ima.CalcularNovaPosicao(posicao, jogador, parametros, deltaTempo);
             }
         }
 
