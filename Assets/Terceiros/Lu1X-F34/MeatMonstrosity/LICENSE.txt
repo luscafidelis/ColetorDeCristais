@@ -1,0 +1,15 @@
+Meat Monstrosity
+Autor: Lu1X-F34
+Origem: https://sketchfab.com/3d-models/meat-monstrosity-f83d6945d94f4a849f8a514bc5ca987b
+Licença: Creative Commons Attribution 4.0 International (CC BY 4.0)
+         https://creativecommons.org/licenses/by/4.0/
+
+"Meat Monstrosity" (https://sketchfab.com/3d-models/meat-monstrosity-f83d6945d94f4a849f8a514bc5ca987b)
+by Lu1X-F34 is licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+
+A CC BY 4.0 exige crédito: nome do autor, link da obra, link da licença e aviso de modificação.
+Isso vale para o repositório e para a tela de créditos do jogo.
+
+Modificações feitas neste projeto:
+- Materiais recriados para o URP Lit (Materiais/Chefe_Carne1 e Chefe_Carne2).
+- Modelo escalado e reposicionado no jogo.

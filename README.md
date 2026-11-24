@@ -86,11 +86,14 @@ python -m unittest discover -s ferramentas
 | `Assets/Prefabs/Comida_Carne.prefab`, `Comida_CarneEstragada.prefab` (variante da carne, com o material `CarneEstragada`), `Comida_Peixe.prefab`, `Comida_Coxa.prefab`, `Comida_Cafe.prefab`, `Comida_Rosquinha.prefab` | Prefab Variants de `Cristal` com modelos de comida do Food Kit (ver "Cristais coletáveis") |
 | `Assets/Prefabs/Cristal_Experiencia.prefab` | Prefab Variant de `Cristal` para os cristais de experiência: definição `Experiencia` e visual com 1/4 do tamanho (ver "Cristais coletáveis") |
 | `Assets/Prefabs/VisualMontrengo.prefab` | Visual do jogador: o modelo do montrengo com a `DeformacaoProcedural`, sem colisão (ver "Visual do jogador (montrengo)") |
+| `Assets/Prefabs/VisualChefeTutorial.prefab` | Visual do chefe do mercado (o Meat Monstrosity), animado e sem colisão. Ainda não entra no jogo (ver "Partida, ondas e chefes") |
 | `Assets/Prefabs/ArenaVisualKenney.prefab` | Visual da Arena: piso e paredes do Mini Shop, sem colisão (ver "Movimento do personagem") |
 | `Assets/Prefabs/MercadoVisualKenney.prefab` | Visual do mercado: o mesmo da Arena, sem as placas de piso do vão |
 | `Assets/Prefabs/Produto_Lata.prefab`, `Produto_Refrigerante.prefab`, `Produto_Garrafa.prefab`, `Produto_Biscoito.prefab` | Prefab Variants de `Cristal` com modelos do Food Kit: os produtos que caem das prateleiras do mercado |
 | `Assets/Terceiros/Kenney/` | Assets de terceiros da Kenney (CC0): `FoodKit/` e `MiniShop/`, em FBX com textura `Textures/colormap.png` e o `License.txt` de cada pacote. Créditos em [`CREDITOS.md`](CREDITOS.md) |
 | `Assets/Terceiros/JoppeMonnens/CronenbergMonster/` | Modelo do montrengo (CC BY 4.0, crédito obrigatório): `CronenBergFinal.fbx`, `Texturas/` (cor e normal originais e o mapa metálico+suavidade combinado, importados em 1K), `Materiais/` (`Montrengo_Corpo`, `Montrengo_Osso`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
+| `Assets/Terceiros/Lu1X-F34/MeatMonstrosity/` | Modelo do chefe do mercado (CC BY 4.0, crédito obrigatório): `Meat.fbx` (com esqueleto e as animações `idle_2` e `walk`), `Texturas/` (`Meat1_Color`, `Meat2_Color`, 1K), `Materiais/` (`Chefe_Carne1`, `Chefe_Carne2`, URP Lit) e `LICENSE.txt` com a atribuição e as modificações |
+| `Assets/Animacoes/` | Animator Controllers: `ChefeTutorial` (estados `Parado`, o padrão, e `Andando`, sem transições) |
 | `Assets/Dados/Cristais/` | Assets `DefinicaoCristal`: `Carne` (a carne crua, que faz crescer), `CarneEstragada` (cresce menos), `CristalBase` (o peixe, sem efeito), `Coxa`, `Cafe`, `Rosquinha`, `Experiencia` (cristais de experiência) e os produtos das prateleiras, sem efeito: `Lata`, `Refrigerante`, `Garrafa` e `Biscoito`. Em `Efeitos/`, os assets de efeito (`VelocidadeCoxa`, `LiberarInvestida`, `LiberarIma`, `EfeitoTamanho`, `EfeitoTamanhoEstragado`) |
 | `Assets/Dados/Corpo/` | Asset `Corpo` (`DefinicaoCorpo`): o tamanho inicial e mínimo do personagem e o dano das batidas (tranco e invulnerabilidade) |
 | `Assets/Dados/Habilidades/` | Assets de valores das habilidades: `Investida` (`DefinicaoInvestida`) e `Ima` (`DefinicaoIma`) |
@@ -444,7 +447,7 @@ Os valores ficam no asset `Assets/Dados/Habilidades/Ima` e podem ser ajustados n
 ## Partida, ondas e chefes
 **Como funciona no jogo:**
 - **Ondas:** a Arena tem **3 ondas de 120 s**; o mercado (arena 0), 1. O cronômetro é regressivo e aparece no topo da tela, junto com a onda (ex.: "Onda 1/3   1:54"). O objetivo é sobreviver até o tempo acabar.
-- **Chefes:** quando o tempo de uma onda acaba, vem o **chefe da onda**; na 3ª onda, no lugar dele, vem o **chefe da arena**. Os chefes ainda não existem: aparece a mensagem "Chefe da onda N!" ou "Chefe da arena!", e **qualquer tecla** (ou botão) conta como chefe derrotado.
+- **Chefes:** quando o tempo de uma onda acaba, vem o **chefe da onda**; na 3ª onda, no lugar dele, vem o **chefe da arena**. Os chefes ainda não existem (o visual do chefe do mercado já está no projeto, mas não aparece; ver abaixo): aparece a mensagem "Chefe da onda N!" ou "Chefe da arena!", e **qualquer tecla** (ou botão) conta como chefe derrotado.
 - **Fim antecipado (só no mercado):** coletar todos os itens que contam encerra a onda na hora, e vem o chefe (no mercado, o da arena). Contam os itens no chão fora da área bônus: os colocados na cena, os produtos já derrubados das prateleiras e a carne estragada. Prateleiras ainda não batidas não contam, e um item caindo conta como item que falta. Na Arena, isso fica desligado: nas próximas arenas, inimigos e itens vão aparecer durante a onda.
 - **Próxima onda:** depois do chefe da onda, começa a próxima onda, com o tempo cheio. O jogador fica onde está e mantém as habilidades liberadas e os bônus. Os itens que sobraram ficam na arena, e entram itens novos em posições sorteadas:
   - as mesmas comidas da primeira onda: 1 carne, 2 peixes e 2 coxas;
@@ -485,6 +488,8 @@ Os valores ficam nos assets `Assets/Dados/Partida/Partida` (Arena) e `PartidaTut
 **Como foi montado na Editor:**
 1. **Valores:** pasta `Assets/Dados/Partida`, *Create > Coletor de Cristais > Definição de Partida* (`Partida`). Preencha *Prefab De Experiencia*, *Comidas Por Onda* e *Itens De Habilidade* com os prefabs listados acima.
 2. **Cena:** um GameObject vazio `Partida` na raiz, com `Controlador Da Partida` (*Definicao* `Partida`, *Jogador* o objeto `Jogador`, *Grupo De Itens* o objeto `Cristais`) e `Mensagens Da Partida`.
+
+**Visual do chefe do mercado** (ainda fora do jogo): o prefab `Assets/Prefabs/VisualChefeTutorial.prefab` tem a raiz vazia, com o pivô na base, e o filho `Modelo`, o FBX `Meat.fbx`. O `Modelo` tem escala 0,911 (3 m de altura), está centralizado na horizontal, com a base em y = 0, e a frente (o peito) no +Z, como o montrengo. O `Animator` usa o controlador `Assets/Animacoes/ChefeTutorial` e começa no estado `Parado` (`idle_2`, 6 s); o estado `Andando` (`walk`, 4 s) existe, mas nada o aciona. As animações do FBX estão em loop. O FBX traz também uma cópia mais curta de cada animação (`Meat_Armature.001`), que não é usada. Os materiais do FBX foram remapeados (aba *Materials* do *Model Importer*) para `Chefe_Carne1` e `Chefe_Carne2` (URP Lit, *Base Map* com a textura de cor, *Smoothness* 0,35).
 
 ## Mercado (arena 0)
 **Como funciona no jogo:** o jogo começa num minimercado, a arena 0, que serve de tutorial. A planta é **provisória**: a definitiva vai seguir um desenho do desenvolvedor.
