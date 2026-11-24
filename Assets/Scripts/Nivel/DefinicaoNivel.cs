@@ -47,6 +47,14 @@ namespace ColetorDeCristais.Nivel
         [Tooltip("Altura, em metros, em que o produto aparece.")]
         [SerializeField] private float alturaDoProduto = 0.8f;
 
+        [Tooltip("Duração, em segundos, da queda do produto do alto da prateleira até o chão (zero: aparece direto no chão).")]
+        [Min(0f)]
+        [SerializeField] private float duracaoDaQuedaDoProduto = 0.4f;
+
+        [Tooltip("Quanto o produto sobe, em metros, acima da linha reta no meio da queda.")]
+        [Min(0f)]
+        [SerializeField] private float alturaDoArcoDoProduto = 0.3f;
+
         /// <summary>Áreas onde o personagem cai.</summary>
         public IReadOnlyList<Retangulo> Vaos => vaos;
 
@@ -82,5 +90,11 @@ namespace ColetorDeCristais.Nivel
 
         /// <summary>Altura do produto.</summary>
         public float AlturaDoProduto => alturaDoProduto;
+
+        /// <summary>Duração da queda do produto, em segundos.</summary>
+        public float DuracaoDaQuedaDoProduto => duracaoDaQuedaDoProduto;
+
+        /// <summary>Quanto o produto sobe acima da linha reta no meio da queda.</summary>
+        public float AlturaDoArcoDoProduto => alturaDoArcoDoProduto;
     }
 }

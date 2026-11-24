@@ -39,3 +39,5 @@ MonoBehaviour:
   afastamentoDoProduto: 0.8
   deslocamentoLateralDoProduto: 1.5
   alturaDoProduto: 0.8
+  duracaoDaQuedaDoProduto: 0.4
+  alturaDoArcoDoProduto: 0.3

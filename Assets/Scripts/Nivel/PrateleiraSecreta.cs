@@ -1,3 +1,4 @@
+using ColetorDeCristais.Cristais;
 using UnityEngine;
 
 namespace ColetorDeCristais.Nivel
@@ -8,7 +9,8 @@ namespace ColetorDeCristais.Nivel
     /// </summary>
     /// <remarks>
     /// Os produtos, o afastamento e a altura vêm do <see cref="DefinicaoNivel"/> do <see cref="ControladorDoNivel"/> no pai.
-    /// O produto cai na frente da face batida, para um lado sorteado.
+    /// O produto sai do alto da face batida e cai em arco (<see cref="QuedaDoItem"/>) na frente dela, para um lado sorteado;
+    /// só pode ser coletado depois de chegar ao chão.
     /// </remarks>
     [RequireComponent(typeof(Collider))]
     public class PrateleiraSecreta : MonoBehaviour
@@ -52,7 +54,12 @@ namespace ColetorDeCristais.Nivel
                 baseDaPrateleira, new Vector2(personagem.x, personagem.z),
                 definicao.AfastamentoDoProduto, lado * definicao.DeslocamentoLateralDoProduto);
             var posicao = new Vector3(noChao.x, definicao.AlturaDoProduto, noChao.y);
-            return Instantiate(definicao.Produtos[indice], posicao, Quaternion.identity, _nivel.GrupoDeItens);
+            // Sai do alto da face batida, na frente do personagem, e cai em arco até o corredor.
+            var naFace = EstadoDaPrateleira.PosicaoDoProduto(baseDaPrateleira, new Vector2(personagem.x, personagem.z), 0f, 0f);
+            var inicio = new Vector3(naFace.x, limites.max.y, naFace.y);
+            var produto = Instantiate(definicao.Produtos[indice], inicio, Quaternion.identity, _nivel.GrupoDeItens);
+            QuedaDoItem.Derrubar(produto, inicio, posicao, definicao.DuracaoDaQuedaDoProduto, definicao.AlturaDoArcoDoProduto);
+            return produto;
         }
     }
 }
