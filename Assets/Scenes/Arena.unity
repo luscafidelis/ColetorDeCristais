@@ -166,6 +166,7 @@ MonoBehaviour:
   definicao: {fileID: 11400000, guid: e346ab653ccc8dd47a20252111c70166, type: 2}
   jogador: {fileID: 2136594509}
   grupoDeItens: {fileID: 67245933}
+  nivel: {fileID: 0}
 --- !u!4 &26875649
 Transform:
   m_ObjectHideFlags: 0
@@ -1988,6 +1989,7 @@ GameObject:
   - component: {fileID: 2136594515}
   - component: {fileID: 2136594516}
   - component: {fileID: 2136594517}
+  - component: {fileID: 2136594518}
   m_Layer: 0
   m_Name: Jogador
   m_TagString: Player
@@ -2148,6 +2150,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Habilidades.ImaDoJogador
   definicao: {fileID: 11400000, guid: 75e2de30b424cc348820dbae00be167e, type: 2}
+--- !u!114 &2136594518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136594509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a06dd0d4508e4f94ab8dd768662af898, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Corpo.CorpoDoJogador
+  definicao: {fileID: 11400000, guid: b2f07dd35d30b75408d991032e415f90, type: 2}
 --- !u!1001 &4267713269376084811
 PrefabInstance:
   m_ObjectHideFlags: 0

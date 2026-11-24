@@ -8858,6 +8858,7 @@ GameObject:
   - component: {fileID: 2136594516}
   - component: {fileID: 2136594517}
   - component: {fileID: 2136594518}
+  - component: {fileID: 2136594519}
   m_Layer: 0
   m_Name: Jogador
   m_TagString: Player
@@ -9030,6 +9031,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 907585f222bae894d8168119cc0b09e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Nivel.ImpactoDaInvestida
+--- !u!114 &2136594519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2136594509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a06dd0d4508e4f94ab8dd768662af898, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Corpo.CorpoDoJogador
+  definicao: {fileID: 11400000, guid: b2f07dd35d30b75408d991032e415f90, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

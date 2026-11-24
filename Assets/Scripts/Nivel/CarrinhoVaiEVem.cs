@@ -77,8 +77,13 @@ namespace ColetorDeCristais.Nivel
 
             var baseDoCarrinho = new Retangulo(posicao + _deslocamentoDaBase, _tamanhoDaBase);
             var jogador = controle.transform.position;
+            // O raio do CharacterController cresce com a escala do personagem (o tamanho do CorpoDoJogador).
+            var escala = controle.transform.lossyScale;
+            var raio = controle.radius * Mathf.Max(Mathf.Abs(escala.x), Mathf.Abs(escala.z));
             // A folga inclui a "pele" do CharacterController, para ele não começar o Move já encostado no carrinho.
-            var empurrao = Empurrao.Calcular(baseDoCarrinho, movimento, new Vector2(jogador.x, jogador.z), controle.radius, controle.skinWidth + 0.01f);
+            // Usa a maior entre a pele com e sem escala: sobrar folga só empurra um pouco mais.
+            var pele = controle.skinWidth * Mathf.Max(1f, Mathf.Abs(escala.x));
+            var empurrao = Empurrao.Calcular(baseDoCarrinho, movimento, new Vector2(jogador.x, jogador.z), raio, pele + 0.01f);
             if (empurrao != Vector2.zero)
             {
                 controle.Move(new Vector3(empurrao.x, 0f, empurrao.y));
