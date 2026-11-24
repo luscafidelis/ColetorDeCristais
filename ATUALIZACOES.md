@@ -134,7 +134,7 @@ O personagem anda um pouco para a direita, para e dá uma investida, esticando p
 - Nova ação `Player/Investida` no Input System (Espaço e gatilho direito).
 - `MovimentoDoJogador` ganhou `Suspenso`, para não mover o personagem durante a investida, e `LerEntrada()`, que lê o controle no quadro do botão. A `DeformacaoProcedural` ganhou o esticamento da investida.
 
-**Validação:** 190 testes EditMode passando, incluindo a distância de 4,375 m, o último quadro, a recarga desde o início, a investida mais longa com bônus de velocidade e o esticamento com volume preservado. Em Play Mode, pela CLI: antes do café a investida não começa; depois de coletar o café, ela começa e percorre 4,375 m; durante a recarga não começa de novo e, passados 5 s, começa; partindo a 2,5 m da mureta leste, ela para encostada na mureta. O teste jogando com teclado e gamepad ainda não foi feito.
+**Validação:** 190 testes EditMode passando, incluindo a distância de 4,375 m, o último quadro, a recarga desde o início, a investida mais longa com bônus de velocidade e o esticamento com volume preservado. Em Play Mode, pela CLI: antes do café a investida não começa; depois de coletar o café, ela começa e percorre 4,375 m; durante a recarga não começa de novo e, passados 5 s, começa; partindo a 2,5 m da mureta leste, ela para encostada na mureta. A investida também foi testada jogando com o teclado. O teste com gamepad ainda não foi feito.
 
 ---
 
