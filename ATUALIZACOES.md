@@ -215,6 +215,52 @@ O teste jogando com teclado ou gamepad ainda não foi feito.
 
 ---
 
+## 12. Montrengo que cresce, tranco dos carrinhos e contorno
+
+**Para quem joga:** o montrengo agora **começa com 1/3 do tamanho** (cerca de 0,67 m) e **cresce comendo carne crua**: cada carne soma 1/6, sem limite. A carne do ponto de partida já o leva a 1/2. Os outros itens não mudam o tamanho.
+
+![O mercado visto de cima: o montrengo pequeno no açougue, com o anel ciano da investida em volta, e as comidas, o café e a rosquinha com contorno preto](docs/atualizacoes/mercado-contorno-e-anel.png)
+
+- **Tranco do carrinho:** ser atingido por um carrinho dá uma **batida**. O montrengo **encolhe 1/6**, é **jogado 3 m** na direção do carrinho e fica 1 s piscando, sem levar outra. Se o tamanho ficar **abaixo de 1/16**, é derrota. Uma batida perto do fim do corredor pode jogá-lo no vão, e ele cai.
+- **Carne estragada:** cada batida que não derrota tem **33% de chance** de derrubar uma carne verde-acinzentada, que sobe e cai no lugar da batida. Ela recupera parte do que foi perdido: **+1/12**, metade da carne crua.
+- **Queda dos produtos:** o produto derrubado de uma prateleira sai do alto dela e cai em arco até o corredor. Enquanto cai, não pode ser coletado.
+- **Fim antecipado no mercado:** coletar todos os itens deste lado do vão **encerra a onda na hora** e chama o chefe da arena. Os itens da área bônus não contam. Na Arena, a onda continua indo até o fim do tempo.
+- **Anel da investida:** um anel ciano fino no chão, em volta do montrengo, aparece quando a investida está pronta. Ele some durante o avanço e a recarga e dá um pulso quando ela volta.
+- **Contorno:** o montrengo e os itens coletáveis (menos os cristais de experiência) têm um **contorno preto fino**, que aparece **através das prateleiras**. Assim dá para achar o montrengo pequeno e os itens escondidos.
+
+O modelo do chefe do mercado (o "Meat Monstrosity", de Lu1X-F34) já está no projeto, mas ainda não aparece no jogo.
+
+**Por dentro:**
+- Novo sistema `Corpo`: `RegraDeTamanho`, `Tranco`, `Invulnerabilidade`, `DanoNoCorpo` e `SorteioDeDrop` (C# puro), valores no ScriptableObject `DefinicaoCorpo` (asset `Corpo`) e o componente `CorpoDoJogador`. O tamanho é um `Atributo`, que escala o `Jogador` inteiro (desenho e colisão). A carne crua soma um modificador pelo novo efeito `EfeitoDeTamanho`.
+- `CarrinhoVaiEVem` chama `CorpoDoJogador.ReceberBatida` quando empurra, e o raio do empurrão acompanha a escala do personagem. Os carrinhos laterais vão até z = 2 (6 m de percurso); o do meio, até z = 0,5, antes do café.
+- `TrajetoriaDeQueda` (C# puro) e `QuedaDoItem` fazem o arco dos produtos e da carne estragada.
+- `RegraDoFimAntecipado` (C# puro) e `CicloDaPartida.EncerrarOnda()`. Ficam ligados só no asset `PartidaTutorial`; a área bônus é uma área ignorada no asset `Mercado`.
+- `MalhaDeAnel` e `PulsoDoIndicador` (C# puro) e o componente `IndicadorDaInvestida`, num filho do `Jogador`.
+- Novo sistema `Contorno`: a Renderer Feature `ContornoRendererFeature` desenha, numa máscara, a silhueta dos objetos com `ContornoDoObjeto`, sem teste de profundidade, e pinta o contorno em volta dela (shader `Hidden/ColetorDeCristais/Contorno`). O assembly do jogo agora referencia o URP.
+- Modelo do chefe em `Assets/Terceiros/Lu1X-F34/MeatMonstrosity/` (CC BY 4.0, em [`CREDITOS.md`](CREDITOS.md)), com o prefab `VisualChefeTutorial` e o controlador de animação `ChefeTutorial`.
+
+**Validação:** 419 testes EditMode passando, incluindo:
+- o tranco com a distância exata em qualquer taxa de quadros;
+- a invulnerabilidade e a derrota por tamanho;
+- o sorteio da carne estragada perto de 33% em 30 mil sorteios;
+- o arco da queda;
+- o fim antecipado (área bônus, borda dela, item caindo e onda encerrada em cada fase);
+- a malha e o pulso do anel;
+- a espessura do contorno em várias resoluções.
+
+Em Play Mode, pela CLI:
+- **Tamanho:** o montrengo começou em 1/3 e foi a 1/2 com a carne, com os pés no chão. No tamanho pequeno, ainda coletou os itens, foi empurrado pelos carrinhos e atravessou o vão com a investida.
+- **Batidas:** três batidas seguidas levaram o tamanho de 0,5 a 0,333 e 0,167 e depois à "Derrota". A batida no fim do corredor lateral jogou o montrengo no vão; no corredor do meio também.
+- **Queda e carne estragada:** um produto caiu do alto da prateleira até o corredor e só então foi coletado. Uma carne estragada derrubada pela CLI (sem depender do sorteio) caiu no chão e, coletada, somou 1/12.
+- **Fim antecipado:** coletar os 10 itens deste lado do vão levou ao chefe da arena com 88 s ainda no relógio, com os 11 da área bônus no lugar.
+- **Anel:** escondido antes do café, ele apareceu com a investida liberada, sumiu na recarga e voltou no fim dela. Com o tempo desacelerado, o pulso foi de 1 a 1,3 e voltou a 1 em 0,3 s.
+- **Contorno:** pela câmera do jogo, o contorno apareceu nos itens e no montrengo e, com o montrengo dentro de uma fileira de prateleiras, apareceu por cima delas.
+- **Chefe:** o modelo foi conferido só em fotos do prefab, fora das cenas do jogo.
+
+O mercado também foi jogado pelo desenvolvedor durante os ajustes (a distância do tranco e o percurso dos carrinhos mudaram a partir disso). O teste com gamepad ainda não foi feito.
+
+---
+
 ## Como registrar uma nova atualização
 1. Acrescente uma seção no fim, com o próximo número, seguindo o mesmo formato: **Para quem joga**, **Por dentro** e **Validação**, com o número de testes passando.
 2. Não registre aqui planejamento, cronograma ou dados pessoais (veja a regra no `CLAUDE.md`).
