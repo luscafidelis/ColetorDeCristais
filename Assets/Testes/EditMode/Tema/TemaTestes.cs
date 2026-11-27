@@ -33,8 +33,9 @@ namespace ColetorDeCristais.Testes.Tema
             Color.RGBToHSV(pastel, out var matizPastel, out var saturacaoPastel, out var brilhoPastel);
 
             Assert.AreEqual(matiz, matizPastel, Tolerancia, "mantém o matiz");
-            Assert.AreEqual(saturacao * 0.7f, saturacaoPastel, Tolerancia, "70% da saturação");
-            Assert.AreEqual(brilho + (1f - brilho) * 0.3f, brilhoPastel, Tolerancia, "30% do caminho até o branco");
+            Assert.AreEqual(saturacao * PaletaDoTema.SaturacaoDoMundo, saturacaoPastel, Tolerancia, "fica a fração da saturação");
+            Assert.AreEqual(brilho + (1f - brilho) * PaletaDoTema.ClareamentoDoMundo, brilhoPastel, Tolerancia,
+                "anda a fração do caminho até o branco");
         }
 
         [Test]

@@ -20,6 +20,8 @@ namespace ColetorDeCristais.Ferramentas
     /// <item>Em cada modelo do kit, troca o material <c>colormap</c> pelo pastel (aba <i>Materials</i> do importador,
     /// <i>Remapped Materials</i>). Os arquivos originais da Kenney não mudam.</item>
     /// </list>
+    /// Se a textura original não abrir (ex.: ponteiro do Git LFS sem <c>git lfs pull</c>), o kit é pulado com um erro e
+    /// nada é alterado. Modelos que já apontam para o material pastel não são reimportados.
     /// Rode com a Editor aberta e fora do Play Mode:
     /// <c>ColetorDeCristais.Ferramentas.GeradorDeTexturasPastel.Gerar();</c>
     /// </remarks>
@@ -46,6 +48,21 @@ namespace ColetorDeCristais.Ferramentas
             return resumo.ToString();
         }
 
+        /// <summary>
+        /// Diz se a textura original abriu: <c>LoadImage</c> devolveu verdadeiro e a textura não ficou no tamanho
+        /// provisório de 2×2 (o que acontece com um ponteiro do Git LFS ou um arquivo corrompido).
+        /// </summary>
+        public static bool OriginalCarregada(bool carregou, int largura, int altura)
+        {
+            return carregou && !(largura <= 2 && altura <= 2);
+        }
+
+        /// <summary>Diz se o modelo precisa ser remapeado: o material atual do remapeamento não é o pastel.</summary>
+        public static bool PrecisaRemapear(Object atual, Material pastel)
+        {
+            return atual != pastel;
+        }
+
         private static string GerarKit(string kit)
         {
             var pastaDoKit = $"Assets/Terceiros/Kenney/{kit}";
@@ -53,7 +70,16 @@ namespace ColetorDeCristais.Ferramentas
             var caminhoPastel = $"{PastaDeSaida}/{kit}_colormap_pastel.png";
 
             var original = new Texture2D(2, 2);
-            original.LoadImage(File.ReadAllBytes(caminhoOriginal));
+            var carregou = original.LoadImage(File.ReadAllBytes(caminhoOriginal));
+            if (!OriginalCarregada(carregou, original.width, original.height))
+            {
+                Object.DestroyImmediate(original);
+                var erro = $"{kit}: a textura {caminhoOriginal} não abriu (ponteiro do Git LFS? rode git lfs pull). " +
+                           "Kit pulado, nada foi alterado.";
+                Debug.LogError(erro);
+                return erro;
+            }
+
             var pixels = original.GetPixels();
             for (var i = 0; i < pixels.Length; i++)
             {
@@ -78,10 +104,21 @@ namespace ColetorDeCristais.Ferramentas
             var caminhoDoMaterial = $"{PastaDeSaida}/{kit}_Pastel.mat";
             var material = AssetDatabase.LoadAssetAtPath<Material>(caminhoDoMaterial);
             var modelos = AssetDatabase.FindAssets("t:Model", new[] { pastaDoKit });
+            var origem = new AssetImporter.SourceAssetIdentifier(typeof(Material), "colormap");
             if (material == null)
             {
-                var base_ = PrimeiroMaterialColormap(modelos);
-                material = base_ != null ? new Material(base_) : new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                var base_ = MaterialColormapOriginal(modelos, origem);
+                if (base_ != null)
+                {
+                    material = new Material(base_);
+                }
+                else
+                {
+                    Debug.LogWarning($"{kit}: material colormap da Kenney não encontrado; {caminhoDoMaterial} " +
+                                     "criado como URP Lit padrão.");
+                    material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                }
+
                 AssetDatabase.CreateAsset(material, caminhoDoMaterial);
             }
 
@@ -90,21 +127,57 @@ namespace ColetorDeCristais.Ferramentas
             EditorUtility.SetDirty(material);
 
             var remapeados = 0;
-            var origem = new AssetImporter.SourceAssetIdentifier(typeof(Material), "colormap");
-            foreach (var guid in modelos)
+            AssetDatabase.StartAssetEditing();
+            try
             {
-                var importador = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as ModelImporter;
-                if (importador == null)
+                foreach (var guid in modelos)
                 {
-                    continue;
-                }
+                    var importador = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as ModelImporter;
+                    if (importador == null)
+                    {
+                        continue;
+                    }
 
-                importador.AddRemap(origem, material);
-                importador.SaveAndReimport();
-                remapeados++;
+                    importador.GetExternalObjectMap().TryGetValue(origem, out var atual);
+                    if (!PrecisaRemapear(atual, material))
+                    {
+                        continue;
+                    }
+
+                    importador.AddRemap(origem, material);
+                    importador.SaveAndReimport();
+                    remapeados++;
+                }
+            }
+            finally
+            {
+                AssetDatabase.StopAssetEditing();
             }
 
             return $"{kit}: {caminhoPastel}, {caminhoDoMaterial}, {remapeados} modelos remapeados.";
+        }
+
+        /// <summary>
+        /// Acha o material <c>colormap</c> embutido nos modelos. Se todos já estão remapeados (o FBX não traz mais o
+        /// material embutido), tira o remapeamento do primeiro modelo para recuperar o original; o laço de remapeamento
+        /// o recoloca em seguida.
+        /// </summary>
+        private static Material MaterialColormapOriginal(string[] modelos, AssetImporter.SourceAssetIdentifier origem)
+        {
+            var material = PrimeiroMaterialColormap(modelos);
+            if (material != null || modelos.Length == 0)
+            {
+                return material;
+            }
+
+            var importador = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(modelos[0])) as ModelImporter;
+            if (importador == null || !importador.RemoveRemap(origem))
+            {
+                return null;
+            }
+
+            importador.SaveAndReimport();
+            return PrimeiroMaterialColormap(new[] { modelos[0] });
         }
 
         private static Material PrimeiroMaterialColormap(string[] modelos)
