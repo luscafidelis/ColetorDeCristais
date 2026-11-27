@@ -23,27 +23,34 @@ namespace ColetorDeCristais.Partida
         /// <param name="itensCaindo">Quantos itens estão caindo agora.</param>
         /// <param name="ignoradas">Áreas cujos itens não contam (pode ser nula).</param>
         /// <exception cref="ArgumentNullException">Se as posições forem nulas.</exception>
-        public static bool TudoColetado(IEnumerable<Vector2> posicoes, int itensCaindo, IReadOnlyList<Retangulo> ignoradas)
+        public static bool TudoColetado(IEnumerable<Vector2> posicoes, int itensCaindo, IReadOnlyList<Retangulo> ignoradas) =>
+            ItensQueFaltam(posicoes, itensCaindo, ignoradas) == 0;
+
+        /// <summary>
+        /// Quantos itens que contam ainda faltam (mostrado na HUD): os itens fora das áreas ignoradas mais os que
+        /// estão caindo.
+        /// </summary>
+        /// <param name="posicoes">Posições no chão (x = X, y = Z do mundo) dos itens que ainda podem ser coletados.</param>
+        /// <param name="itensCaindo">Quantos itens estão caindo agora (negativo conta como zero).</param>
+        /// <param name="ignoradas">Áreas cujos itens não contam (pode ser nula).</param>
+        /// <exception cref="ArgumentNullException">Se as posições forem nulas.</exception>
+        public static int ItensQueFaltam(IEnumerable<Vector2> posicoes, int itensCaindo, IReadOnlyList<Retangulo> ignoradas)
         {
             if (posicoes == null)
             {
                 throw new ArgumentNullException(nameof(posicoes));
             }
 
-            if (itensCaindo > 0)
-            {
-                return false;
-            }
-
+            var faltam = Math.Max(0, itensCaindo);
             foreach (var posicao in posicoes)
             {
                 if (!Ignorada(posicao, ignoradas))
                 {
-                    return false;
+                    faltam++;
                 }
             }
 
-            return true;
+            return faltam;
         }
 
         private static bool Ignorada(Vector2 posicao, IReadOnlyList<Retangulo> ignoradas)

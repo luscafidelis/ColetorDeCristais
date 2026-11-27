@@ -55,6 +55,15 @@ namespace ColetorDeCristais.Partida
         /// <summary>Nível da cena (vãos e áreas sem itens novos). Nulo se não houver.</summary>
         public DefinicaoNivel Nivel => nivel;
 
+        /// <summary>O jogador da partida (pode ser nulo se a cena estiver incompleta).</summary>
+        public GameObject Jogador => jogador;
+
+        /// <summary>
+        /// Quantos itens que contam para o fim antecipado ainda faltam (<see cref="RegraDoFimAntecipado.ItensQueFaltam"/>),
+        /// medido a cada quadro da onda. -1 quando a partida não tem fim antecipado (ou antes da primeira medida).
+        /// </summary>
+        public int ItensQueFaltam { get; private set; } = -1;
+
         /// <summary>Indica se o jogo já aceita uma tecla para continuar (fora de uma onda e depois da espera).</summary>
         public bool AguardandoTecla => Ciclo != null && !Ciclo.EmOnda && _esperaRestante <= 0f;
 
@@ -156,8 +165,9 @@ namespace ColetorDeCristais.Partida
                 }
             }
 
-            return RegraDoFimAntecipado.TudoColetado(
+            ItensQueFaltam = RegraDoFimAntecipado.ItensQueFaltam(
                 _itensQueFaltam, QuedaDoItem.EmQueda, nivel != null ? nivel.AreasForaDoFimAntecipado : null);
+            return ItensQueFaltam == 0;
         }
 
         /// <summary>Registra a derrota do jogador (ex.: vida zerada). Sem efeito se a partida já acabou.</summary>

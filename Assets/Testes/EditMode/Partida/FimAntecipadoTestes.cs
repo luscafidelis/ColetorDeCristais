@@ -79,6 +79,24 @@ namespace ColetorDeCristais.Testes.Partida
         }
 
         [Test]
+        public void ItensQueFaltam_ContaOsDesteLadoEOsCaindo()
+        {
+            var posicoes = new[] { new Vector2(0f, 2.3f), new Vector2(-5f, -1f), new Vector2(3f, 9f) };
+
+            Assert.AreEqual(2, RegraDoFimAntecipado.ItensQueFaltam(posicoes, 0, AreaBonus), "o da área bônus não conta");
+            Assert.AreEqual(3, RegraDoFimAntecipado.ItensQueFaltam(posicoes, 1, AreaBonus), "um caindo conta");
+            Assert.AreEqual(3, RegraDoFimAntecipado.ItensQueFaltam(posicoes, 0, null), "sem áreas ignoradas, todos contam");
+        }
+
+        [Test]
+        public void ItensQueFaltam_ZeroSoQuandoTudoColetado()
+        {
+            Assert.AreEqual(0, RegraDoFimAntecipado.ItensQueFaltam(new[] { new Vector2(0f, 8.5f) }, 0, AreaBonus));
+            Assert.AreEqual(0, RegraDoFimAntecipado.ItensQueFaltam(new Vector2[0], -2, AreaBonus), "caindo negativo conta como zero");
+            Assert.Throws<ArgumentNullException>(() => RegraDoFimAntecipado.ItensQueFaltam(null, 0, AreaBonus));
+        }
+
+        [Test]
         public void EncerrarOnda_AntesDaUltima_VemOChefeDaOnda()
         {
             var ciclo = new CicloDaPartida(new ParametrosDaPartida(120f, 3));

@@ -228,7 +228,7 @@ O teste jogando com teclado ou gamepad ainda não foi feito.
 - **Anel da investida:** um anel ciano fino no chão, em volta do montrengo, aparece quando a investida está pronta. Ele some durante o avanço e a recarga e dá um pulso quando ela volta.
 - **Contorno:** o montrengo e os itens coletáveis (menos os cristais de experiência) têm um **contorno preto fino**, que aparece **através das prateleiras**. Assim dá para achar o montrengo pequeno e os itens escondidos.
 
-O modelo do chefe do mercado (o "Meat Monstrosity", de Lu1X-F34) já está no projeto, mas ainda não aparece no jogo.
+O modelo do chefe do mercado (o "Meat Monstrosity", de Lu1X-F34) entrou no projeto nesta atualização, ainda sem aparecer no jogo; ele passa a aparecer na atualização 14.
 
 **Por dentro:**
 - Novo sistema `Corpo`: `RegraDeTamanho`, `Tranco`, `Invulnerabilidade`, `DanoNoCorpo` e `SorteioDeDrop` (C# puro), valores no ScriptableObject `DefinicaoCorpo` (asset `Corpo`) e o componente `CorpoDoJogador`. O tamanho é um `Atributo`, que escala o `Jogador` inteiro (desenho e colisão). A carne crua soma um modificador pelo novo efeito `EfeitoDeTamanho`.
@@ -258,6 +258,51 @@ Em Play Mode, pela CLI:
 - **Chefe:** o modelo foi conferido só em fotos do prefab, fora das cenas do jogo.
 
 O mercado também foi jogado pelo desenvolvedor durante os ajustes (a distância do tranco e o percurso dos carrinhos mudaram a partir disso). O teste com gamepad ainda não foi feito.
+
+---
+
+## 13. HUD
+
+**Para quem joga:** a tela agora tem uma **HUD**:
+- **Onda e tempo** no topo, como antes.
+- **Itens que faltam**, no canto superior esquerdo, só no mercado: "Itens: N" conta os itens deste lado do vão que ainda faltam para o fim antecipado da onda (os da área bônus não contam). Na Arena, o contador não aparece.
+- **Habilidades**, no canto inferior esquerdo: um ícone para a **investida** (ciano) e outro para o **ímã** (rosa). Antes do café e da rosquinha, os ícones ficam cinza e apagados. Depois de usar a investida, o ícone dela escurece e vai enchendo de baixo para cima durante os 5 s de recarga. O anel no chão continua.
+- As mensagens de chefe, vitória e derrota continuam no centro.
+
+![O mercado com a HUD: "Itens: 9" no canto superior esquerdo, "Onda 1/1 1:53" no topo e, no canto inferior esquerdo, o ícone ciano da investida pela metade da recarga e o ícone rosa do ímã](docs/atualizacoes/hud-mercado.png)
+
+**Por dentro:**
+- Novo sistema `Interface` (`Assets/Scripts/Interface/`): `IndicadorDeHabilidade` e `EstadoDaHabilidade` (C# puro) e o componente `HudDaPartida`, que substitui a interface mínima `MensagensDaPartida` (mesmo GUID, então as cenas continuam apontando para ele). A HUD é uGUI criada pelo código, com o `Text` legado e ícones de formas e letras simples até haver arte.
+- `RegraDoFimAntecipado.ItensQueFaltam` conta os itens que faltam; o `ControladorDaPartida` guarda a contagem em `ItensQueFaltam`, e o fim antecipado passa a ser essa contagem igual a zero.
+- `Investida.RecargaTotal` guarda a recarga da última investida, para a HUD calcular quanto já recarregou.
+
+**Validação:** 457 testes EditMode passando, incluindo:
+- o estado dos ícones (bloqueado, pronto, recarga enchendo e valores inválidos);
+- a contagem de itens que faltam (área bônus, item caindo, sem áreas);
+- os textos do contador e das mensagens;
+- a recarga total da investida.
+
+Em Play Mode, pela CLI:
+- **Mercado:** no início, "Itens: 9" e os dois ícones cinza. Com a investida e o ímã liberados pela CLI, os ícones ficaram coloridos. Logo depois de uma investida, o véu do ícone cobria quase tudo; com 2,46 s de recarga restantes, cobria a metade de cima (a captura); no fim da recarga, sumiu. Coletar uma coxa levou o contador de 9 para 8.
+- **Arena:** o contador não aparece, os ícones começam cinza e a onda aparece como "Onda 1/3".
+
+O teste com teclado e gamepad de verdade ainda não foi feito.
+
+---
+
+## 14. Chefe no mercado
+
+**Para quem joga:** no mercado, quando a onda acaba (pelo tempo ou pelo fim antecipado), o **chefe aparece**: o Meat Monstrosity, com cerca de 3 m de altura, fica parado na ponta norte do salão, logo antes do vão, virado para a câmera, junto com a mensagem "Chefe da arena!". Ele ainda não luta: não anda, não tem colisão nem dano, e qualquer tecla continua contando como vitória. Depois da tecla, ele some e aparece "Arena concluída!".
+
+![O mercado na vez do chefe: o Meat Monstrosity vermelho parado antes do vão e a mensagem "Chefe da arena!" no centro](docs/atualizacoes/chefe-no-mercado.png)
+
+**Por dentro:**
+- Novo componente `ApresentacaoDoChefe`, no objeto `Partida` do mercado: liga o objeto do chefe só na vez de um chefe (`DeveAparecer(ciclo)`, que usa `CicloDaPartida.EmChefe`) e o desliga no resto da partida. Ligar o objeto reinicia a animação no estado `Parado`.
+- Na cena `Mercado`, a instância `ChefeTutorial` do prefab `VisualChefeTutorial`, guardada desligada, em (0; 0; 2,6), girada 180°. A cena `Arena` não tem chefe.
+
+**Validação:** 457 testes EditMode passando, incluindo os 7 do chefe: ele aparece no fim do tempo, no fim antecipado e no chefe da onda, e não aparece durante a onda, na vitória nem na derrota.
+
+Em Play Mode, pela CLI, no mercado: com o tempo da onda adiantado, o estado passou a "Chefe da arena" e o chefe apareceu na animação `Parado` (a captura); depois de `Continuar()`, que faz o mesmo que a tecla, veio a vitória e o chefe sumiu. O teste com teclado de verdade ainda não foi feito.
 
 ---
 

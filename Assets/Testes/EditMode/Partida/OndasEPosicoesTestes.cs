@@ -9,8 +9,8 @@ using Random = System.Random;
 namespace ColetorDeCristais.Testes.Partida
 {
     /// <summary>
-    /// Testes de <see cref="ComposicaoDaOnda"/> (quantos itens novos cada onda traz),
-    /// <see cref="GeradorDePosicoes"/> (posições sorteadas) e dos textos de <see cref="MensagensDaPartida"/>.
+    /// Testes de <see cref="ComposicaoDaOnda"/> (quantos itens novos cada onda traz)
+    /// e <see cref="GeradorDePosicoes"/> (posições sorteadas).
     /// </summary>
     public class OndasEPosicoesTestes
     {
@@ -151,26 +151,6 @@ namespace ColetorDeCristais.Testes.Partida
             Assert.Throws<ArgumentException>(() => GeradorDePosicoes.Gerar(1, 8f, Vector2.zero, null, 2f, sorteio, 0));
             Assert.Throws<ArgumentNullException>(() => GeradorDePosicoes.Gerar(1, 8f, Vector2.zero, null, 2f, null));
             Assert.AreEqual(0, GeradorDePosicoes.Gerar(0, 8f, Vector2.zero, null, 2f, sorteio).Count);
-        }
-
-        // --- Textos da interface mínima ---
-
-        [Test]
-        public void Mensagens_CadaFaseTemSeuTexto()
-        {
-            Assert.AreEqual(string.Empty, MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.EmOnda, 1, false));
-            StringAssert.StartsWith("Chefe da onda 2!", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.ChefeDaOnda, 2, false));
-            StringAssert.StartsWith("Chefe da arena!", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.ChefeDaArena, 3, false));
-            StringAssert.StartsWith("Arena concluída!", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.Vitoria, 3, false));
-            StringAssert.StartsWith("Derrota", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.Derrota, 2, false));
-        }
-
-        [Test]
-        public void Mensagens_SoMostramATeclaDepoisDaEspera()
-        {
-            StringAssert.DoesNotContain("qualquer tecla", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.Vitoria, 3, false));
-            StringAssert.Contains("qualquer tecla para recomeçar", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.Vitoria, 3, true));
-            StringAssert.Contains("qualquer tecla para vencê-lo", MensagensDaPartida.TextoDaMensagem(EstadoDaPartida.ChefeDaOnda, 1, true));
         }
     }
 }

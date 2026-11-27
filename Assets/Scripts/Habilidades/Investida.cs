@@ -32,6 +32,9 @@ namespace ColetorDeCristais.Habilidades
         /// <summary>Segundos até poder usar de novo (zero quando pronta).</summary>
         public float RecargaRestante { get; private set; }
 
+        /// <summary>Recarga total da última investida, em segundos (zero antes da primeira). Usada pela HUD.</summary>
+        public float RecargaTotal { get; private set; }
+
         /// <summary>Indica se <see cref="TentarIniciar"/> funcionaria agora.</summary>
         public bool Pronta => Liberada && !EmAndamento && RecargaRestante <= 0f;
 
@@ -70,6 +73,7 @@ namespace ColetorDeCristais.Habilidades
             _velocidade = horizontal.normalized * (velocidadeDeMovimento * parametros.MultiplicadorDeVelocidade);
             _tempoRestante = parametros.Duracao;
             RecargaRestante = parametros.Recarga;
+            RecargaTotal = parametros.Recarga;
             return true;
         }
 

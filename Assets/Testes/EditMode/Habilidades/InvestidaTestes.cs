@@ -127,6 +127,21 @@ namespace ColetorDeCristais.Testes.Habilidades
         // --- Recarga ---
 
         [Test]
+        public void RecargaTotal_ZeroAntesDaPrimeira_EDepoisADaUltimaInvestida()
+        {
+            var investida = Liberada();
+            Assert.AreEqual(0f, investida.RecargaTotal);
+
+            investida.TentarIniciar(Vector3.forward, 3.5f, DoJogo);
+            investida.Atualizar(1f);
+            Assert.AreEqual(5f, investida.RecargaTotal, "não diminui com o tempo");
+
+            investida.Atualizar(10f);
+            investida.TentarIniciar(Vector3.forward, 3.5f, new ParametrosDeInvestida(5f, 0.25f, 2f));
+            Assert.AreEqual(2f, investida.RecargaTotal);
+        }
+
+        [Test]
         public void Recarga_BloqueiaAteTerminar_EContaDesdeOInicio()
         {
             var investida = Liberada();
