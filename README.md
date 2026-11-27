@@ -1,20 +1,42 @@
 # Carne Viva
 
-Jogo 3D em Unity: o Carniça, um monstro de carne, coleta comida e cresce numa arena de mundo pastel. O código usa o namespace `ColetorDeCristais`, o nome do projeto quando ele começou.
+Carniça, essa bolota de carne, está com fome, e esse fofo mercado está no cardápio. Enfrente inimigos, colete itens e ganhe habilidades para garantir que o Carniça não morra de fome.
 
-**Nomes:** o personagem é o **Carniça** (com artigo masculino: "o Carniça"). Nos scripts, prefabs e materiais ele continua "montrengo" (`VisualMontrengo`, `Montrengo_Corpo`, `Montrengo_Osso`). Na HUD, a investida se chama **Bote**, o ímã **Faro** e os itens **Comida**; no código, os nomes continuam `Investida`, `Ima` e itens.
+## Sobre o nome
+**Coletor de Cristais** é o nome de desenvolvimento do projeto. Ele começou como um protótipo em que um personagem andava por uma arena coletando cristais. Ao longo dos sprints o jogo ganhou forma: os cristais viraram comida, o personagem virou um monstro de carne que cresce ao comer, a arena virou um supermercado e o jogo ganhou o nome de **Carne Viva**.
+
+O nome de desenvolvimento continua por dentro do projeto: no nome da pasta, no namespace e nos assemblies (`ColetorDeCristais` e `ColetorDeCristais.Testes.EditMode`) e no sistema de itens coletáveis, que no código continua se chamando cristal (`Assets/Scripts/Cristais/`, `Cristal.prefab`, `DefinicaoCristal`). Para quem joga, o nome é Carne Viva (`productName` nas configurações do projeto e `InformacoesDoProjeto.Nome`).
+
+**Outros nomes:** o personagem é o **Carniça** (com artigo masculino: "o Carniça"). Nos scripts, prefabs e materiais ele continua "montrengo" (`VisualMontrengo`, `Montrengo_Corpo`, `Montrengo_Osso`). Na HUD, a investida se chama **Bote**, o ímã **Faro** e os itens **Comida**; no código, os nomes continuam `Investida`, `Ima` e itens.
 
 ## O jogo
-Arena 3D com câmera fixa elevada. O jogador anda pela arena e coleta cristais. A partida é em ondas: o objetivo é sobreviver até o tempo da onda acabar; aí vem o chefe da onda, que precisa ser derrotado para passar para a próxima. Cada arena tem 3 ondas, e a última termina no chefe da arena. Cada cristal é um item com um efeito:
-- **Atributo:** aumenta a velocidade.
-- **Habilidade passiva:** ímã, que puxa cristais próximos.
-- **Habilidade ativa:** investida, com tempo de recarga.
+Arena 3D com câmera fixa elevada. O Carniça anda pela arena e come os itens de comida do chão. Cada item tem um efeito:
+- **Coxa** (atributo): acelera o Carniça.
+- **Carne crua:** faz o Carniça crescer.
+- **Café** (habilidade ativa): libera o **Bote**, um avanço rápido com tempo de recarga.
+- **Rosquinha** (habilidade passiva): libera o **Faro**, que puxa a comida próxima.
 
-O jogo começa no **Mercadinho** (arena 0), que serve de tutorial: corredores entre prateleiras, carrinhos de compras que empurram o personagem e um vão que só se atravessa com a investida. Cair no vão é fim de jogo.
+A partida é em ondas: o objetivo é sobreviver até o tempo da onda acabar; aí vem o chefe da onda, que precisa ser derrotado para passar para a próxima. Cada partida tem 3 ondas, e a última termina no chefe. O Carniça perde tamanho nas batidas e perde a partida se ficar pequeno demais.
+
+O jogo começa no **Mercadinho** (arena 0), que serve de tutorial: corredores entre prateleiras, carrinhos de compras que empurram o personagem e um vão que só se atravessa com o Bote. Cair no vão é fim de jogo.
 
 Plataforma: Windows. Sem monetização.
 
-> Estado atual: a arena com o personagem que anda (teclado ou gamepad), desenhado como um monstro de carne (o Carniça, modelo de Joppe Monnens) que começa pequeno (1/3 do modelo, cerca de 0,67 m) e cresce a cada carne crua, que pulsa parado e estica, achata e se inclina ao andar, e a câmera fixa elevada; o sistema de atributos com modificadores permanentes e temporários (a velocidade do personagem já é um atributo); os itens coletáveis com visual de comida (carne, peixe e coxa), que somem ao ser coletados e são contados, numa arena de piso e paredes de supermercado, com modelos da Kenney. A coxa acelera o personagem (+30% por 5 s e, ao fim, +0,3 m/s permanente); o café libera a investida, um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o Carniça estica para a frente; a rosquinha libera o ímã, que puxa os itens próximos até o personagem (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido); a carne crua faz o Carniça crescer; o peixe ainda não tem efeito, e os cristais de experiência ainda não dão experiência. A partida tem 3 ondas de 120 s, com cronômetro regressivo no topo da tela; a cada nova onda entram itens novos em posições sorteadas. Os chefes e os inimigos ainda não existem, e o tamanho faz o papel de vida: na vez de um chefe, qualquer tecla conta como vitória sobre ele, e só se perde caindo no vão do Mercadinho ou ficando pequeno demais: a batida de um carrinho joga o Carniça para trás e o encolhe 1/6, e abaixo de 1/16 é derrota. O Mercadinho (arena 0) tem 1 onda, 3 corredores com carrinhos que empurram o personagem, um vão de 3 m que só se atravessa com a investida e, do outro lado, uma área bônus com a rosquinha e 10 cristais de experiência; uma investida contra uma prateleira derruba um produto, que cai em arco até o chão (ainda sem efeito). No Mercadinho, coletar todos os itens do chão fora da área bônus encerra a onda na hora. Cada batida que não derrota tem 33% de chance de derrubar uma carne estragada, que cai em arco no chão (nunca num vão) e devolve +1/12 de tamanho. O Carniça e os itens coletáveis (menos os cristais de experiência) têm um contorno bordô fino, que aparece através das prateleiras, e um anel ciano no chão, em volta do Carniça, mostra quando a investida está pronta. No Mercadinho, o chefe (o Meat Monstrosity, só o visual, parado) aparece perto da ponta norte do salão, antes do vão, na vez dele. A planta do Mercadinho é provisória. A HUD mostra a onda e o tempo no topo, a comida que falta (só no Mercadinho) no canto superior esquerdo e os ícones do Bote (a investida, com a recarga) e do Faro (o ímã) no canto inferior esquerdo. O mundo (os modelos da Kenney) aparece em tons pastel claros, e a carne (o Carniça e o chefe) em tons escuros (ver "Tema e paleta"). Outros efeitos na tela e os sons ainda não foram implementados.
+### Estado atual
+- **Carniça:** anda com teclado ou gamepad, visto pela câmera fixa elevada. É um monstro de carne (modelo de Joppe Monnens) que começa pequeno (1/3 do modelo, cerca de 0,67 m), pulsa parado e estica, achata e se inclina ao andar.
+- **Atributos:** sistema com modificadores permanentes e temporários; a velocidade do Carniça já é um atributo.
+- **Comida:** os itens coletáveis têm visual de comida, somem ao ser coletados e são contados.
+  - A coxa acelera o Carniça (+30% por 5 s e, ao fim, +0,3 m/s permanente).
+  - A carne crua faz o Carniça crescer.
+  - O café libera o Bote (a investida), um avanço rápido com recarga de 5 s (4,375 m na velocidade base), durante o qual o Carniça estica para a frente.
+  - A rosquinha libera o Faro (o ímã), que puxa os itens próximos até o Carniça (os cristais de experiência, pequenos losangos ciano, de mais longe e mais rápido).
+  - O peixe ainda não tem efeito, e os cristais de experiência ainda não dão experiência.
+- **Partida:** 3 ondas de 120 s, com cronômetro regressivo no topo da tela; a cada nova onda entram itens novos em posições sorteadas. Os chefes e os inimigos ainda não existem: na vez de um chefe, qualquer tecla conta como vitória sobre ele.
+- **Tamanho como vida:** só se perde caindo no vão do Mercadinho ou ficando pequeno demais. A batida de um carrinho joga o Carniça para trás e o encolhe 1/6, e abaixo de 1/16 é derrota. Cada batida que não derrota tem 33% de chance de derrubar uma carne estragada, que cai em arco no chão (nunca num vão) e devolve +1/12 de tamanho.
+- **Mercadinho (arena 0):** 3 corredores com carrinhos que empurram o Carniça, um vão de 3 m que só se atravessa com o Bote e, do outro lado, uma área bônus com a rosquinha e 10 cristais de experiência. Um Bote contra uma prateleira derruba um produto, que cai em arco até o chão (ainda sem efeito). Coletar todos os itens do chão fora da área bônus encerra a onda na hora. Na vez do chefe, ele (o Meat Monstrosity, só o visual, parado) aparece perto da ponta norte do salão, antes do vão. A planta do Mercadinho é provisória.
+- **Visual:** piso, paredes, prateleiras, carrinhos e comida com modelos da Kenney, em tons pastel claros; a carne (o Carniça e o chefe) em tons escuros (ver "Tema e paleta"). O Carniça e os itens coletáveis (menos os cristais de experiência) têm um contorno bordô fino, que aparece através das prateleiras. Um anel ciano no chão, em volta do Carniça, mostra quando o Bote está pronto.
+- **HUD:** a onda e o tempo no topo, a comida que falta (só no Mercadinho) no canto superior esquerdo e os ícones do Bote (com a recarga) e do Faro no canto inferior esquerdo.
+- **Ainda não implementados:** outros efeitos na tela e os sons.
 
 ## Requisitos
 | Item | Versão |
@@ -276,7 +298,7 @@ A cor, a espessura e o momento do desenho ficam na feature `Contorno` dos render
 - `MedidaDoContorno` (estática, C# pura): `Deslocamento(espessura, largura, altura)` converte a espessura (em pixels numa tela de 1080 de altura) num deslocamento em UV, com o mesmo número de pixels na horizontal e na vertical. Assim, o contorno tem a mesma aparência em qualquer resolução. Valores inválidos dão zero (sem contorno).
 - `ListaSemRepeticao<T>` (C# puro): lista que não aceita nulo nem repetido.
 - `ContornoDoObjeto` (`MonoBehaviour`): marca o objeto. No `Awake`, guarda os `MeshRenderer` e `SkinnedMeshRenderer` dele e dos filhos; enquanto ligado, fica em `ContornoDoObjeto.Ativos`. `Desenhavel(desenho)` diz se um desenho entra no quadro (ligado e ativo). `PartesDosDesenhos` guarda, para cada desenho, quantas partes entram no contorno: `ContagemDePartes(subMalhas, materiais)` usa o número de submalhas da malha (`MeshFilter.sharedMesh` ou `SkinnedMeshRenderer.sharedMesh`), mesmo com menos ou mais materiais que submalhas; sem malha, uma por material, e no mínimo uma. Está na raiz do prefab `Cristal` (e por isso nas variantes: comidas e produtos), removido na variante `Cristal_Experiencia`, e na raiz do `VisualMontrengo` (o anel da investida, irmão dele no `Jogador`, fica de fora).
-- `ContornoRendererFeature` (`ScriptableRendererFeature`): campos *Shader* (`Hidden/ColetorDeCristais/Contorno`), *Cor* preta, *Espessura* 2 e *Momento* `BeforeRenderingTransparents` (o texto da tela, um Canvas na câmera, fica por cima do contorno). Sem objetos com contorno, não faz nada. Sem o shader (ou sem suporte a ele), registra um aviso uma vez só e não desenha o contorno.
+- `ContornoRendererFeature` (`ScriptableRendererFeature`): campos *Shader* (`Hidden/ColetorDeCristais/Contorno`), *Cor* (preta por padrão; nos renderers do jogo, bordô #4A0D14), *Espessura* 2 e *Momento* `BeforeRenderingTransparents` (o texto da tela, um Canvas na câmera, fica por cima do contorno). Sem objetos com contorno, não faz nada. Sem o shader (ou sem suporte a ele), registra um aviso uma vez só e não desenha o contorno.
 - `PassoDoContorno` (`ScriptableRenderPass`, Render Graph), em duas passadas:
   1. **Máscara:** desenha os desenhos de `ContornoDoObjeto.Ativos` numa textura de um canal (`R8`), em branco e **sem teste de profundidade** (passada 0 do shader), com uma chamada por submalha de cada desenho.
   2. **Composição:** na imagem da câmera, pinta a cor onde há máscara num círculo em volta do pixel (16 direções, no raio cheio e na metade) mas não no próprio pixel (passada 1 do shader, com mistura por alfa para suavizar a borda).
