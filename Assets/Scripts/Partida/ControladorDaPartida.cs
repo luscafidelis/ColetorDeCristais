@@ -23,7 +23,8 @@ namespace ColetorDeCristais.Partida
     /// Os efeitos temporários também param, porque perdem tempo no <see cref="MovimentoDoJogador"/>.</item>
     /// <item>Com <see cref="DefinicaoPartida.EncerrarAoColetarTudo"/> (no tutorial), a onda acaba mais cedo quando não
     /// falta nenhum item que conta (<see cref="RegraDoFimAntecipado"/>; as áreas fora da contagem vêm do <i>Nivel</i>).</item>
-    /// <item>Os chefes ainda não existem: na vez de um chefe, qualquer tecla conta como chefe derrotado.</item>
+    /// <item>Os chefes ainda não lutam (no mercado, o visual aparece pelo <see cref="ApresentacaoDoChefe"/>): na vez de
+    /// um chefe, qualquer tecla conta como chefe derrotado.</item>
     /// <item>Depois do fim (vitória ou derrota), qualquer tecla recarrega a cena.</item>
     /// <item>A derrota acontece por <see cref="DerrotarJogador"/>, para o futuro sistema de vida chamar.</item>
     /// </list>
