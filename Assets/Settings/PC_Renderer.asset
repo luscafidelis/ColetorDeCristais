@@ -70,7 +70,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Contorno.ContornoRendererFeature
   m_Active: 1
   shader: {fileID: 4800000, guid: d14db3dcd9711fa448bdce38fd68fcc3, type: 3}
-  cor: {r: 0, g: 0, b: 0, a: 1}
+  cor: {r: 0.2901961, g: 0.050980393, b: 0.078431375, a: 1}
   espessura: 2
   momento: 450
 --- !u!114 &7833122117494664109

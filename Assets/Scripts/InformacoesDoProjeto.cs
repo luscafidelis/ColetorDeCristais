@@ -7,7 +7,7 @@ namespace ColetorDeCristais
     /// </summary>
     public static class InformacoesDoProjeto
     {
-        /// <summary>Nome do jogo.</summary>
-        public const string Nome = "Coletor de Cristais";
+        /// <summary>Nome do jogo. O código continua no namespace <c>ColetorDeCristais</c>, o nome de quando o projeto começou.</summary>
+        public const string Nome = "Carne Viva";
     }
 }

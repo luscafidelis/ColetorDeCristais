@@ -1,5 +1,6 @@
 using ColetorDeCristais.Habilidades;
 using ColetorDeCristais.Partida;
+using ColetorDeCristais.Tema;
 using UnityEngine;
 
 namespace ColetorDeCristais.Interface
@@ -11,7 +12,7 @@ namespace ColetorDeCristais.Interface
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
-    /// <item>Os ícones das habilidades (investida e ímã) ficam apagados até a habilidade ser obtida; o da investida
+    /// <item>Os ícones das habilidades (Bote, a investida, e Faro, o ímã) ficam apagados até a habilidade ser obtida; o da investida
     /// escurece e vai enchendo de baixo para cima durante a recarga (<see cref="IndicadorDeHabilidade"/>).</item>
     /// <item>Os textos só são refeitos quando o que mostram muda, para não criar strings novas a cada quadro.</item>
     /// <item>Sem jogador na <see cref="ControladorDaPartida"/>, ou sem os componentes das habilidades, os ícones não
@@ -37,11 +38,11 @@ namespace ColetorDeCristais.Interface
         [Tooltip("Lado de cada ícone de habilidade, em pixels de referência.")]
         [SerializeField] private float tamanhoDoIcone = 120f;
 
-        [Tooltip("Cor do ícone da investida (a mesma do anel no chão).")]
-        [SerializeField] private Color corDaInvestida = new Color(0.2f, 0.9f, 1f, 1f);
+        [Tooltip("Cor do ícone do Bote (a investida). Padrão: a carne da paleta do tema.")]
+        [SerializeField] private Color corDaInvestida = PaletaDoTema.Carne;
 
-        [Tooltip("Cor do ícone do ímã.")]
-        [SerializeField] private Color corDoIma = new Color(1f, 0.55f, 0.75f, 1f);
+        [Tooltip("Cor do ícone do Faro (o ímã). Padrão: a gosma da paleta do tema.")]
+        [SerializeField] private Color corDoIma = PaletaDoTema.Gosma;
 
         private ControladorDaPartida _controlador;
         private UnityEngine.UI.Text _cronometro;
@@ -95,13 +96,13 @@ namespace ColetorDeCristais.Interface
             var espaco = tamanhoDoIcone + 20f;
             if (_investida != null)
             {
-                _iconeDaInvestida = new IconeDeHabilidade(raiz, "Icone_Investida", fonte, "»", "Investida", corDaInvestida,
+                _iconeDaInvestida = new IconeDeHabilidade(raiz, "Icone_Investida", fonte, "»", "Bote", corDaInvestida,
                     tamanhoDoIcone, new Vector2(40f, 40f));
             }
 
             if (_ima != null)
             {
-                _iconeDoIma = new IconeDeHabilidade(raiz, "Icone_Ima", fonte, "U", "Ímã", corDoIma,
+                _iconeDoIma = new IconeDeHabilidade(raiz, "Icone_Ima", fonte, "U", "Faro", corDoIma,
                     tamanhoDoIcone, new Vector2(40f + espaco, 40f));
             }
         }
@@ -182,7 +183,7 @@ namespace ColetorDeCristais.Interface
         }
 
         /// <summary>Texto do contador de itens que faltam (vazio se a partida não tem fim antecipado, valor negativo).</summary>
-        public static string TextoDosItens(int itensQueFaltam) => itensQueFaltam < 0 ? string.Empty : $"Itens: {itensQueFaltam}";
+        public static string TextoDosItens(int itensQueFaltam) => itensQueFaltam < 0 ? string.Empty : $"Comida: {itensQueFaltam}";
 
         private static UnityEngine.UI.Text CriarTexto(Transform pai, string nome, Font fonte, int tamanho, Vector2 ancora,
             Vector2 posicao, Vector2 dimensao, TextAnchor alinhamento)

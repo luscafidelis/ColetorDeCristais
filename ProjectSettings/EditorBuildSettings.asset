@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Mercado.unity
+    path: Assets/Scenes/Mercadinho.unity
     guid: c25f7d35b0148bf4eb1fbb451ffeaf25
   - enabled: 1
     path: Assets/Scenes/Arena.unity

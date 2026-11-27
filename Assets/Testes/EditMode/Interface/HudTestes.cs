@@ -76,10 +76,10 @@ namespace ColetorDeCristais.Testes.Interface
         // --- Textos ---
 
         [Test]
-        public void Itens_MostraQuantosFaltam()
+        public void Comida_MostraQuantosFaltam()
         {
-            Assert.AreEqual("Itens: 7", HudDaPartida.TextoDosItens(7));
-            Assert.AreEqual("Itens: 0", HudDaPartida.TextoDosItens(0));
+            Assert.AreEqual("Comida: 7", HudDaPartida.TextoDosItens(7));
+            Assert.AreEqual("Comida: 0", HudDaPartida.TextoDosItens(0));
         }
 
         [Test]

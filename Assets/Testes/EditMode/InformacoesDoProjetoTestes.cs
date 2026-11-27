@@ -9,9 +9,9 @@ namespace ColetorDeCristais.Testes
     public class InformacoesDoProjetoTestes
     {
         [Test]
-        public void Nome_EhColetorDeCristais()
+        public void Nome_EhCarneViva()
         {
-            Assert.AreEqual("Coletor de Cristais", InformacoesDoProjeto.Nome);
+            Assert.AreEqual("Carne Viva", InformacoesDoProjeto.Nome);
         }
 
         [Test]

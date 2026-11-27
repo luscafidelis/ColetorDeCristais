@@ -1,4 +1,4 @@
-# Atualizações do Coletor de Cristais
+# Atualizações do Carne Viva
 
 Registro do que foi entrando no jogo, em ordem: da primeira atualização (no topo) até a mais recente (no fim). Cada entrada diz o que mudou para quem joga, o que mudou por dentro e como foi validada. Os detalhes técnicos de cada sistema ficam no [README](README.md).
 
@@ -303,6 +303,30 @@ O teste com teclado e gamepad de verdade ainda não foi feito.
 **Validação:** 457 testes EditMode passando, incluindo os 7 do chefe: ele aparece no fim do tempo, no fim antecipado e no chefe da onda, e não aparece durante a onda, na vitória nem na derrota.
 
 Em Play Mode, pela CLI, no mercado: com o tempo da onda adiantado, o estado passou a "Chefe da arena" e o chefe apareceu na animação `Parado` (a captura); depois de `Continuar()`, que faz o mesmo que a tecla, veio a vitória e o chefe sumiu. O teste com teclado de verdade ainda não foi feito.
+
+---
+
+## 15. Tema: Carne Viva
+
+**Para quem joga:** o jogo agora se chama **Carne Viva**, e o personagem é **o Carniça**.
+- O mundo ficou **pastel claro**: piso, paredes, prateleiras, carrinhos, comidas e produtos da Kenney estão mais claros e menos saturados.
+- A **carne** ficou **escura e realista**: o Carniça e o chefe estão num vermelho-carne mais fechado, puxado para o bordô, e brilham menos.
+- O **contorno** do Carniça e dos itens passou de preto para **bordô**.
+- O minimercado virou o **Mercadinho**.
+- Na HUD, a investida virou **Bote** (ícone vermelho-carne), o ímã virou **Faro** (ícone verde-gosma) e o contador de itens virou **"Comida: N"**.
+- O anel ciano da investida, os cristais de experiência e a carne estragada continuam com as cores de antes.
+
+![O Mercadinho em tons pastel claros, com o Carniça bordô no açougue, contorno bordô nas comidas e, na HUD, "Comida: 9" e os ícones do Bote e do Faro](docs/atualizacoes/tema-carne-viva.png)
+
+**Por dentro:**
+- Novo sistema `Tema` (`Assets/Scripts/Tema/`): `PaletaDoTema`, com as cores decididas (sangue #5A0F14, carne #8E3B3B, gosma #6B7A3A, contorno #4A0D14 e a tinta da carne #B06A6A), e `PaletaPastel`, a conversão para o pastel do mundo (C# puro).
+- Nova ferramenta só da Editor, `GeradorDeTexturasPastel`: grava as texturas pastel do Mini Shop e do Food Kit em `Assets/Materiais/Pastel/` e remapeia o material `colormap` dos 230 modelos para os materiais pastel. Os arquivos da Kenney não mudam.
+- Materiais `Montrengo_Corpo`, `Chefe_Carne1` e `Chefe_Carne2` com tinta #B06A6A e menos brilho; `Montrengo_Osso` só com menos brilho. A cor do contorno está nas duas configurações de renderização (`PC_Renderer` e `Mobile_Renderer`).
+- A cena `Mercado` virou `Mercadinho.unity` e o nível, `Mercadinho.asset`. O nome do produto (`productName`) e `InformacoesDoProjeto.Nome` são "Carne Viva". O código continua no namespace `ColetorDeCristais`, e os scripts, prefabs e materiais do personagem continuam com "montrengo" no nome.
+
+**Validação:** 465 testes EditMode passando, incluindo os 8 do tema (a conversão para pastel e as cores da paleta).
+
+Em Play Mode, pela CLI, no Mercadinho: a captura mostra o mundo pastel, o Carniça e o contorno bordô e a HUD com "Comida: 9", Bote e Faro (as duas habilidades liberadas pela CLI para os ícones aparecerem coloridos). O chefe com a nova cor e o jogo com teclado de verdade ainda não foram conferidos.
 
 ---
 

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ColetorDeCristais.Nivel
 {
     /// <summary>
-    /// Movimento de vai e vem entre dois pontos, em velocidade constante, em C# puro (os carrinhos do mercado).
+    /// Movimento de vai e vem entre dois pontos, em velocidade constante, em C# puro (os carrinhos do Mercadinho).
     /// </summary>
     /// <remarks>
     /// A posição é calculada direto do tempo acumulado, sem somar passos, então é a mesma em qualquer

@@ -11,7 +11,7 @@ namespace ColetorDeCristais.Partida
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
-    /// <item>Contam os itens no chão fora das áreas ignoradas (no mercado, a área bônus do outro lado do vão).</item>
+    /// <item>Contam os itens no chão fora das áreas ignoradas (no Mercadinho, a área bônus do outro lado do vão).</item>
     /// <item>Um item caindo (ainda sem poder ser coletado) conta como item que falta.</item>
     /// <item>Retângulos inválidos (tamanho zero) são ignorados.</item>
     /// </list>

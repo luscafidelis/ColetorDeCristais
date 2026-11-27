@@ -152,6 +152,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: ColetorDeCristais::ColetorDeCristais.Partida.MensagensDaPartida
   tamanhoDoCronometro: 48
   tamanhoDaMensagem: 64
+  tamanhoDosItens: 48
+  tamanhoDoIcone: 120
+  corDaInvestida: {r: 0.5568628, g: 0.23137255, b: 0.23137255, a: 1}
+  corDoIma: {r: 0.41960785, g: 0.47843137, b: 0.22745098, a: 1}
 --- !u!114 &26875648
 MonoBehaviour:
   m_ObjectHideFlags: 0
